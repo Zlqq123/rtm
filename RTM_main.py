@@ -8,7 +8,7 @@ import gc
 import hist_func
 
 filepath("D:/03RTM/ALL_RTM_data/0509/")
-
+# sd
 client=Client(host='10.122.17.69',port='9005',user='en' ,password='en1Q',database='en')
 
 #BMS working piont
