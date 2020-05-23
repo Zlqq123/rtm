@@ -12,14 +12,103 @@ import RTM_ana
 
 client=Client(host='10.122.17.69',port='9005',user='en' ,password='en1Q',database='en')
 
+sql0 = 'select * from en.rtm_vds limit 10' #选取前十条记录
+sql1 ='desc en.rtm_vds' #查看表结构
+aus=client.execute(sql0)
+
+
+
+#"Sample 0.1 " \table doesn't support sampling
+
+#for Lavida
+# e_motor working piont电机工作点分布
+
+sql35="SELECT cast(emspeed,'float'),cast(emtq,'float') " \
+    "from en.rtm_vds " \
+    "where cast(vehiclespeed,'float')>0 " \
+    "and deviceid like 'LSVA%' AND CAST(accmiles,'float')>100 "
+aus=client.execute(sql35)
+speed=[]
+torq=[]
+for value in aus:
+    speed.append(value[0])
+    torq.append(value[1])
+del aus
+gc.collect()
+workbook = xlsxwriter.Workbook(filepath+"LE_working_point_lavida.xlsx")
+RTM_ana.hist_2con_show(workbook,['sheet1'],speed,range(-5000,13500,500),torq,range(-300,400,50))
+workbook.close()
+#BMS working piont
+sql35="WITH cast(splitByChar(',',cocesprotemp1),'Array(Int8)') AS temp_list " \
+    "SElECT soc,arrayReduce('sum',temp_list)/length(temp_list),totalcurrent*totalvolt/1000 " \
+    "FROM en.rtm_vds " \
+    "WHERE chargingstatus='NO_CHARGING' and totalcurrent>0 and cocesprotemp1!='NULL' " \
+    "AND deviceid like 'LSVA%' AND CAST(accmiles,'float')>100"
+aus=client.execute(sql35)
+
+soc,temp_av,pow_bms=[],[],[]
+for value in aus:
+    soc.append(value[0])
+    temp_av.append(value[1])
+    pow_bms.append(value[2])
+
+
+workbook = xlsxwriter.Workbook(filepath+"BMS_working_point_lavida.xlsx")
+RTM_ana.hist_2con_show(workbook,['discharging'],soc,range(0,115,5),temp_av,range(-10,55,5))
+
+soc,temp_av,pow_bms=[],[],[]
+sql35="WITH cast(splitByChar(',',cocesprotemp1),'Array(Int8)') AS temp_list " \
+    "SElECT soc,arrayReduce('sum',temp_list)/length(temp_list),totalcurrent*totalvolt/1000 " \
+    "FROM en.rtm_vds " \
+    "where chargingstatus in ('CHARGING_STOPPED','CHARGING_FINISH') AND totalcurrent<0 AND cocesprotemp1!='NULL' " \
+    "and deviceid like 'LSVA%' AND CAST(accmiles,'float')>100 "
+aus=client.execute(sql35)
+
+for value in aus:
+    soc.append(value[0])
+    temp_av.append(value[1])
+    pow_bms.append(value[2])
+
+RTM_ana.hist_2con_show(workbook,['charging'],soc,range(0,115,5),temp_av,range(-10,55,5))
+workbook.close()
+
+#电机工作点分布
+sql35="SELECT cast(emspeed,'float'),cast(emtq,'float') " \
+    "from en.rtm_vds " \
+    "where cast(emtq,'float')>0 and cast(emspeed,'float')>0 " \
+    "and deviceid like 'LSVA%' AND CAST(accmiles,'float')>100 "
+aus=client.execute(sql35)
+speed=[]
+torq=[]
+for value in aus:
+    speed.append(value[0])
+    torq.append(value[1])
+del aus
+gc.collect()
+workbook = xlsxwriter.Workbook("LE_working_point_lavida.xlsx")
+RTM_ana.hist_2con_show(workbook,['speed>0&t>0'],speed,range(0,13500,500),torq,range(0,400,50))
+
+speed=[]
+torq=[]
+sql35="SELECT cast(emspeed,'float'),cast(emtq,'float') " \
+    "from en.rtm_vds " \
+    "where cast(emtq,'float')<0 and cast(emspeed,'float')>0 " \
+    "and deviceid like 'LSVA%' AND CAST(accmiles,'float')>100 "
+aus=client.execute(sql35)
+for value in aus:
+    speed.append(value[0])
+    torq.append(value[1])
+del aus
+gc.collect()
+RTM_ana.hist_2con_show(workbook,['speed>0&t<0'],speed,range(0,13500,500),torq,range(-300,50,50))
+
+workbook.close()
+
 sql36="WITH cast(splitByChar(',',cocesprotemp1),'Array(Int8)') AS temp_list " \
     "SElECT soc,arrayReduce('sum',temp_list)/length(temp_list),totalcurrent*totalvolt/1000 " \
     "FROM en.rtm_vds " \
     "WHERE chargingstatus='NO_CHARGING' and totalcurrent>0 and cocesprotemp1!='NULL' " \
     "AND deviceid like 'LSVA%' AND CAST(accmiles,'float')>100"
-aus=client.execute(sql36)
-aa=aus[2][1]
-print(type(aa))
 
 sql35="SElECT soc,cocesprotemp1,totalcurrent,totalvolt " \
     "FROM en.rtm_vds " \
@@ -27,35 +116,9 @@ sql35="SElECT soc,cocesprotemp1,totalcurrent,totalvolt " \
     "and deviceid like 'LSVA%' AND CAST(accmiles,'float')>100 "
 aus=client.execute(sql35)
 
-soc,temp_av,pow_bms=[],[],[]
-for value in aus:
-    if value[1]!='NULL':
-        soc.append(value[0])
-        a=value[1].split(',')
-        b=[int(i) for i in a]
-        temp_av.append(sum(b)/len(b))
-        pow_bms.append(value[2]*value[3]/1000)
-print(len(aus))
-print(len(soc))
 
 #电池工作点
-sql34="SELECT soc,CAST(mxtemp,'int'),CAST(mitemp,'int') " \
-    "from en.rtm_vds " \
-    "where chargingstatus in ('CHARGING_STOPPED','CHARGING_FINISH') and totalcurrent<0 " \
-    "and deviceid like 'LSVA%' AND CAST(accmiles,'float')>100 "
-aus1=client.execute(sql34)
-SOC=[]
-temp=[]
-for value in aus1:
-    SOC.append(value[0])
-    temp.append((value[1]+value[2])/2)
 
-del aus1
-gc.collect()
-
-workbook = xlsxwriter.Workbook("battery_working_point_lavida.xlsx")
-RTM_ana.hist_2con_show(workbook,['充电'],SOC,range(0,110,10),temp,range(-10,60,5))
-workbook.close()
 
 sql32="SELECT CAST(accmiles,'float') from rtm_vds Where deviceid='LSVAY60E3K2011395'"
 aus=client.execute(sql32)

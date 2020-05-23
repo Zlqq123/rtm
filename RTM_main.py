@@ -1,83 +1,68 @@
+import sys
+sys.path.append('./')
 from clickhouse_driver import Client
 import xlsxwriter
 import time
 import csv
 import numpy as np
-import RTM_ana
 import gc
 import hist_func
+from range_test.range_test import Rangetest
+from rtm.Charge_ana import RtmCharging
 
-filepath("D:/03RTM/ALL_RTM_data/0509/")
-# sd
 client=Client(host='10.122.17.69',port='9005',user='en' ,password='en1Q',database='en')
 
-#BMS working piont
-sql35="WITH cast(splitByChar(',',cocesprotemp1),'Array(Int8)') AS temp_list " \
-    "SElECT soc,arrayReduce('sum',temp_list)/length(temp_list),totalcurrent*totalvolt/1000 " \
-    "FROM en.rtm_vds " \
-    "WHERE chargingstatus='NO_CHARGING' and totalcurrent>0 and cocesprotemp1!='NULL' " \
-    "AND deviceid like 'LSVA%' AND CAST(accmiles,'float')>100"
-aus=client.execute(sql35)
+#mile
+l1=RtmCharging("lavida","D:/03RTM/ALL_RTM_data/0509/","lavida",client)#charging_lavida
+[soc_s,soc_e,soc_d]=l1.get_soc()
+[time_h_s,time_d]=l1.get_time()
 
-soc,temp_av,pow_bms=[],[],[]
-for value in aus:
-    soc.append(value[0])
-    temp_av.append(value[1])
-    pow_bms.append(value[2])
+count=0
+a,b=[],[]
+for i,s in enumerate(soc_d):
+    if s<0:
+        count+=1
+        print(i)
+        a.append(time_d[i])
+        b.append(s)
+print(count,len(soc_d),count/len(soc_d))
+l1.Charge_summary()
 
-
-workbook = xlsxwriter.Workbook("BMS_working_point_lavida.xlsx")
-RTM_ana.hist_2con_show(workbook,['discharging'],soc,range(0,115,5),temp_av,range(-10,55,5))
-
-soc,temp_av,pow_bms=[],[],[]
-sql35="WITH cast(splitByChar(',',cocesprotemp1),'Array(Int8)') AS temp_list " \
-    "SElECT soc,arrayReduce('sum',temp_list)/length(temp_list),totalcurrent*totalvolt/1000 " \
-    "FROM en.rtm_vds " \
-    "where chargingstatus in ('CHARGING_STOPPED','CHARGING_FINISH') AND totalcurrent<0 AND cocesprotemp1!='NULL' " \
-    "and deviceid like 'LSVA%' AND CAST(accmiles,'float')>100 "
-aus=client.execute(sql35)
-
-for value in aus:
-    soc.append(value[0])
-    temp_av.append(value[1])
-    pow_bms.append(value[2])
-
-RTM_ana.hist_2con_show(workbook,['charging'],soc,range(0,115,5),temp_av,range(-10,55,5))
-workbook.close()
-
-#电机工作点分布
-sql35="SELECT cast(emspeed,'float'),cast(emtq,'float') " \
-    "from en.rtm_vds " \
-    "where cast(emtq,'float')>0 and cast(emspeed,'float')>0 " \
-    "and deviceid like 'LSVA%' AND CAST(accmiles,'float')>100 "
-aus=client.execute(sql35)
-speed=[]
-torq=[]
-for value in aus:
-    speed.append(value[0])
-    torq.append(value[1])
-del aus
-gc.collect()
-workbook = xlsxwriter.Workbook("LE_working_point_lavida.xlsx")
-RTM_ana.hist_2con_show(workbook,['speed>0&t>0'],speed,range(0,13500,500),torq,range(0,400,50))
-
-speed=[]
-torq=[]
-sql35="SELECT cast(emspeed,'float'),cast(emtq,'float') " \
-    "from en.rtm_vds " \
-    "where cast(emtq,'float')<0 and cast(emspeed,'float')>0 " \
-    "and deviceid like 'LSVA%' AND CAST(accmiles,'float')>100 "
-aus=client.execute(sql35)
-for value in aus:
-    speed.append(value[0])
-    torq.append(value[1])
-del aus
-gc.collect()
-RTM_ana.hist_2con_show(workbook,['speed>0&t<0'],speed,range(0,13500,500),torq,range(-300,50,50))
+l1.cut_data()
+[mile,soc_r,mile1]=l1.get_mile_soc()
+[block,mile_freq]=hist_func.hist_con(mile,[0,10,20,30,40,50,60,80,100,150,200,250,300,350,400,1000])
+[block,mile_freq1]=hist_func.hist_con(mile1,[0,150,200,210,220,230,240,250,260,270,280,290,300,310,320,330,340,350,400,1000])
+print(np.mean(np.array(mile1)))
+print(np.median(np.array(mile1)))
 
 
 
-workbook.close()
+
+[block,mile_freq]=hist_func.hist_con(mile,[0,10,20,30,40,50,60,80,100,150,200,250,300,400,1000])
+
+
+
+
+
+l1=RtmCharging("lavida","D:/03RTM/ALL_RTM_data/0509/","lavida",client)#charging_lavida
+l1.cut_data()
+[soc_s,soc_e,soc_d]=l1.get_soc()
+[time_h_s,time_d]=l1.get_time()
+[temp_s,temp_e,temp_min,temp_max,temp_mean]=l1.get_temp()
+charge_mode=l1.get_mode()
+[power_max,power_mean]=l1.get_pow()
+[mile,soc_r]=l1.get_mile_soc()
+
+
+NEDC_path='D:/11test/01BEV-NEDC/1-lavida 53Ah/14 LBE734/vp426/D/'
+NEDC_D=Rangetest('LBE734_NEDC_D',NEDC_path,'NEDC')
+#NEDC_D.cut_range()
+#range_dyno=295.9
+#E_AC=38.055
+#NEDC_D.sum_to_excel_NEDC(range_dyno,E_AC)
+#NEDC_D.plot_v()
+
+
 
 
 #计算电机工作效率
