@@ -1,12 +1,33 @@
 import sys
 import numpy as np
 import xlsxwriter
+import time
 '''
 given input_input and steps,output hist.
 input_data:list,steps:[start,step,end]
 output:dictionary, key:start of every block
 value: stastics result
 '''
+
+def time_cost(fn):
+    def _wrapper(*args,**kwargs):
+        start=time.time()
+        A=fn(*args,**kwargs)
+        dt=time.time()-start
+        if dt<60:
+            print("%s cost %s second"%(fn.__name__,dt))
+        elif dt<3600:
+            dm=int(dt/60)
+            dt=dt-dm*60
+            print("%s cost %s min %s second"%(fn.__name__,dm,dt))
+        else:
+            dh=int(dt/3600)
+            dm=int((dt-dh*3600)/60)
+            dt=dt-dh*3600-dm*60
+            print("%s cost %s hour %s min %s second"%(fn.__name__,dh,dm,dt))
+        return A
+    return _wrapper
+
 #统计按照顺序排列的连续变量的分布
 def hist1(input_data,steps):
     block=[]
@@ -31,6 +52,7 @@ def hist1(input_data,steps):
 
 #input_data is continuous variable
 #interval1 is for input_data1
+@time_cost
 def hist_con(input_data,steps):
     if not input_data:
         print('Input_data is empty')
@@ -188,7 +210,7 @@ def hist_cros_con_dis_show(workbook,name_list,in1,in2,step):
     for i in range(len(row_con)):
         worksheet.write(i+1,0,row_con[i])
     
-# 统计两个连续变量的分布（电机工作点）
+# 统计两个连续变量的分布（eg:电机工作点）
 #in1和in2长度和step都不要求相同#name_list=[sheet名]
 def hist_cros_2con_show(workbook,name_list,in1,step1,in2,step2):
     
