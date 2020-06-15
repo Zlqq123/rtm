@@ -204,7 +204,7 @@ v2.0
 通过chargestatus切换判断，来切取充电数据，
 如果上一次充电结束的里程与下一次开始充电的里程不变，合并为一次充电。前提是同一辆车。
 '''
-class RtmCharging():
+class RtmCharging1():
     def __init__ (self,path,proj,client):
         #self.name=name
         self.path=path

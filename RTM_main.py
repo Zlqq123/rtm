@@ -28,24 +28,29 @@ l1.Charge_summary()
 l1.drive_summary()
 dt=time.time()-start
 file=open(path+"lavida"+"_log.txt",'a')
-file.write("running cost"+ str(dt)+"s \r\n")
-
+file.write("------------------\r\n")
+file.write("running cost"+ str(round(dt,2))+"s \r\n")
+file.close()
+print("-----------------")
 start=time.time()
 l1=RtmAna(path,"tiguan",client)#charging_lavida
 l1.Charge_summary()
 l1.drive_summary()
 dt=time.time()-start
 file=open(path+"tiguan"+"_log.txt",'a')
-file.write("running cost"+ str(dt)+"s \r\n")
-
+file.write("------------------\r\n")
+file.write("running cost"+ str(round(dt,2))+"s \r\n")
+file.close()
+print("-----------------")
 start=time.time()
 l1=RtmAna(path,"passat",client)#charging_lavida
 l1.Charge_summary()
 l1.drive_summary()
 dt=time.time()-start
 file=open(path+"passat"+"_log.txt",'a')
-file.write("running cost"+ str(dt)+"s \r\n")
-
+file.write("------------------\r\n")
+file.write("running cost"+ str(round(dt,2))+"s \r\n")
+file.close()
 
 
 NEDC_path='D:/11test/01BEV-NEDC/1-lavida 53Ah/14 LBE734/vp426/D/'

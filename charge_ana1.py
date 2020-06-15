@@ -11,9 +11,10 @@ from datetime import datetime
 '''
 V4.0
 统计函数采用numpy,统计函数速度提升99.9%
-new cost 0.8858745098114014
-old cost 138.67561984062195
+hist function 138.67->0.88
 综合速度提升？
+passat 5421-> 1146 提升79%
+tiguan 2408->391 提升83%
 '''
 
 class RtmAna():
@@ -34,11 +35,12 @@ class RtmAna():
         sql = "select uniq(deviceid) from en.rtm_vds Where "+con
         aus=client.execute(sql)
         dt=datetime.now()
-        file=open(path+proj+"_log.txt",'w')
+        file=open(path+proj+"_log.txt",'a')
         file.write("\r\n####################################\r\n")
-        file.write("运行日期&时间："+str(dt)+"\r\n")
-        file.write("参与统计车辆总数："+str(aus[0][0])+"辆\r\n")
-        file.write("参与统计天数：2020/03/01~2020/03/19 \r\n")
+        file.write("##运行日期&时间："+str(dt)+"\r\n")
+        file.write("##参与统计车辆总数："+str(aus[0][0])+"辆\r\n")
+        file.write("##参与统计天数：2020/03/01~2020/03/19 \r\n")
+        file.write("####################################\r\n")
         file.close()
 
     #return all_charge=i*[0vin,1time_start,2time_end,3soc_start,4soc_end,5mile_start,6charging_mode]
@@ -102,10 +104,10 @@ class RtmAna():
         file=open(self.path+self.proj+"_log.txt",'a')
         file.write("---------charge analysis---------\r\n")
         file.write("原始充电次数："+str(l1)+"\r\n")
-        file.write("充电前数据丢失次数："+str(count_1)+"占比："+str(count_1/l1*100)+"%\r\n")
-        file.write("充电后数据丢失次数："+str(count_2)+"占比："+str(count_2/l1*100)+"%\r\n")
-        file.write("充电前后数据均丢失次数："+str(count_12)+"占比："+str(count_12/l1*100)+"%\r\n")
-        file.write("充电合并次数："+str(count_3)+"占比："+str(count_3/l1*100)+"%\r\n")
+        file.write("充电前数据丢失次数："+str(count_1)+"占比："+str(round(count_1/l1*100,2))+"%\r\n")
+        file.write("充电后数据丢失次数："+str(count_2)+"占比："+str(round(count_2/l1*100,2))+"%\r\n")
+        file.write("充电前后数据均丢失次数："+str(count_12)+"占比："+str(round(count_12/l1*100,2))+"%\r\n")
+        file.write("充电合并次数："+str(count_3)+"占比："+str(round(count_3/l1*100,2))+"%\r\n")
         file.write("处理后充电次数："+str(l2)+"\r\n")
         file.close()
 
@@ -133,7 +135,6 @@ class RtmAna():
     
     #return [mode,temp_s,temp_e,temp_min,temp_max,temp_mean,temp_range,power_max,power_mean]
     def get_temp_pow(self,all_charge):
-
         sql="WITH cast(splitByChar(',',cocesprotemp1),'Array(Int8)') AS temp_list " \
             "SELECT deviceid,uploadtime,-totalcurrent*totalvolt/1000,arrayReduce('sum',temp_list)/length(temp_list) " \
             "FROM en.rtm_vds WHERE chargingstatus in ('CHARGING_STOPPED','CHARGING_FINISH') AND cocesprotemp1!='NULL' " \
@@ -173,7 +174,7 @@ class RtmAna():
                 not_find.append(j)
 
         file=open(self.path+self.proj+"_log.txt",'a')        
-        file.write("未匹配的充电次数："+str(len(not_find))+"占比："+str(len(not_find)/len(all_charge)*100)+"%\r\n")
+        file.write("未匹配的充电次数："+str(len(not_find))+"占比："+str(round(len(not_find)/len(all_charge)*100,2))+"%\r\n")
         file.write("匹配的充电次数："+str(len(ss))+"\r\n")
         file.close()
 
@@ -250,10 +251,10 @@ class RtmAna():
         file=open(self.path+self.proj+"_log.txt",'a')
         file.write("------mile perCharging analysis---------\r\n")
         file.write("原始行驶次数："+str(l1)+"\r\n")
-        file.write("充电前数据丢失次数："+str(count_1)+"占比："+str(count_1/l1*100)+"%\r\n")
-        file.write("充电后数据丢失次数："+str(count_2)+"占比："+str(count_2/l1*100)+"%\r\n")
-        file.write("充电前后数据均丢失次数："+str(count_12)+"占比："+str(count_12/l1*100)+"%\r\n")
-        file.write("SOC 没有变化的行驶次数："+str(l1-l2-count_1-count_2+count_12)+"   占比："+str((l1-l2-count_1-count_2+count_12)/l1*100)+"%\r\n")
+        file.write("充电前数据丢失次数："+str(count_1)+"占比："+str(round(count_1/l1*100,2))+"%\r\n")
+        file.write("充电后数据丢失次数："+str(count_2)+"占比："+str(round(count_2/l1*100,2))+"%\r\n")
+        file.write("充电前后数据均丢失次数："+str(count_12)+"占比："+str(round(count_12/l1*100,2))+"%\r\n")
+        file.write("SOC 没有变化的行驶次数："+str(l1-l2-count_1-count_2+count_12)+"   占比："+str(round((l1-l2-count_1-count_2+count_12)/l1*100,2))+"%\r\n")
         file.write("处理后行驶次数："+str(l2)+"\r\n")
         file.close()
 
@@ -287,8 +288,8 @@ class RtmAna():
         file=open(self.path+self.proj+"_log.txt",'a')
         file.write("-------E-Motor Working Point Analysis---------\r\n")
         file.write("原始抓取点数："+str(l1)+"\r\n")
-        file.write("去除转矩为零或转速为零之后工作点数："+str(l2)+"   占比："+str(l2/l1*100)+"%\r\n")
-        file.write("效率值在合理范围数："+str(l3)+"   占比："+str(l3/l2*100)+"%\r\n")
+        file.write("去除转矩为零或转速为零之后工作点数："+str(l2)+"   占比："+str(round(l2/l1*100,2))+"%\r\n")
+        file.write("效率值在合理范围数："+str(l3)+"   占比："+str(round(l3/l2*100,2))+"%\r\n")
         file.close()
 
 
@@ -438,10 +439,10 @@ class RtmAna():
         file=open(self.path+self.proj+"_log.txt",'a')
         file.write("---------driving analysis--------------\r\n")
         file.write("原始行驶次数："+str(l1)+"\r\n")
-        file.write("行驶前数据丢失次数："+str(count_1)+"占比："+str(count_1/l1*100)+"%\r\n")
-        file.write("行驶后数据丢失次数："+str(count_2)+"占比："+str(count_2/l1*100)+"%\r\n")
-        file.write("行驶前后数据均丢失次数："+str(count_12)+"占比："+str(count_12/l1*100)+"%\r\n")
-        file.write("行驶前后里程不变的次数："+str(count_3)+"占比："+str(count_3/l1*100)+"%\r\n")
+        file.write("行驶前数据丢失次数："+str(count_1)+"占比："+str(round(count_1/l1*100,2))+"%\r\n")
+        file.write("行驶后数据丢失次数："+str(count_2)+"占比："+str(round(count_2/l1*100,2))+"%\r\n")
+        file.write("行驶前后数据均丢失次数："+str(count_12)+"占比："+str(round(count_12/l1*100,2))+"%\r\n")
+        file.write("行驶前后里程不变的次数："+str(count_3)+"占比："+str(round(count_3/l1*100,2))+"%\r\n")
         file.write("处理后行驶次数："+str(l2)+"\r\n")
         file.close()
 
@@ -464,9 +465,9 @@ class RtmAna():
             soc_e.append(a[4])
             soc_d.append(a[3]-a[4])
             mile_d.append(a[6]-a[5])
-            if a[4]-a[3]>0:
+            if a[4]-a[3]>1:
                 mile_d_c.append((a[6]-a[5])/(a[3]-a[4])*100)
-            if d.seconds>0:
+            if d.seconds>60:
                 v_mean.append((a[6]-a[5])/d.seconds*3.6)
 
         return np.array(time_h_s),np.array(time_d),np.array(soc_s),np.array(soc_e),np.array(soc_d),np.array(mile_d),np.array(mile_d_c),np.array(v_mean)
