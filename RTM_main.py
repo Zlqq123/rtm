@@ -20,10 +20,10 @@ def print_in_excel(aus,s1):
 
 
 client=Client(host='10.122.17.69',port='9005',user='en' ,password='en1Q',database='en')
-path='D:/03RTM/ALL_RTM_data/0612/'
+path='D:/03RTM/ALL_RTM_data/0629/'
 
 start=time.time()
-l1=RtmAna(path,"lavida",client)#charging_lavida
+l1=RtmAna(path,"lavida",client)
 l1.Charge_summary()
 l1.drive_summary()
 dt=time.time()-start
@@ -32,8 +32,9 @@ file.write("------------------\r\n")
 file.write("running cost"+ str(round(dt,2))+"s \r\n")
 file.close()
 print("-----------------")
+
 start=time.time()
-l1=RtmAna(path,"tiguan",client)#charging_lavida
+l1=RtmAna(path,"tiguan",client)
 l1.Charge_summary()
 l1.drive_summary()
 dt=time.time()-start
@@ -42,8 +43,9 @@ file.write("------------------\r\n")
 file.write("running cost"+ str(round(dt,2))+"s \r\n")
 file.close()
 print("-----------------")
+
 start=time.time()
-l1=RtmAna(path,"passat",client)#charging_lavida
+l1=RtmAna(path,"passat",client)
 l1.Charge_summary()
 l1.drive_summary()
 dt=time.time()-start
@@ -51,6 +53,27 @@ file=open(path+"passat"+"_log.txt",'a')
 file.write("------------------\r\n")
 file.write("running cost"+ str(round(dt,2))+"s \r\n")
 file.close()
+
+
+l1=RtmAna(path,"lavida",client)#charging_lavida
+workbook = xlsxwriter.Workbook(path+"lavida"+"_append"+".xlsx")
+l1.hourly_mileage(workbook)
+l1.percharge_mile(workbook)
+l1.BMS(workbook)
+workbook.close()
+
+l1=RtmAna(path,"tiguan",client)#charging_lavida
+workbook = xlsxwriter.Workbook(path+"Tiguan"+"_append"+".xlsx")
+l1.hourly_mileage(workbook)
+l1.BMS(workbook)
+workbook.close()
+
+l1=RtmAna(path,"passat",client)#charging_lavida
+workbook = xlsxwriter.Workbook(path+"Passat"+"_append"+".xlsx")
+l1.hourly_mileage(workbook)
+l1.BMS(workbook)
+workbook.close()
+
 
 
 NEDC_path='D:/11test/01BEV-NEDC/1-lavida 53Ah/14 LBE734/vp426/D/'

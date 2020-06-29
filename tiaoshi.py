@@ -11,6 +11,11 @@ from rtm.charge_ana1 import RtmAna
 
 client=Client(host='10.122.17.69',port='9005',user='en' ,password='en1Q',database='en')
 
+sql="SELECT deviceid,toDate(uploadtime),toHour(uploadtime),max(CAST(accmiles,'float')),min(CAST(accmiles,'float')),COUNT(deviceid)" \
+    "from rtm_vds where vehiclestatus=='STARTED' AND deviceid like 'LSVA%' group by deviceid,toDate(uploadtime),toHour(uploadtime) "
+aus=client.execute(sql)
+
+
 l1=RtmAna("D:/03RTM/ALL_RTM_data/0611/","lavida",client)#charging_lavida
 
 

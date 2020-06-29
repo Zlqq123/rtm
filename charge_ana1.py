@@ -15,6 +15,10 @@ hist function 138.67->0.88
 综合速度提升？
 passat 5421-> 1146 提升79%
 tiguan 2408->391 提升83%
+
+V4.1
+添加能耗计算模块
+添加每个小时的行驶时间和行驶距离统计
 '''
 
 class RtmAna():
@@ -47,7 +51,7 @@ class RtmAna():
     def get_Charge(self):
         sql1="SELECT deviceid,uploadtime,delta,soc,d_soc,acc,ch_mode " \
             "FROM (SELECT deviceid,uploadtime,runningDifference(char_s) AS delta,soc, runningDifference(soc) AS d_soc,acc, " \
-            "multiIf(P>8,'DC',P<=8 and P>5,'mode3_1',P<=5 and P>2.5,'mode3_2',P<=2.5 and P>0,'mode2','discharging') AS ch_mode " \
+            "multiIf(P>7.5,'DC',P<=7.5 and P>4,'mode3_1',P<=4 and P>2,'mode3_2',P<=2 and P>0,'mode2','discharging') AS ch_mode " \
             "FROM (SELECT deviceid,uploadtime,soc,CAST(accmiles,'float') AS acc, if(chargingstatus=='NO_CHARGING',7,8) AS char_s, -totalcurrent*totalvolt/1000 AS P " \
             "FROM en.rtm_vds " \
             "WHERE " + self.con + " ORDER BY deviceid,uploadtime)) " \
@@ -233,6 +237,8 @@ class RtmAna():
         soc_r=[]
         mile_r=[]
         mile_r_c=[]
+        Energy_consump=[]
+
         for i,a in enumerate(all_drive):
             if abs(tmp[i][0])>5 or abs(tmp[i][1])>5:
                 if abs(tmp[i][0])>5:
@@ -261,7 +267,15 @@ class RtmAna():
         name_list=['mile_perCharging','mile_perCharging','mile_convert']
         in_list=[np.array(mile_r),np.array(mile_r_c)]
         hist_func_np.hist_con_show(workbook,name_list,in_list,range(0,500,20),2)
-    
+
+        if self.proj=='lavida':
+            charging_energy=37 #lavida BEV 实际SOC96~8% 冲入电量37kWh,来源NEDC充电测试平均值
+            for a in all_drive:
+                if a[3]>a[4] and a[6]>a[5]:
+                    Energy_consump.append(charging_energy*(a[3]-a[4])/(a[6]-a[5]))
+            hist_func_np.hist_con_show(workbook,['Energy consumption','Energy consumption'],[Energy_consump],np.arange(9,21,0.5),2)
+
+
 
     def E_motor(self,workbook):
         sql="SELECT cast(emspeed,'float') as sp,cast(emtq,'float') as tq,sp*tq/9550,cast(emvolt,'float')*cast(emctlcut,'float')/1000,cast(emtemp,'float'),cast(emctltemp,'float') " \
@@ -294,7 +308,7 @@ class RtmAna():
 
 
         hist_func_np.hist_cros_2con_show(workbook,['LE_working_point'],np.array(speed),range(-4000,13000,500),np.array(torq),range(-300,400,50))
-        hist_func_np.hist_con_show(workbook,["LE-eff",'LE_efficiency'],[np.array(eff)],[0,50,70,80,90,92,94,96,98,100],2)
+        hist_func_np.hist_con_show(workbook,["LE-eff",'LE_efficiency'],[np.array(eff)],[0,50,70,80,82,84,86,88,90,92,94,96,98,100],2)
         hist_func_np.hist_con_show(workbook,["LE-temp",'E_motor temperature','LE temperature'],[np.array(temp_motor),np.array(temp_LE)],range(-10,120,5),2)
         
     def BMS(self,workbook):
@@ -311,7 +325,7 @@ class RtmAna():
             temp_av.append(value[1])
             pow_bms.append(value[2])
         
-        hist_func_np.hist_cros_2con_show(workbook,['discharging'],np.array(soc),range(0,115,5),np.array(temp_av),range(-10,55,5))
+        hist_func_np.hist_cros_2con_show(workbook,['discharging'],np.array(soc),range(0,115,5),np.array(temp_av),range(-30,65,5))
 
         soc,temp_av,pow_bms=[],[],[]
         sql="WITH cast(splitByChar(',',cocesprotemp1),'Array(Int8)') AS temp_list " \
@@ -326,7 +340,7 @@ class RtmAna():
             temp_av.append(value[1])
             pow_bms.append(value[2])
         
-        hist_func_np.hist_cros_2con_show(workbook,['charging'],np.array(soc),range(0,115,5),np.array(temp_av),range(-10,55,5))
+        hist_func_np.hist_cros_2con_show(workbook,['charging'],np.array(soc),range(0,115,5),np.array(temp_av),range(-30,65,5))
 
     def daily_mileage(self,workbook):
         sql="SELECT deviceid,toDate(uploadtime),max(CAST(accmiles,'float')),min(CAST(accmiles,'float')) " \
@@ -337,6 +351,26 @@ class RtmAna():
             mileage.append(value[2]-value[3])
         
         hist_func_np.hist_con_show(workbook,["daily-mile",'mileage per day'],[np.array(mileage)],range(0,500,20),2)
+
+    def hourly_mileage(self,workbook):
+        sql="SELECT deviceid,toDate(uploadtime),toHour(uploadtime),max(CAST(accmiles,'float')),min(CAST(accmiles,'float')),COUNT(deviceid) " \
+            "from rtm_vds where vehiclestatus=='STARTED' AND "+ self.con+" group by deviceid,toDate(uploadtime),toHour(uploadtime) "
+        aus=self.client.execute(sql)
+        mileage_h=[]
+        hour=[]
+        durate=[]
+        for value in aus:
+            if value[3]>value[4]:
+                hour.append(value[2])
+                mileage_h.append(value[3]-value[4])
+                if value[5]<120:
+                    durate.append(value[5]*0.5)
+                else:
+                    durate.append(60)
+        
+        hist_func_np.hist_cros_con_dis_show(workbook,["hourly_mileage"],np.array(mileage_h),range(0,150,10),np.array(hour),range(24))
+        hist_func_np.hist_cros_con_dis_show(workbook,["hourly_driving_time"],np.array(durate),range(0,65,5),np.array(hour),range(24))
+
 
     def v_mode(self,workbook):
         sql="SELECT cast(vehiclespeed,'float') as v,operationmode,CAST(accmiles,'float') as acc " \
@@ -475,6 +509,7 @@ class RtmAna():
     def drive_summary(self):
         workbook = xlsxwriter.Workbook(self.path+self.proj+"_drive"+".xlsx")
         self.daily_mileage(workbook)
+        self.hourly_mileage(workbook)
         self.percharge_mile(workbook)
         self.v_mode(workbook)
 
@@ -490,9 +525,11 @@ class RtmAna():
         name_list=['driving_time','driving_time']
         hist_func_np.hist_con_show(workbook,name_list,[time_d],[0,30,60,90,120,180,240,300,1500],2)
 
+        '''
         name_list=['mile_perCharging(to delete)','mile_perCharging','mile_convert']
         in_list=[mile_d,mile_d_c]
         hist_func_np.hist_con_show(workbook,name_list,in_list,range(0,500,20),2)
+        '''
 
         name_list=['mean_V','mean_V(Including idle speed)']
         hist_func_np.hist_con_show(workbook,name_list,[v_mean],[0,10,20,30,40,50,60,100,210],2)
