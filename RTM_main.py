@@ -31,7 +31,7 @@ file=open(path+"lavida"+"_log.txt",'a')
 file.write("------------------\r\n")
 file.write("running cost"+ str(round(dt,2))+"s \r\n")
 file.close()
-print("-----------------")
+print("lavida end-----------------")
 
 start=time.time()
 l1=RtmAna(path,"tiguan",client)

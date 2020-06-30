@@ -17,8 +17,9 @@ passat 5421-> 1146 提升79%
 tiguan 2408->391 提升83%
 
 V4.1
-添加能耗计算模块
-添加每个小时的行驶时间和行驶距离统计
+添加能耗计算模块 Change in 【percharge_mile(self,workbook)】
+添加每个小时的行驶时间和行驶距离统计create 【hourly_mileage(self,workbook)】
+BMS工作点，电机工作点，添加自定义采样频率 Change in 【E_motor_sample(self,workbook)，BMS_sample(self,workbook):】
 '''
 
 class RtmAna():
@@ -91,9 +92,13 @@ class RtmAna():
                 i+=1
         i=1
         count_3=0#计数合并充电情况
+        count_31=0#计数合并充电情况中充电中断时间过长>30分钟
         while i<len(all_charge):
             if all_charge[i-1][0]==all_charge[i][0] and tmp[i-1][2]==all_charge[i][5] and all_charge[i-1][4]==all_charge[i][3]:
                 #如果上一次充电结束的里程与下一次开始充电的里程不变，合并为一次充电。前提是同一辆车。
+                d=all_charge[i][1]-all_charge[i-1][2]
+                if d.seconds/60>30:
+                    count_31+=1
                 all_charge[i-1][2]=all_charge[i][2]
                 all_charge[i-1][4]=all_charge[i][4]
                 tmp[i-1][1]=tmp[i][1]
@@ -112,6 +117,7 @@ class RtmAna():
         file.write("充电后数据丢失次数："+str(count_2)+"占比："+str(round(count_2/l1*100,2))+"%\r\n")
         file.write("充电前后数据均丢失次数："+str(count_12)+"占比："+str(round(count_12/l1*100,2))+"%\r\n")
         file.write("充电合并次数："+str(count_3)+"占比："+str(round(count_3/l1*100,2))+"%\r\n")
+        file.write("充电合并次数中充电中断时间过长>30分钟："+str(count_31)+"占比："+str(round(count_31/l1*100,2))+"%\r\n")
         file.write("处理后充电次数："+str(l2)+"\r\n")
         file.close()
 
@@ -129,7 +135,8 @@ class RtmAna():
             soc_s.append(a[3])
             soc_e.append(a[4])
             soc_d.append(a[4]-a[3])
-            if a[4]-a[3]>0:
+            if a[4]-a[3]>5:
+                #充入电量SOC>5%
                 d=a[2]-a[1]
                 time_d.append(d.seconds/60)
                 time_d_c.append(d.seconds/60/(a[4]-a[3])*100)
@@ -209,7 +216,6 @@ class RtmAna():
         
         return np.array(mode),np.array(temp_s),np.array(temp_e),np.array(temp_min),np.array(temp_max),np.array(temp_mean),np.array(temp_range),np.array(power_max),np.array(power_mean)
 
-
     def percharge_mile(self,workbook):
         sql1="SELECT deviceid,uploadtime,delta,soc,d_soc,acc " \
             "FROM (SELECT deviceid,uploadtime,runningDifference(char_s) AS delta,soc, runningDifference(soc) AS d_soc,acc " \
@@ -275,12 +281,13 @@ class RtmAna():
                     Energy_consump.append(charging_energy*(a[3]-a[4])/(a[6]-a[5]))
             hist_func_np.hist_con_show(workbook,['Energy consumption','Energy consumption'],[Energy_consump],np.arange(9,21,0.5),2)
 
-
-
-    def E_motor(self,workbook):
+    def E_motor_sample(self,workbook,sampling=1/6):
+        '''
+        sampling自定义采样频率 取值范围[1/60,1]
+        '''
         sql="SELECT cast(emspeed,'float') as sp,cast(emtq,'float') as tq,sp*tq/9550,cast(emvolt,'float')*cast(emctlcut,'float')/1000,cast(emtemp,'float'),cast(emctltemp,'float') " \
             "FROM en.rtm_vds " \
-            "WHERE cast(vehiclespeed,'float')>0 AND "+ self.con+ " and toSecond(uploadtime)<10 "
+            "WHERE cast(vehiclespeed,'float')>0 AND "+ self.con+ " and toSecond(uploadtime)<"+str(int(sampling*60))
         aus=self.client.execute(sql)
         speed=[]
         torq=[]
@@ -305,18 +312,20 @@ class RtmAna():
         file.write("去除转矩为零或转速为零之后工作点数："+str(l2)+"   占比："+str(round(l2/l1*100,2))+"%\r\n")
         file.write("效率值在合理范围数："+str(l3)+"   占比："+str(round(l3/l2*100,2))+"%\r\n")
         file.close()
-
-
-        hist_func_np.hist_cros_2con_show(workbook,['LE_working_point'],np.array(speed),range(-4000,13000,500),np.array(torq),range(-300,400,50))
+        
         hist_func_np.hist_con_show(workbook,["LE-eff",'LE_efficiency'],[np.array(eff)],[0,50,70,80,82,84,86,88,90,92,94,96,98,100],2)
         hist_func_np.hist_con_show(workbook,["LE-temp",'E_motor temperature','LE temperature'],[np.array(temp_motor),np.array(temp_LE)],range(-10,120,5),2)
-        
-    def BMS(self,workbook):
+        hist_func_np.hist_cros_2con_show(workbook,['LE_working_point'],np.array(speed),range(-4000,13000,500),np.array(torq),range(-300,400,50))
+    
+    def BMS_sample(self,workbook,sampling=1/6):
+        '''
+        sampling自定义采样频率 取值范围[1/60,1]
+        '''
         sql="WITH cast(splitByChar(',',cocesprotemp1),'Array(Int8)') AS temp_list " \
             "SElECT soc,arrayReduce('sum',temp_list)/length(temp_list),totalcurrent*totalvolt/1000 " \
             "FROM en.rtm_vds " \
             "WHERE chargingstatus='NO_CHARGING' and totalcurrent>0 and cocesprotemp1!='NULL' " \
-            "AND "+self.con+" and toSecond(uploadtime)<10"
+            "AND "+self.con+" and toSecond(uploadtime)<"+str(int(sampling*60))
         aus=self.client.execute(sql)
 
         soc,temp_av,pow_bms=[],[],[]
@@ -332,7 +341,7 @@ class RtmAna():
             "SElECT soc,arrayReduce('sum',temp_list)/length(temp_list),totalcurrent*totalvolt/1000 " \
             "FROM en.rtm_vds " \
             "where chargingstatus in ('CHARGING_STOPPED','CHARGING_FINISH') AND totalcurrent<0 AND cocesprotemp1!='NULL' " \
-            "AND "+self.con+" and toSecond(uploadtime)<10"
+            "AND "+self.con+" and toSecond(uploadtime)<"+str(int(sampling*60))
         aus=self.client.execute(sql)
         soc,temp_av,pow_bms=[],[],[]
         for value in aus:
@@ -370,7 +379,6 @@ class RtmAna():
         
         hist_func_np.hist_cros_con_dis_show(workbook,["hourly_mileage"],np.array(mileage_h),range(0,150,10),np.array(hour),range(24))
         hist_func_np.hist_cros_con_dis_show(workbook,["hourly_driving_time"],np.array(durate),range(0,65,5),np.array(hour),range(24))
-
 
     def v_mode(self,workbook):
         sql="SELECT cast(vehiclespeed,'float') as v,operationmode,CAST(accmiles,'float') as acc " \
@@ -509,10 +517,11 @@ class RtmAna():
     def drive_summary(self):
         workbook = xlsxwriter.Workbook(self.path+self.proj+"_drive"+".xlsx")
         self.daily_mileage(workbook)
-        self.hourly_mileage(workbook)
         self.percharge_mile(workbook)
+        self.hourly_mileage(workbook)
         self.v_mode(workbook)
-
+        
+        '''
         [time_h_s,time_d,soc_s,soc_e,soc_d,mile_d,mile_d_c,v_mean]=self.get_drive_variable()
 
         name_list=['SOC','start_SOC','end_SOC']
@@ -525,16 +534,14 @@ class RtmAna():
         name_list=['driving_time','driving_time']
         hist_func_np.hist_con_show(workbook,name_list,[time_d],[0,30,60,90,120,180,240,300,1500],2)
 
-        '''
         name_list=['mile_perCharging(to delete)','mile_perCharging','mile_convert']
         in_list=[mile_d,mile_d_c]
         hist_func_np.hist_con_show(workbook,name_list,in_list,range(0,500,20),2)
-        '''
 
         name_list=['mean_V','mean_V(Including idle speed)']
         hist_func_np.hist_con_show(workbook,name_list,[v_mean],[0,10,20,30,40,50,60,100,210],2)
-
-        self.E_motor(workbook)
-        self.BMS(workbook)
+        '''
+        self.E_motor_sample(workbook)
+        self.BMS_sample(workbook)
 
         workbook.close()

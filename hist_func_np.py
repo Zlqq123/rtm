@@ -96,18 +96,20 @@ def hist_con_dis(input_data1,interval1,input_data2,interval2,show_interval=1,sho
 
     '''
     re = np.zeros((len(interval2),len(interval1)-1),dtype=int)
-    re2=np.zeros((len(interval2),6),dtype=int)
+    re2=np.zeros((len(interval2),8),dtype=int)
     
     for i in range(len(interval2)):
         in1=input_data1[input_data2==interval2[i]]
         re[i,:]=hist_con(in1,interval1,0)
         if show_hist and in1!=[]:
             re2[i,0]=np.min(in1)
-            re2[i,1]=np.percentile(in1,25)
-            re2[i,2]=np.percentile(in1,50)
-            re2[i,3]=np.percentile(in1,75)
-            re2[i,4]=np.max(in1)
-            re2[i,5]=np.mean(in1)
+            re2[i,1]=np.percentile(in1,1)
+            re2[i,2]=np.percentile(in1,25)
+            re2[i,3]=np.percentile(in1,50)
+            re2[i,4]=np.percentile(in1,75)
+            re2[i,5]=np.percentile(in1,99)
+            re2[i,6]=np.max(in1)
+            re2[i,7]=np.mean(in1)
 
     if show_interval:
         block=interval_str(interval1)
@@ -182,20 +184,24 @@ def hist_con_show(workbook,name_list,in_list,step,need=0):
             worksheet.write(c+3,n+1,np.mean(inx))
         if need==2:
             worksheet.write(c+1,n+1,np.min(inx))
-            worksheet.write(c+2,n+1,np.percentile(inx,25))
-            worksheet.write(c+3,n+1,np.percentile(inx,50))
-            worksheet.write(c+4,n+1,np.percentile(inx,75))
-            worksheet.write(c+5,n+1,np.max(inx))
-            worksheet.write(c+6,n+1,np.mean(inx))
+            worksheet.write(c+2,n+1,np.percentile(inx,1))
+            worksheet.write(c+3,n+1,np.percentile(inx,25))
+            worksheet.write(c+4,n+1,np.percentile(inx,50))
+            worksheet.write(c+5,n+1,np.percentile(inx,75))
+            worksheet.write(c+6,n+1,np.percentile(inx,99))
+            worksheet.write(c+7,n+1,np.max(inx))
+            worksheet.write(c+8,n+1,np.mean(inx))
         if need==3:
             worksheet.write(c+1,n+1,np.min(inx))
-            worksheet.write(c+2,n+1,np.percentile(inx,25))
-            worksheet.write(c+3,n+1,np.percentile(inx,50))
-            worksheet.write(c+4,n+1,np.percentile(inx,75))
-            worksheet.write(c+5,n+1,np.max(inx))
-            worksheet.write(c+6,n+1,np.mean(inx))
+            worksheet.write(c+2,n+1,np.percentile(inx,1))
+            worksheet.write(c+3,n+1,np.percentile(inx,25))
+            worksheet.write(c+4,n+1,np.percentile(inx,50))
+            worksheet.write(c+5,n+1,np.percentile(inx,75))
+            worksheet.write(c+6,n+1,np.percentile(inx,99))
+            worksheet.write(c+7,n+1,np.max(inx))
+            worksheet.write(c+8,n+1,np.mean(inx))
             counts=np.bincount(inx)
-            worksheet.write(c+7,n+1,np.argmax(counts))
+            worksheet.write(c+9,n+1,np.argmax(counts))
     
     row_con=interval_str(step)
     c=0
@@ -209,18 +215,22 @@ def hist_con_show(workbook,name_list,in_list,step,need=0):
         worksheet.write(c+3,0,"mean")
     if need==2:
         worksheet.write(c+1,0,'min')
-        worksheet.write(c+2,0,'25%percentile')
-        worksheet.write(c+3,0,'50%percentile')
-        worksheet.write(c+4,0,'75%percentile')
-        worksheet.write(c+5,0,'max')
-        worksheet.write(c+6,0,'mean')
+        worksheet.write(c+2,0,'1%percentile')
+        worksheet.write(c+3,0,'25%percentile')
+        worksheet.write(c+4,0,'50%percentile')
+        worksheet.write(c+5,0,'75%percentile')
+        worksheet.write(c+6,0,'99%percentile')
+        worksheet.write(c+7,0,'max')
+        worksheet.write(c+8,0,'mean')
     if need==3:
         worksheet.write(c+1,0,'min')
-        worksheet.write(c+2,0,'25%percentile')
-        worksheet.write(c+3,0,'50%percentile')
-        worksheet.write(c+4,0,'75%percentile')
-        worksheet.write(c+5,0,'max')
-        worksheet.write(c+6,0,'mean')
+        worksheet.write(c+2,0,'1%percentile')
+        worksheet.write(c+3,0,'25%percentile')
+        worksheet.write(c+4,0,'50%percentile')
+        worksheet.write(c+5,0,'75%percentile')
+        worksheet.write(c+6,0,'99%percentile')
+        worksheet.write(c+7,0,'max')
+        worksheet.write(c+8,0,'mean')
         counts=np.bincount(inx)
         worksheet.write(c+7,0,'mode')
 
@@ -243,7 +253,7 @@ def hist_cros_con_dis_show(workbook,name_list,input_data1,interval1,input_data2,
             r+=1
             worksheet.write(r,c+1,freq[c][i])
         r+=3
-        for i in range(6):
+        for i in range(8):
             worksheet.write(r+i,c+1,re2[c][i])
     
     r=0
@@ -251,8 +261,8 @@ def hist_cros_con_dis_show(workbook,name_list,input_data1,interval1,input_data2,
         r+=1
         worksheet.write(r,0,row_con[i])
     r+=3
-    l=['min','25%percentile','50%percentile','75%percentile','max','mean']
-    for i in range(6):
+    l=['min','1%percentile','25%percentile','50%percentile','75%percentile','99%percentile','max','mean']
+    for i in range(8):
         worksheet.write(r+i,0,l[i])
 
 #@time_c
