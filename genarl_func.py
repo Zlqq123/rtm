@@ -29,15 +29,15 @@ def time_cost(fn):
         A=fn(*args,**kwargs)
         dt=time.time()-start
         if dt<60:
-            print("%s cost %s second"%(fn.__name__,dt))
+            print("%s cost %s second"%(fn.__name__,round(dt,2)))
         elif dt<3600:
             dm=int(dt/60)
             dt=dt-dm*60
-            print("%s cost %s min %s second"%(fn.__name__,dm,dt))
+            print("%s cost %s min %s second"%(fn.__name__,dm,round(dt,2)))
         else:
             dh=int(dt/3600)
             dm=int((dt-dh*3600)/60)
             dt=dt-dh*3600-dm*60
-            print("%s cost %s hour %s min %s second"%(fn.__name__,dh,dm,dt))
+            print("%s cost %s hour %s min %s second"%(fn.__name__,dh,dm,round(dt,2)))
         return A
     return _wrapper

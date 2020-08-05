@@ -167,7 +167,7 @@ class RtmAna():
     def __call__(self):
         pass
     '''
-
+    @time_cost
     def daily_mileage(self,workbook):
         sql="SELECT max(accmiles)-min(accmiles) FROM " +self.tb1_name+ self.tb_join+ \
             " where "+ self.con+" group by deviceid,toDate(uploadtime) "
@@ -178,6 +178,7 @@ class RtmAna():
         
         hist_func_np.hist_con_show(workbook,["daily_mile",'mileage per day'],[np.array(mileage)],range(0,500,20),2)
 
+    @time_cost
     def percharge_mile(self,workbook):
         sql="SELECT deviceid,uploadtime,charg_s_c,soc,soc_c,accmiles " \
             "FROM " +self.tb1_name+ self.tb_join+ " WHERE " + self.con + " AND "+ self.tb1_name +".charg_s_c IN (1,-1) ORDER BY deviceid,uploadtime "
@@ -190,19 +191,19 @@ class RtmAna():
         i=1
         while i<len(aus):
             if aus[i][0]==aus[i-1][0] and aus[i-1][2]==-1 and aus[i][2]==1:#i-1时刻是开始行驶，i是结束行驶时刻
-                i+=2
-                start_d_soc=aus[i-1][4]
-                end_d_soc=aus[i][4]
-                if abs(start_d_soc)>5 or abs(end_d_soc)>5:
-                    if abs(start_d_soc)>5:
+                start_d_soc=abs(aus[i-1][4])
+                end_d_soc=abs(aus[i][4])
+                if start_d_soc>5 or end_d_soc>5:
+                    if start_d_soc>5:
                         count_1+=1
-                    if abs(end_d_soc)>5:
+                    if end_d_soc>5:
                         count_2+=1
-                    if abs(start_d_soc)>5 and abs(end_d_soc)>5:
+                    if start_d_soc>5 and end_d_soc>5:
                         count_12+=1
                 elif aus[i-1][3]>aus[i][3] and aus[i-1][5]<aus[i][5]:# 行驶过程中SOC减少，里程增加
                     all_drive.append([aus[i][0],aus[i-1][1],aus[i][1],aus[i-1][3],aus[i][3],aus[i-1][5],aus[i][5]])
                     #all_drive=[0vin,1time_start,2time_end,3soc_start,4soc_end,5mile_start,6mile_end]
+                i+=2
             else:
                 i+=1
         l1=len(all_drive)+count_1+count_2-count_12
@@ -257,6 +258,8 @@ class RtmAna():
         hist_func_np.hist_cros_con_dis_show(workbook,["hourly_mileage"],np.array(mileage_h),[0,5,10,15,20,30,40,60,100,200],np.array(hour),range(24))
         hist_func_np.hist_cros_con_dis_show(workbook,["hourly_driving_time"],np.array(durate),range(0,65,5),np.array(hour),range(24))
     '''
+
+    @time_cost
     def v_mode(self,workbook,sampling=1/6):
         sql="SELECT vehiclespeed,operationmode FROM " + self.tb1_name + self.tb_join+  \
             " Where "+ self.con+ " AND "+ self.tb1_name +".vehiclespeed>0 and toSecond(uploadtime)<"+str(int(sampling*60))
@@ -268,7 +271,8 @@ class RtmAna():
         hist_func_np.hist_con_show(workbook,['v','vehicle speed km/h'],[np.array(v)],[0,10,20,30,40,50,60,70,80,90,100,110,120,200],2)
         if self.pro_typ=="PHEV":
             hist_func_np.hist_cros_con_dis_show(workbook,["driving mode"],np.array(v),[0,10,20,30,40,50,60,70,80,90,100,110,120,200],np.array(mode),['EV','PHEV',"FV"])
-
+    
+    @time_cost
     def get_drive(self,workbook):
         sql="SELECT deviceid,uploadtime,vehicle_s_c,accmiles,soc,soc_c FROM " +self.tb1_name+ self.tb_join+ \
             " WHERE " + self.con + " AND "+self.tb1_name+".vehicle_s_c in (1,-1) ORDER BY deviceid,uploadtime"
@@ -368,6 +372,7 @@ class RtmAna():
         hist_func_np.hist_con_show(workbook,name_list,[v_mean],[0,10,20,30,40,50,60,100,210],2)
         '''
 
+    @time_cost
     def E_motor(self,workbook,sampling=1/6):
         '''
         sampling自定义采样频率 取值范围[1/60,1]
@@ -400,7 +405,8 @@ class RtmAna():
         hist_func_np.hist_con_show(workbook,["LE-eff",'LE_efficiency'],[np.array(eff)],[0,20,40,50,60,62,64,66,68,70,72,74,76,78,80,82,84,86,88,90,92,94,96,98,100],2)
         hist_func_np.hist_con_show(workbook,["LE-temp",'E_motor temperature','LE temperature'],[np.array(temp_motor),np.array(temp_LE)],range(-10,120,5),2)
         hist_func_np.hist_cros_2con_show(workbook,['LE_working_point'],np.array(speed),range(-4000,13000,500),np.array(torq),range(-300,400,50))
-    
+
+    @time_cost
     def power_distribution(self,workbook,sampling=1/6):
         '''
         sampling自定义采样频率 取值范围[1/60,1]
@@ -420,6 +426,7 @@ class RtmAna():
         in_list=[np.array(BMS_pow),np.array(em_el_pow),np.array(other_pow)]
         hist_func_np.hist_con_show(workbook,name_list,in_list,range(50),2)
 
+    @time_cost
     def BMS(self,workbook,sampling=1/6):
         '''
         sampling自定义采样频率 取值范围[1/60,1]
@@ -636,9 +643,10 @@ class RtmAna():
         charg_soc=[np.array(soc_s),np.array(soc_e),np.array(soc_d)]
 
         return np.array(time_h_s),np.array(time_d),np.array(time_d_c),np.array(mode),charg_soc,charg_temp,charg_pow
-
+    
+    @time_cost
     def charg_hist(self,workbook):
-        [time_h_s,time_d,time_d_c,mode,charg_soc,charg_pow,charg_temp]=self.charge_ana()
+        [time_h_s,time_d,time_d_c,mode,charg_soc,charg_temp,charg_pow]=self.charge_ana()
 
         name_list=['charg_SOC','start_SOC','end_SOC','soc_range']
         hist_func_np.hist_con_show(workbook,name_list,charg_soc,range(0,120,10),2)
@@ -662,7 +670,8 @@ class RtmAna():
         hist_func_np.hist_con_show(workbook,name_list,charg_pow,range(50),2)
         hist_func_np.hist_cros_con_dis_show(workbook,['charg_pow-mode'],charg_pow[1],range(50),np.array(mode),mode_interval)
 
-    def Warming_hist(self):
+    @time_cost
+    def Warming_hist(self,workbook):
         sql="SELECT tdfwn,celohwn,vedtovwn,vedtuvwn,lsocwn,celovwn,celuvwn,hsocwn,jpsocwn,cesysumwn,celpoorwn,inswn,dctpwn,bksyswn, " \
             "dcstwn,emctempwn,hvlockwn,emtempwn,vesoc,mxal,count_wn FROM "+self.tb1_name + self.tb_join+" WHERE "+ self.con+ " AND "+ self.tb1_name +".count_wn>0 "
         aus=self.client.execute(sql)
@@ -670,7 +679,9 @@ class RtmAna():
         for val in aus:
             for i in range(19):
                 count_wm[i]+=val[i]
-        return count_wm
+        worksheet = workbook.add_worksheet('Warming')
+        for i in range(19):
+            worksheet.write(i,0,count_wm[i])
 
     def summary(self):
         workbook = xlsxwriter.Workbook(self.path+self.proj+".xlsx")
@@ -683,6 +694,7 @@ class RtmAna():
         self.BMS(workbook)
         self.power_distribution(workbook)
         self.charg_hist(workbook)
+        self.Warming_hist(workbook)
 
         workbook.close()
 
