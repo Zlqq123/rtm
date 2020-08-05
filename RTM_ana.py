@@ -4,6 +4,8 @@ import numpy as np
 import hist_func_np
 import sys
 from datetime import datetime
+from genarl_func import time_cost
+from genarl_func import time_cost_all
 
 '''
 V4.0
@@ -30,7 +32,8 @@ V5.0
 车辆vin码对应客户信息+里程：en.vehicle_vin 
 V5.1
 自定义region province usertype mileage_range d_mileage
-
+V5.2
+自定义处理数据时间选择
 
 '''
 
@@ -304,7 +307,7 @@ class RtmAna():
         while i<len(all_drive):
             d=all_drive[i][1]-all_drive[i-1][2]
             if all_drive[i-1][0]==all_drive[i][0] and (d.seconds<300 or all_drive[i][6]-all_drive[i][5]<1):
-                #如果两次行驶间隔小于3分钟或者行驶距离小于1km,合并为同一次行驶。前提是同一辆车。
+                #如果两次行驶间隔小于300s或者行驶距离小于1km,合并为同一次行驶。前提是同一辆车。
                 count_3+=1
                 all_drive[i-1][2]=all_drive[i][2]
                 all_drive[i-1][4]=all_drive[i][4]
@@ -432,7 +435,7 @@ class RtmAna():
             temp_av.append(value[1])
             pow_bms.append(value[2])
         
-        hist_func_np.hist_cros_2con_show(workbook,['discharging'],np.array(soc),range(0,115,5),np.array(temp_av),range(-30,65,5))
+        hist_func_np.hist_cros_2con_show(workbook,['BMS_workingpoint_discharge'],np.array(soc),range(0,115,5),np.array(temp_av),range(-30,65,5))
 
         #charging
         soc,temp_av,pow_bms=[],[],[]
@@ -445,8 +448,31 @@ class RtmAna():
             temp_av.append(value[1])
             pow_bms.append(value[2])
         
-        hist_func_np.hist_cros_2con_show(workbook,['charging'],np.array(soc),range(0,115,5),np.array(temp_av),range(-30,65,5))
+        hist_func_np.hist_cros_2con_show(workbook,['BMS_workingpoint_charge'],np.array(soc),range(0,115,5),np.array(temp_av),range(-30,65,5))
     
+        sql="SELECT arrayReduce('max',cocesprotemp1),arrayReduce('min',cocesprotemp1) " \
+            "FROM " +self.tb1_name+ self.tb_join+" WHERE " + self.con + " AND "+ self.tb1_name + ".charg_s==0"
+        aus=self.client.execute(sql)
+        max_temp,min_temp,temp_range=[],[],[]
+        for val in aus:
+            max_temp.append(val[0])
+            min_temp.append(val[1])
+            temp_range.append(val[0]-val[1])
+        name_list=['BMS_temp_discharge','Max','Min','range']
+        hist_func_np.hist_con_show(workbook,name_list,[np.array(max_temp),np.array(min_temp),np.array(temp_range)],range(-10,62,2),2)
+
+        sql="SELECT arrayReduce('max',cocesprotemp1),arrayReduce('min',cocesprotemp1) " \
+            "FROM " +self.tb1_name+ self.tb_join+" WHERE " + self.con + " AND "+ self.tb1_name + ".charg_s==1"
+        aus=self.client.execute(sql)
+        max_temp,min_temp,temp_range=[],[],[]
+        for val in aus:
+            max_temp.append(val[0])
+            min_temp.append(val[1])
+            temp_range.append(val[0]-val[1])
+        name_list=['BMS_temp_charge','Max','Min','range']
+        hist_func_np.hist_con_show(workbook,name_list,[np.array(max_temp),np.array(min_temp),np.array(temp_range)],range(-10,62,2),2)
+
+
     def get_Charge(self):
         '''
         return all_charge=i*[0vin,1time_start,2time_end,3soc_start,4soc_end,5mile_start,6 end_mile ]
@@ -528,11 +554,11 @@ class RtmAna():
         '''
         all_charge=self.get_Charge()
 
-        sql="SELECT deviceid,uploadtime,-BMS_pow,cocesprotemp1_mean,soc,charg_mode " \
+        sql="SELECT deviceid,uploadtime,-BMS_pow,cocesprotemp1_mean,soc,charg_mode,arrayReduce('max',cocesprotemp1),arrayReduce('min',cocesprotemp1) " \
             "FROM " +self.tb1_name + self.tb_join+" WHERE "+ self.con+ " AND "+ self.tb1_name +".charg_s==1 " \
             "ORDER BY deviceid,uploadtime"
         aus=self.client.execute(sql)
-        #aus=[i][0vin 1time, 2 BMS_power 3temp 4soc 5charg_mode]
+        #aus=[i][0vin 1time, 2 BMS_power 3temp 4soc 5charg_mode 6max_temp 7min_temp]
 
         ss,ee=[],[]#用于存放aus中每段充电开始的index 和每次充电结束的index
         i,j=0,0 #j为all_charge的index      i 为aus的index
@@ -569,26 +595,34 @@ class RtmAna():
         file.write("匹配的充电次数："+str(len(ss))+"\r\n")
         file.close()
        
-        temp_s,temp_e,temp_min,temp_max,temp_mean,temp_range=[],[],[],[],[],[]
+        temp_mean,temp_range=[],[]
+        temp_min,temp_max=[],[]
+        temp_start_max,temp_start_min=[],[]
         power_max,power_mean=[],[]
-        temp_a,pow_a=[],[]#中间过程量
+        temp_a,pow_a,temp_max_a,temp_min_a=[],[],[],[]#中间过程量
         time_h_s,time_d,time_d_c=[],[],[]
         soc_s,soc_e,soc_d=[],[],[]
         
         for i in range(len(aus)):
             pow_a.append(aus[i][2])
             temp_a.append(aus[i][3])
+            temp_max_a.append(aus[i][6])
+            temp_min_a.append(aus[i][7])
 
         for i in range(len(ss)):
             mode.append(aus[ss[i]][5])
             power_max.append(max(pow_a[ss[i]:ee[i]]))
             power_mean.append(sum(pow_a[ss[i]:ee[i]])/len(pow_a[ss[i]:ee[i]]))
-            temp_s.append(temp_a[ss[i]])
-            temp_e.append(temp_a[ss[i]])
-            temp_min.append(min(temp_a[ss[i]:ee[i]]))
-            temp_max.append(max(temp_a[ss[i]:ee[i]]))
+            #temp_s.append(temp_a[ss[i]])
+            #temp_e.append(temp_a[ss[i]])
+            #temp_min.append(min(temp_a[ss[i]:ee[i]]))
+            #temp_max.append(max(temp_a[ss[i]:ee[i]]))
             temp_mean.append(sum(temp_a[ss[i]:ee[i]])/len(temp_a[ss[i]:ee[i]]))
             temp_range.append(max(temp_a[ss[i]:ee[i]])-min(temp_a[ss[i]:ee[i]]))
+            temp_min.append(min(temp_min_a[ss[i]:ee[i]]))
+            temp_max.append(max(temp_max_a[ss[i]:ee[i]]))
+            temp_start_max.append(aus[ss[i]][6])
+            temp_start_min.append(aus[ss[i]][7])
             soc_s.append(aus[ss[i]][4])
             soc_e.append(aus[ee[i]][4])
             soc_d.append(aus[ee[i]][4]-aus[ss[i]][4])
@@ -597,7 +631,7 @@ class RtmAna():
             time_d_c.append(d.seconds/60/(aus[ee[i]][4]-aus[ss[i]][4])*100)
             time_h_s.append(aus[ss[i]][1].hour)
         
-        charg_temp=[np.array(temp_s),np.array(temp_e),np.array(temp_min),np.array(temp_max),np.array(temp_mean),np.array(temp_range)]
+        charg_temp=[np.array(temp_min),np.array(temp_max),np.array(temp_mean),np.array(temp_range),np.array(temp_start_max),np.array(temp_start_min)]
         charg_pow=[np.array(power_max),np.array(power_mean)]
         charg_soc=[np.array(soc_s),np.array(soc_e),np.array(soc_d)]
 
@@ -620,15 +654,15 @@ class RtmAna():
         hist_func_np.hist_cros_con_dis_show(workbook,['charg_mode-time'],time_d,time_interval,mode,mode_interval)
         hist_func_np.hist_cros_con_dis_show(workbook,['charg_mode-time(convert)'],time_d_c,time_interval,mode,mode_interval)
                 
-        name_list=['charg_temp','start_temp','end_temp','min_temp','max_temp','temp_mean','temp_range']
+        name_list=['charg_temp','min_temp','max_temp','temp_mean','temp_range','start_temp_max','start_temp_min']
         hist_func_np.hist_con_show(workbook,name_list,charg_temp,range(-10,60,5),2)
-        hist_func_np.hist_cros_con_dis_show(workbook,['charg_temp-mode'],charg_temp[4],range(-10,60,5),mode,mode_interval)
+        hist_func_np.hist_cros_con_dis_show(workbook,['charg_temp-mode'],charg_temp[2],range(-10,60,5),mode,mode_interval)
 
         name_list=['charg_power','pow_max','power_mean']
         hist_func_np.hist_con_show(workbook,name_list,charg_pow,range(50),2)
         hist_func_np.hist_cros_con_dis_show(workbook,['charg_pow-mode'],charg_pow[1],range(50),np.array(mode),mode_interval)
 
-    def Warming_hist():
+    def Warming_hist(self):
         sql="SELECT tdfwn,celohwn,vedtovwn,vedtuvwn,lsocwn,celovwn,celuvwn,hsocwn,jpsocwn,cesysumwn,celpoorwn,inswn,dctpwn,bksyswn, " \
             "dcstwn,emctempwn,hvlockwn,emtempwn,vesoc,mxal,count_wn FROM "+self.tb1_name + self.tb_join+" WHERE "+ self.con+ " AND "+ self.tb1_name +".count_wn>0 "
         aus=self.client.execute(sql)
@@ -652,12 +686,5 @@ class RtmAna():
 
         workbook.close()
 
-def print_in_excel(aus,s1):
-    workbook = xlsxwriter.Workbook(s1)
-    worksheet = workbook.add_worksheet("sheet1")
-    for i in range(len(aus)):
-        for j in range(len(aus[0])):
-            worksheet.write(i+1,j,aus[i][j])
-    workbook.close()
 
 

@@ -1,41 +1,13 @@
 import sys
 import numpy as np
 import xlsxwriter
-import time
+from genarl_func import time_cost
+from genarl_func import time_cost_all
 '''
 given input_input and steps,output hist.
 input_data:array,interval:array
 return [0block: list[str]  1freq: array[int]  2freq_rate: list[float]]
 '''
-def time_c(fn):
-    num=[]
-    def _wrapper(*args,**kwargs):
-        start=time.time()
-        A=fn(*args,**kwargs)
-        dt=time.time()-start
-        num.append(dt)
-        print("%s 第 %s 次执行  耗时 %s  s 总耗时 %s   min"%(fn.__name__,len(num),round(dt,2),round(sum(num)/60,2)))
-        return A
-    return _wrapper
-
-def time_cost(fn):
-    def _wrapper(*args,**kwargs):
-        start=time.time()
-        A=fn(*args,**kwargs)
-        dt=time.time()-start
-        if dt<60:
-            print("%s cost %s second"%(fn.__name__,dt))
-        elif dt<3600:
-            dm=int(dt/60)
-            dt=dt-dm*60
-            print("%s cost %s min %s second"%(fn.__name__,dm,dt))
-        else:
-            dh=int(dt/3600)
-            dm=int((dt-dh*3600)/60)
-            dt=dt-dh*3600-dm*60
-            print("%s cost %s hour %s min %s second"%(fn.__name__,dh,dm,dt))
-        return A
-    return _wrapper
 
 
 def interval_str(interval):
@@ -67,7 +39,6 @@ def hist_con(input_data,interval,show_interval=1):
         return block,re
     return re
 
-    
 
 # input_data had sorted in order from largest to smallest
 #@time_cost
@@ -92,7 +63,7 @@ def hist_con_dis(input_data1,interval1,input_data2,interval2,show_interval=1,sho
     show_interval是否输出间隔段str
     show_hist是否输出统计值：最小值，4分位置最大值，平均值
 
-    outout:
+    output:
 
     '''
     re = np.zeros((len(interval2),len(interval1)-1),dtype=int)
@@ -269,7 +240,7 @@ def hist_cros_con_dis_show(workbook,name_list,input_data1,interval1,input_data2,
 def hist_cros_2con_show(workbook,name_list,in1,step1,in2,step2):
     '''
     统计两个连续变量的分布（eg:电机工作点）
-    #name_list=[sheet名]
+    #name_list=[sheet name]
     '''
     worksheet = workbook.add_worksheet(name_list[0])
     [col_con,row_con,res]=hist_cros_2con(in1,step1,in2,step2)

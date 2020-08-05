@@ -5,22 +5,13 @@ import xlsxwriter
 import time
 import csv
 import numpy as np
-import gc
 #from range_test.range_test import Rangetest
 from rtm.RTM_ana import RtmAna
+from genarl_func import print_in_excel
+from genarl_func import time_cost
+from genarl_func import time_cost_all
 import hist_func_np
-from rtm.RTM_ana import print_in_excel
 
-def time_c(fn):
-    num=[]
-    def _wrapper(*args,**kwargs):
-        start=time.time()
-        A=fn(*args,**kwargs)
-        dt=time.time()-start
-        num.append(dt)
-        print("%s 第 %s 次执行  耗时 %s  s 总耗时 %s   min"%(fn.__name__,len(num),round(dt,2),round(sum(num)/60,2)))
-        return A
-    return _wrapper
 
 client=Client(host='10.122.17.69',port='9005',user='en' ,password='en1Q',database='en')
 path='D:/03RTM/ALL_RTM_data/0723/'
@@ -31,6 +22,32 @@ con="en.vehicle_vin.project=='Lavida BEV 53Ah'  AND en.vehicle_vin.d_mileage > 1
 sampling=1/6
 
 
+vin="LSVUY60T3L2028579"
+def for_1_car(vin):
+    client=Client(host='10.122.17.69',port='9005',user='en' ,password='en1Q',database='en')
+    sql="select deviceid, uploadtime,vehiclespeed, accmiles FROM ods.rtm_details WHERE deviceid=='"+vin+"' "
+    aus=client.execute(sql)
+    print_in_excel(aus,vin+'.xlsx')
+
+for_1_car(vin)
+
+def Start_charge_temp_soc():
+    '''
+    考察高温环境下充电起始电池温度SOC分布
+    '''
+    client=Client(host='10.122.17.69',port='9005',user='en' ,password='en1Q',database='en')
+    path='D:/03RTM/ALL_RTM_data/0723/'
+    tb1_name="en.rtm_6_2th"
+    tb2_name="en.vehicle_vin"
+    l1=RtmAna(path,'Lavida',client,tb1_name,tb2_name)
+    l1.d_mile_condition_select(100)
+    l1.generate_log_file()
+    __, __, __, __, charg_soc, charg_temp, __ = l1.charge_ana()
+    a=charg_soc[0]
+    b=charg_temp[4]
+    workbook = xlsxwriter.Workbook("开始充电SOC_temp分布.xlsx")
+    hist_func_np.hist_cros_2con_show(workbook,['SOC_temp'],charg_soc[0],range(0,115,5),charg_temp[4],range(-20,62,2))
+    workbook.close()
 
 
 sql="SELECT emspeed,emtq,em_eff,emctltemp,emtemp " \
@@ -66,11 +83,7 @@ l1.condition_printer()
 
 #target1、统计不同驾驶风格（针对BEV），（前提，相同地理位置，相同用户类型，相同附件消耗）统计其全电续驶里程和能耗差别
 
-def for_1_car(vin):
-    client=Client(host='10.122.17.69',port='9005',user='en' ,password='en1Q',database='en')
-    sql="select * FROM en.rtm_vds WHERE deviceid=='"+vin+"' "
-    aus=client.execute(sql)
-    print_in_excel(aus,vin+'.xlsx')
+
 
 def Start_soc_mode():
     '''

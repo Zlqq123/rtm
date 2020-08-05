@@ -1,13 +1,49 @@
 import sys
 sys.path.append('./')
 from clickhouse_driver import Client
-from rtm.RTM_ana import print_in_excel
 import csv
+from genarl_func import print_in_excel
+from genarl_func import time_cost
+from genarl_func import time_cost_all
 
 client=Client(host='10.122.17.69',port='9005',user='en' ,password='en1Q',database='en')
 
+
+def View_table(tb_name):
+    sql="DESC " + tb_name
+    aus=client.execute(sql)
+    print("------"+tb_name+"------")
+    print(len(aus))
+    print(aus)
+    sql="select count(distinct deviceid) from "+ tb_name
+    aus=client.execute(sql)
+    print("------Vehicle number------")
+    print(aus)
+    sql="SELECT topK(1)(toDate(t1)),topK(1)(toDate(t2)) " \
+        "FROM (select deviceid,min(uploadtime) as t1,max(uploadtime) as t2 " \
+        " From " +tb_name+" group by deviceid) "
+    aus=client.execute(sql)
+    print("------date------")
+    print(aus)
+    sql="SELECT topK(10)(toDate(t1)) FROM " \
+        "(Select deviceid,min(uploadtime) as t1,max(uploadtime) as t2 " \
+        " From " +tb_name+" group by deviceid) "
+    aus=client.execute(sql)
+    print("------date------")
+    print(aus)
+    sql="select deviceid,min(toDate(uploadtime)), max(toDate(uploadtime)) " \
+        " From " +tb_name+ " group by deviceid"
+    aus=client.execute(sql)
+    print_in_excel(aus,'rtm_details.xlsx')
+
+
+View_table("ods.rtm_details")
+
 sql="desc en.vehicle_vin"
 '''
+host='10.122.17.69',port='9005',database='en',user='en' ,password='en1Q'
+1. ods.rtm_details ，为t-1的实时RTM数据，即今天可以查到昨天的数据
+2. ods.vehicles_info ，为2019.1-2020.6的RTM历史数据
 SQL notes
 三月数据：en.rtm_vds
 六月数据：en.rtm_data_june
