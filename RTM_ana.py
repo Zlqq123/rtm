@@ -47,22 +47,24 @@ class RtmAna():
         self.tb1_name=tb1_name
         self.tb2_name=tb2_name
 
-        if proj=="Lavida":
+        proj=proj.upper()
+
+        if proj=="LAVIDA":
             con_pro= tb2_name + ".project=='Lavida BEV 53Ah' "
             typ_v='BEV'
         else:
             typ_v='PHEV'
-            if proj=="Tiguan":
+            if proj=="TIGUAN":
                 con_pro= tb2_name + ".project in {'Tiguan L PHEV C6', 'Tiguan L PHEV C5'} "
-            elif proj=="Tiguan C5":
+            elif proj=="TIGUAN C5":
                 con_pro= tb2_name + ".project=='Tiguan L PHEV C5' "
-            elif proj=="Tiguan C6":
+            elif proj=="TIGUAN C6":
                 con_pro= tb2_name + ".project=='Tiguan L PHEV C6' "
-            elif proj=="Passat":
+            elif proj=="PASSAT":
                 con_pro= tb2_name + ".project in {'Passat PHEV C6', 'Passat PHEV C5'} "
-            elif proj=="Passat C5":
+            elif proj=="PASSAT C5":
                 con_pro= tb2_name + ".project=='Passat PHEV C5' "
-            elif proj=="Passat C6":
+            elif proj=="PASSAT C6":
                 con_pro= tb2_name + ".project=='Passat PHEV C6' "
             else:
                 print("input error:project must be in {'Lavida','Passat','Tiguan','Passat C5','Passat C6','Tiguan C5','Tiguan C6'}")
@@ -157,6 +159,36 @@ class RtmAna():
         print("------------SELECT condition:")
         print(self.con)
 
+    def __call__(self,region=0,user_type=0,province=0,d_mile_condition=100,start_mileage=0,end_mileage=0):
+        if region!=0:
+            self.region_select(region)
+        if user_type!=0:
+            self.user_type_select(user_type)
+        if province!=0:
+            self.province_select(province)
+        if d_mile_condition!=0:
+            self.d_mile_condition_select(d_mile_condition)
+        if start_mileage!=0 and end_mileage!=0:
+            self.mileage_select(start_mileage,end_mileage)
+    
+        self.condition_printer()
+
+        self.generate_log_file()
+
+        workbook = xlsxwriter.Workbook(self.path+self.proj+".xlsx")
+        
+        self.daily_mileage(workbook)
+        self.percharge_mile(workbook)
+        self.v_mode(workbook)
+        self.get_drive(workbook)
+        self.E_motor(workbook)
+        self.BMS(workbook)
+        self.power_distribution(workbook)
+        self.charg_hist(workbook)
+        self.Warming_hist(workbook)
+
+        workbook.close()
+
     '''
     def __enter__(self):
         return self
@@ -164,8 +196,6 @@ class RtmAna():
     def __exit__(self,exc_type,exc_value,exc_trackback):
         pass
 
-    def __call__(self):
-        pass
     '''
     @time_cost
     def daily_mileage(self,workbook):
@@ -672,31 +702,56 @@ class RtmAna():
 
     @time_cost
     def Warming_hist(self,workbook):
-        sql="SELECT tdfwn,celohwn,vedtovwn,vedtuvwn,lsocwn,celovwn,celuvwn,hsocwn,jpsocwn,cesysumwn,celpoorwn,inswn,dctpwn,bksyswn, " \
-            "dcstwn,emctempwn,hvlockwn,emtempwn,vesoc,mxal,count_wn FROM "+self.tb1_name + self.tb_join+" WHERE "+ self.con+ " AND "+ self.tb1_name +".count_wn>0 "
-        aus=self.client.execute(sql)
-        count_wm=[0]*19
-        for val in aus:
-            for i in range(19):
-                count_wm[i]+=val[i]
-        worksheet = workbook.add_worksheet('Warming')
+        sql="SELECT sum(tdfwn),sum(celohwn),sum(vedtovwn),sum(vedtuvwn),sum(lsocwn),sum(celovwn),sum(celuvwn),sum(hsocwn),sum(jpsocwn), " \
+            "sum(cesysumwn),sum(celpoorwn),sum(inswn),sum(dctpwn),sum(bksyswn),sum(dcstwn),sum(emctempwn),sum(hvlockwn),sum(emtempwn),sum(vesoc) " \
+            "FROM "+self.tb1_name + self.tb_join+" WHERE "+ self.con+ " AND "+ self.tb1_name +".count_wn>0 "
+        count_wm=self.client.execute(sql)
+
+        dic={}
+        dic[0]='tdfwn'
+        dic[1]='celohwn'
+        dic[2]='vedtovwn'
+        dic[3]='vedtuvwn'
+        dic[4]='lsocwn'
+        dic[5]='celovwn'
+        dic[6]='celuvwn'
+        dic[7]='hsocwn'
+        dic[8]='jpsocwn'
+        dic[9]='cesysumwn'
+        dic[10]='celpoorwn'
+        dic[11]='inswn'
+        dic[12]='dctpwn'
+        dic[13]='bksyswn'
+        dic[14]='dcstwn'
+        dic[15]='emctempwn'
+        dic[16]='hvlockwn'
+        dic[17]='emtempwn'
+        dic[18]='vesoc'
+
+        count_vehicle_wm=[0]*19
         for i in range(19):
-            worksheet.write(i,0,count_wm[i])
+            if count_wm[0][i]!=0:
+                wn_name=dic[i]
+                sql="SELECT uniq(deviceid) FROM "+self.tb1_name + self.tb_join+" WHERE "+ self.con+ " AND "+ self.tb1_name +"."+ wn_name+ ">0 "
+                aus=self.client.execute(sql)
+                count_vehicle_wm[i]=aus[0][0]
 
-    def summary(self):
-        workbook = xlsxwriter.Workbook(self.path+self.proj+".xlsx")
-        
-        self.daily_mileage(workbook)
-        self.percharge_mile(workbook)
-        self.v_mode(workbook)
-        self.get_drive(workbook)
-        self.E_motor(workbook)
-        self.BMS(workbook)
-        self.power_distribution(workbook)
-        self.charg_hist(workbook)
-        self.Warming_hist(workbook)
+        sql="SELECT count(deviceid),uniq(deviceid) FROM "+self.tb1_name + self.tb_join+" WHERE "+ self.con+ " AND "+ self.tb1_name +".count_wn>0 "
+        aus=self.client.execute(sql)
 
-        workbook.close()
+        worksheet = workbook.add_worksheet('Warming')
+        worksheet.write(0,0,'Name_warming')
+        worksheet.write(0,1,'warming times')
+        worksheet.write(0,2,'vehicle involved')
+        for i in range(19):
+            worksheet.write(i+1,0,dic[i])
+            worksheet.write(i+1,1,count_wm[0][i])
+            worksheet.write(i+1,2,count_vehicle_wm[i])
+        worksheet.write(21,0,'total')
+        worksheet.write(21,1,aus[0][0])
+        worksheet.write(21,2,aus[0][1])
+
+
 
 
 

@@ -19,27 +19,28 @@ tb1_name="en.rtm_6_2th"
 tb2_name="en.vehicle_vin"
 tb_join=' INNER JOIN en.vehicle_vin on en.rtm_6_2th.deviceid=en.vehicle_vin.deviceid'
 con="en.vehicle_vin.project=='Lavida BEV 53Ah'  AND en.vehicle_vin.d_mileage > 100 AND en.vehicle_vin.region=='MidEast'  AND en.vehicle_vin.user_typ=='Private'"
+con="en.vehicle_vin.project=='Lavida BEV 53Ah'  AND en.vehicle_vin.d_mileage > 100 "
 sampling=1/6
+
 
 
 def RTM_june(proj):
     start=time.time()
-    #client=Client(host='10.122.17.69',port='9005',user='en' ,password='en1Q',database='en')
-    #path='D:/03RTM/ALL_RTM_data/0805/'
-    #tb1_name="en.rtm_6_2th"
-    #tb2_name="en.vehicle_vin"
     l1=RtmAna(path,proj,client,tb1_name,tb2_name)
-    l1.d_mile_condition_select(100)
-    l1.generate_log_file()
-    l1.summary()
+    l1()
     dt=time.time()-start
     file=open(l1.log_filename,'a')
     file.write("------------------\r\n")
     file.write("running cost"+ str(round(dt,2))+"s \r\n")
     file.close()
 
-RTM_june('Lavida')
-#abd('Tiguan C5')
+RTM_june('Tiguan C5')
+RTM_june('Tiguan C6')
+RTM_june('Passat C5')
+RTM_june('Passat C6')
+
+#RTM_june('Lavida')
+
 
 vin="LSVUY60T3L2028579"
 def for_1_car(vin):
@@ -189,9 +190,6 @@ def BMS_temp_lavida():
     name_list=['charge_min','March','June']
     hist_func_np.hist_con_show(workbook,name_list,[np.array(min_temp_3_ch),np.array(min_temp_6_ch)],range(-10,60,5),2)
     workbook.close()
-
-
-
 
 
 
