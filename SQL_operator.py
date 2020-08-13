@@ -6,8 +6,20 @@ from genarl_func import print_in_excel
 from genarl_func import time_cost
 from genarl_func import time_cost_all
 
-client=Client(host='10.122.17.69',port='9005',user='en' ,password='en1Q',database='en')
+'''
+All data(without warmingsignal)----------------------------- ods.rtm_details  
+2020/03 Data(without warmingsignal)------------------------- en.rtm_vds
+2020/06 Data(with warmingsignal)---------------------------- en.rtm_data_june
+2020/06 Data(with warmingsignal) after pre analyzing-------- en.rtm_6_2th
+VIN Usertype Project region province mileage---------------- en.vehicle_vin 
+VIN Usertype Project region province(had dropped)----------- en.vehicle_vin1 
+VIN mileage (had dropped)----------------------------------- en.vehicle_mile
+'''
 
+client=Client(host='10.122.17.69',port='9005',user='en' ,password='en1Q',database='en')
+sql="desc en.rtm_vds"
+aus=client.execute(sql)
+print(aus)
 
 def View_table(tb_name):
     sql="DESC " + tb_name
@@ -37,21 +49,10 @@ def View_table(tb_name):
     print_in_excel(aus,'rtm_details.xlsx')
 
 
-View_table("ods.rtm_details")
+#View_table("ods.rtm_details")
 
 sql="desc en.vehicle_vin"
-'''
-host='10.122.17.69',port='9005',database='en',user='en' ,password='en1Q'
-1. ods.rtm_details ，为t-1的实时RTM数据，即今天可以查到昨天的数据
-2. ods.vehicles_info ，为2019.1-2020.6的RTM历史数据
-SQL notes
-三月数据：en.rtm_vds
-六月数据：en.rtm_data_june
-六月数据预处理表：en.rtm_6_2th
-车辆vin码对应客户信息+里程：en.vehicle_vin 
-车辆vin码对应客户信息：en.vehicle_vin1 临时表（已删除）
-车辆vin码对应的里程信息：en.vehicle_mile临时表（已删除）
-'''
+
 def db_pre_ana(client):
     sql="CREATE TABLE IF NOT EXISTS en.vehicle_mile " \
         "(deviceid String, mile_min Float32,mile_max Float32, d_mileage Float32 ) " \

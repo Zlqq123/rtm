@@ -4,7 +4,7 @@ import numpy as np
 import hist_func_np
 import sys
 from datetime import datetime
-from genarl_func import time_cost
+from genarl_func import time_cost1
 from genarl_func import time_cost_all
 
 '''
@@ -34,6 +34,8 @@ V5.1
 自定义region province usertype mileage_range d_mileage
 V5.2
 自定义处理数据时间选择
+添加call函数
+添加绝缘阻值统计
 
 '''
 
@@ -81,6 +83,7 @@ class RtmAna():
         self.d_mile_condition=0
         self.province='ALL'
         self.mile_range=[]
+        self.time_range=[]
 
         #create log file
         dt=datetime.now()
@@ -129,6 +132,16 @@ class RtmAna():
         self.d_mile_condition=d_mile_condition
         self.con+=" AND "+self.tb2_name+ ".d_mileage>"+str(d_mile_condition)
 
+    def datetime_select(self,start,end):
+        '''
+        start,end:yyyy-mm-dd        eg: 2020-06-01,2020-06-13
+        '''
+        self.time_range=[start,end]
+        a=start+" 00:00:00"
+        b=end+" 23:59:59"
+        self.con+=" AND "+self.tb1_name+ ".uploadtime BETWEEN '"+a+"' AND '"+b+"'"
+
+
     def reset_select_condution(self):
         self.con=self.con_pro
         self.province="All"
@@ -136,9 +149,11 @@ class RtmAna():
         self.user_type="All"
         self.d_mile_condition=0
         self.mile_range=[]
+        self.time_range=[]
 
     def generate_log_file(self):
-        sql = "select uniq(deviceid) from "+self.tb2_name+" Where "+self.con
+        sql = "select uniq(deviceid) FROM "+self.tb1_name+ self.tb_join+" Where "+self.con
+        print(sql)
         aus=self.client.execute(sql)
         dt=datetime.now()
         file=open(self.log_filename,'a')
@@ -149,17 +164,28 @@ class RtmAna():
         file.write("##User Type："+self.user_type+"\r\n")
         file.write("##mile range："+str(self.mile_range)+"  d_mile_condition:>"+str(self.d_mile_condition)+"\r\n")
         file.write("##Vehicle Count："+str(aus[0][0])+"辆\r\n")
-        file.write("##Raw data date：2020/06/01~2020/06/30 \r\n")
+        file.write("##Raw data date："+str(self.time_range) +" \r\n")
         file.write("####################################\r\n")
         file.close()
+        return aus[0][0]
 
     def condition_printer(self):
-        print("------------tb_jion:")
+        print("--tb_jion:")
         print(self.tb_join)
-        print("------------SELECT condition:")
+        print("--SELECT condition:")
         print(self.con)
 
-    def __call__(self,region=0,user_type=0,province=0,d_mile_condition=100,start_mileage=0,end_mileage=0):
+    def __call__(self,region=0,user_type=0,province=0,d_mile_condition=0,start_mileage=0,end_mileage=0,start_date=0,end_date=0):
+        '''
+        region must be in {'MidSouth', 'MidNorth', 'MidEast', 'SouthWest', 'Mid', 'NorthWest', 'NorthEast'}
+
+        user_type must be in {'Private', 'Fleet', 'Taxi'}
+
+        province must be in {"GuangDong","ShangHai","TianJin","ZheJiang","HeBei","SiChuan","Shan3Xi","HeNan","FuJian","ShanDong","GuangXi","NingXia","XinJinag","JiLin", \
+            "Shan1Xi","LiaoNing","ChongQing","JiangSu","HuBei","YunNan","HuNan","GuiZhou","JiangXi","AnHui","HanNan","GanSu","QingHai","NeiMeng","HeiLongJiang","BeiJing","XiZang"}
+
+        start_date,end_date:yyyy-mm-dd        eg: 2020-06-01,2020-06-13
+        '''
         if region!=0:
             self.region_select(region)
         if user_type!=0:
@@ -170,24 +196,26 @@ class RtmAna():
             self.d_mile_condition_select(d_mile_condition)
         if start_mileage!=0 and end_mileage!=0:
             self.mileage_select(start_mileage,end_mileage)
+        if start_date!=0 and end_date!=0:
+            self.datetime_select(start_date,end_date)
     
         self.condition_printer()
 
-        self.generate_log_file()
+        n=self.generate_log_file()
 
-        workbook = xlsxwriter.Workbook(self.path+self.proj+".xlsx")
-        
-        self.daily_mileage(workbook)
-        self.percharge_mile(workbook)
-        self.v_mode(workbook)
-        self.get_drive(workbook)
-        self.E_motor(workbook)
-        self.BMS(workbook)
-        self.power_distribution(workbook)
-        self.charg_hist(workbook)
-        self.Warming_hist(workbook)
-
-        workbook.close()
+        if n!=0:
+            workbook = xlsxwriter.Workbook(self.path+self.proj+".xlsx")
+            self.daily_mileage(workbook)
+            self.percharge_mile(workbook)
+            self.v_mode(workbook)
+            self.get_drive(workbook)
+            self.E_motor(workbook)
+            self.BMS(workbook)
+            self.power_distribution(workbook)
+            self.charg_hist(workbook)
+            self.Warming_hist(workbook)
+            self.insulation_resistance_hist(workbook)
+            workbook.close()
 
     '''
     def __enter__(self):
@@ -195,9 +223,9 @@ class RtmAna():
 
     def __exit__(self,exc_type,exc_value,exc_trackback):
         pass
-
     '''
-    @time_cost
+
+    @time_cost1()
     def daily_mileage(self,workbook):
         sql="SELECT max(accmiles)-min(accmiles) FROM " +self.tb1_name+ self.tb_join+ \
             " where "+ self.con+" group by deviceid,toDate(uploadtime) "
@@ -208,7 +236,7 @@ class RtmAna():
         
         hist_func_np.hist_con_show(workbook,["daily_mile",'mileage per day'],[np.array(mileage)],range(0,500,20),2)
 
-    @time_cost
+    @time_cost1()
     def percharge_mile(self,workbook):
         sql="SELECT deviceid,uploadtime,charg_s_c,soc,soc_c,accmiles " \
             "FROM " +self.tb1_name+ self.tb_join+ " WHERE " + self.con + " AND "+ self.tb1_name +".charg_s_c IN (1,-1) ORDER BY deviceid,uploadtime "
@@ -268,28 +296,7 @@ class RtmAna():
                 Energy_consump.append(charging_energy*(a[3]-a[4])/(a[6]-a[5]))
             hist_func_np.hist_con_show(workbook,['Energy consumption','Energy consumption'],[np.array(Energy_consump)],np.arange(6,30,0.5),2)
 
-    '''
-    def hourly_mileage(self,workbook):
-        sql="SELECT deviceid,toDate(uploadtime),toHour(uploadtime),max(CAST(accmiles,'float')),min(CAST(accmiles,'float')),COUNT(deviceid) " \
-            "from " +self.tb_name+" where vehiclestatus=='STARTED' AND "+ self.con+" group by deviceid,toDate(uploadtime),toHour(uploadtime) "
-        aus=self.client.execute(sql)
-        mileage_h=[]
-        hour=[]
-        durate=[]
-        for value in aus:
-            if value[3]>value[4]:
-                hour.append(value[2])
-                mileage_h.append(value[3]-value[4])
-                if value[5]<120:
-                    durate.append(value[5]*0.5)
-                else:
-                    durate.append(60)
-        
-        hist_func_np.hist_cros_con_dis_show(workbook,["hourly_mileage"],np.array(mileage_h),[0,5,10,15,20,30,40,60,100,200],np.array(hour),range(24))
-        hist_func_np.hist_cros_con_dis_show(workbook,["hourly_driving_time"],np.array(durate),range(0,65,5),np.array(hour),range(24))
-    '''
-
-    @time_cost
+    @time_cost1()
     def v_mode(self,workbook,sampling=1/6):
         sql="SELECT vehiclespeed,operationmode FROM " + self.tb1_name + self.tb_join+  \
             " Where "+ self.con+ " AND "+ self.tb1_name +".vehiclespeed>0 and toSecond(uploadtime)<"+str(int(sampling*60))
@@ -302,7 +309,7 @@ class RtmAna():
         if self.pro_typ=="PHEV":
             hist_func_np.hist_cros_con_dis_show(workbook,["driving mode"],np.array(v),[0,10,20,30,40,50,60,70,80,90,100,110,120,200],np.array(mode),['EV','PHEV',"FV"])
     
-    @time_cost
+    @time_cost1()
     def get_drive(self,workbook):
         sql="SELECT deviceid,uploadtime,vehicle_s_c,accmiles,soc,soc_c FROM " +self.tb1_name+ self.tb_join+ \
             " WHERE " + self.con + " AND "+self.tb1_name+".vehicle_s_c in (1,-1) ORDER BY deviceid,uploadtime"
@@ -402,7 +409,7 @@ class RtmAna():
         hist_func_np.hist_con_show(workbook,name_list,[v_mean],[0,10,20,30,40,50,60,100,210],2)
         '''
 
-    @time_cost
+    @time_cost1()
     def E_motor(self,workbook,sampling=1/6):
         '''
         sampling自定义采样频率 取值范围[1/60,1]
@@ -436,7 +443,7 @@ class RtmAna():
         hist_func_np.hist_con_show(workbook,["LE-temp",'E_motor temperature','LE temperature'],[np.array(temp_motor),np.array(temp_LE)],range(-10,120,5),2)
         hist_func_np.hist_cros_2con_show(workbook,['LE_working_point'],np.array(speed),range(-4000,13000,500),np.array(torq),range(-300,400,50))
 
-    @time_cost
+    @time_cost1()
     def power_distribution(self,workbook,sampling=1/6):
         '''
         sampling自定义采样频率 取值范围[1/60,1]
@@ -456,7 +463,7 @@ class RtmAna():
         in_list=[np.array(BMS_pow),np.array(em_el_pow),np.array(other_pow)]
         hist_func_np.hist_con_show(workbook,name_list,in_list,range(50),2)
 
-    @time_cost
+    @time_cost1()
     def BMS(self,workbook,sampling=1/6):
         '''
         sampling自定义采样频率 取值范围[1/60,1]
@@ -674,7 +681,7 @@ class RtmAna():
 
         return np.array(time_h_s),np.array(time_d),np.array(time_d_c),np.array(mode),charg_soc,charg_temp,charg_pow
     
-    @time_cost
+    @time_cost1()
     def charg_hist(self,workbook):
         [time_h_s,time_d,time_d_c,mode,charg_soc,charg_temp,charg_pow]=self.charge_ana()
 
@@ -700,7 +707,7 @@ class RtmAna():
         hist_func_np.hist_con_show(workbook,name_list,charg_pow,range(50),2)
         hist_func_np.hist_cros_con_dis_show(workbook,['charg_pow-mode'],charg_pow[1],range(50),np.array(mode),mode_interval)
 
-    @time_cost
+    @time_cost1()
     def Warming_hist(self,workbook):
         sql="SELECT sum(tdfwn),sum(celohwn),sum(vedtovwn),sum(vedtuvwn),sum(lsocwn),sum(celovwn),sum(celuvwn),sum(hsocwn),sum(jpsocwn), " \
             "sum(cesysumwn),sum(celpoorwn),sum(inswn),sum(dctpwn),sum(bksyswn),sum(dcstwn),sum(emctempwn),sum(hvlockwn),sum(emtempwn),sum(vesoc) " \
@@ -751,7 +758,17 @@ class RtmAna():
         worksheet.write(21,1,aus[0][0])
         worksheet.write(21,2,aus[0][1])
 
+    def insulation_resistance_hist(self,workbook):
+        sql="SELECT avg(ir)/1000 FROM "+self.tb1_name + self.tb_join+" WHERE "+ self.con+ \
+            " AND " +self.tb1_name+".ir<10000 AND "+self.tb1_name+".charg_s==0 GROUP BY deviceid,toDate(uploadtime) "
+        aus=self.client.execute(sql)
 
+        ir=[]
+        for val in aus:
+            ir.append(val[0])
+
+        name_list=['ir','ir(MΩ)']
+        hist_func_np.hist_con_show(workbook,name_list,[np.array(ir)],range(0,1,10),2)
 
 
 

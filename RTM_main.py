@@ -9,12 +9,11 @@ import numpy as np
 from rtm.RTM_ana import RtmAna
 from genarl_func import print_in_excel
 from genarl_func import time_cost
-from genarl_func import time_cost_all
 import hist_func_np
 
 
 client=Client(host='10.122.17.69',port='9005',user='en' ,password='en1Q',database='en')
-path='D:/03RTM/ALL_RTM_data/0805/'
+path='D:/03RTM/ALL_RTM_data/0811/'
 tb1_name="en.rtm_6_2th"
 tb2_name="en.vehicle_vin"
 tb_join=' INNER JOIN en.vehicle_vin on en.rtm_6_2th.deviceid=en.vehicle_vin.deviceid'
@@ -22,18 +21,32 @@ con="en.vehicle_vin.project=='Lavida BEV 53Ah'  AND en.vehicle_vin.d_mileage > 1
 con="en.vehicle_vin.project=='Lavida BEV 53Ah'  AND en.vehicle_vin.d_mileage > 100 "
 sampling=1/6
 
+sql="SELECT deviceid,min(ir),max(ir),topK(3)(ir),arrayReduce('avg',topK(10)(ir))/1000,avg(ir)/1000 FROM "+tb1_name +tb_join+" WHERE "+con+ " AND "+tb1_name+".ir<10000 and charg_s==0 GROUP BY deviceid,toDate(uploadtime)"
+aus=client.execute(sql)
 
+
+vin='LSVAY60E1K2011895'
+sql="SELECT uploadtime,vehiclestatus,chargingstatus,cast(ir,'UInt32') FROM en.rtm_data_june WHERE cast(ir,'UInt32')<10000 and deviceid='LSVAY60E1K2011895' order by uploadtime"
+aus=client.execute(sql)
+print_in_excel(aus,vin+'.xlsx')
+
+
+
+#sql="SELECT uploadtime from en.rtm_6_2th INNER JOIN en.vehicle_vin on en.rtm_6_2th.deviceid=en.vehicle_vin.deviceid where en.vehicle_vin.project=='Lavida BEV 53Ah'  AND en.rtm_6_2th.uploadtime BETWEEN '2020-06-05 00:00:00' AND '2020-06-05 23:59:59'
+l1=RtmAna(path,'lavida',client,tb1_name,tb2_name)
+l1(start_date='2020-06-05',end_date='2020-06-05')
 
 def RTM_june(proj):
     start=time.time()
     l1=RtmAna(path,proj,client,tb1_name,tb2_name)
-    l1()
+    l1(user_type='Taxi',province='Shan1Xi')
     dt=time.time()-start
     file=open(l1.log_filename,'a')
     file.write("------------------\r\n")
     file.write("running cost"+ str(round(dt,2))+"s \r\n")
     file.close()
 
+RTM_june('lavida')
 RTM_june('Tiguan C5')
 RTM_june('Tiguan C6')
 RTM_june('Passat C5')
