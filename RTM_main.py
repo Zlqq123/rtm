@@ -21,20 +21,6 @@ con="en.vehicle_vin.project=='Lavida BEV 53Ah'  AND en.vehicle_vin.d_mileage > 1
 con="en.vehicle_vin.project=='Lavida BEV 53Ah'  AND en.vehicle_vin.d_mileage > 100 "
 sampling=1/6
 
-sql="SELECT deviceid,min(ir),max(ir),topK(3)(ir),arrayReduce('avg',topK(10)(ir))/1000,avg(ir)/1000 FROM "+tb1_name +tb_join+" WHERE "+con+ " AND "+tb1_name+".ir<10000 and charg_s==0 GROUP BY deviceid,toDate(uploadtime)"
-aus=client.execute(sql)
-
-
-vin='LSVAY60E1K2011895'
-sql="SELECT uploadtime,vehiclestatus,chargingstatus,cast(ir,'UInt32') FROM en.rtm_data_june WHERE cast(ir,'UInt32')<10000 and deviceid='LSVAY60E1K2011895' order by uploadtime"
-aus=client.execute(sql)
-print_in_excel(aus,vin+'.xlsx')
-
-
-
-#sql="SELECT uploadtime from en.rtm_6_2th INNER JOIN en.vehicle_vin on en.rtm_6_2th.deviceid=en.vehicle_vin.deviceid where en.vehicle_vin.project=='Lavida BEV 53Ah'  AND en.rtm_6_2th.uploadtime BETWEEN '2020-06-05 00:00:00' AND '2020-06-05 23:59:59'
-l1=RtmAna(path,'lavida',client,tb1_name,tb2_name)
-l1(start_date='2020-06-05',end_date='2020-06-05')
 
 def RTM_june(proj):
     start=time.time()
@@ -46,13 +32,7 @@ def RTM_june(proj):
     file.write("running cost"+ str(round(dt,2))+"s \r\n")
     file.close()
 
-RTM_june('lavida')
-RTM_june('Tiguan C5')
-RTM_june('Tiguan C6')
-RTM_june('Passat C5')
-RTM_june('Passat C6')
 
-#RTM_june('Lavida')
 
 
 vin="LSVUY60T3L2028579"
@@ -62,7 +42,7 @@ def for_1_car(vin):
     aus=client.execute(sql)
     print_in_excel(aus,vin+'.xlsx')
 
-for_1_car(vin)
+#for_1_car(vin)
 
 def Start_charge_temp_soc():
     '''
@@ -83,36 +63,8 @@ def Start_charge_temp_soc():
     workbook.close()
 
 
-sql="SELECT emspeed,emtq,em_eff,emctltemp,emtemp " \
-    "FROM " +tb1_name+ tb_join+ " WHERE " + con + " AND "+ tb1_name +".emstat !='CLOSED'" \
-    " AND toSecond(uploadtime)<"+str(int(sampling*60))
-print(sql)
-aus=client.execute(sql)
-
-a=1
-sql1="SELECT deviceid,uploadtime,charg_s_c,soc,soc_c,accmiles " \
-    "FROM " +tb1_name+ tb_join+ " WHERE " + con + " AND "+ tb1_name +".charg_s_c IN (1,-1) ORDER BY deviceid,uploadtime "
-print(sql1)
-aus=client.execute(sql1)
-#aus=[0 vin  1 时间  2充电变化标志位  3 soc   4 d_soc  5 mileage ]
 
 
-sql="SELECT deviceid,uploadtime,-BMS_pow,cocesprotemp1_mean,soc,charg_mode " \
-    "FROM " +tb1_name + tb_join+" WHERE "+ con+ " AND "+ tb1_name +".charg_s==1 " \
-    "ORDER BY deviceid,uploadtime"
-print(sql)
-#aus=[i][0vin 1time 2power 3temp 4soc 5charg_mode]
-aus=client.execute(sql)
-
-
-sql1="SELECT deviceid,uploadtime,charg_s_c,soc,soc_c,accmiles,charg_mode FROM " + tb1_name + tb_join+ \
-    " WHERE " + con + " AND "+ tb1_name +".charg_s_c IN (1,-1) ORDER BY deviceid,uploadtime "
-print(sql1)
-
-
-path='D:/03RTM/ALL_RTM_data/0717/'
-l1=RtmAna(path,'Lavida',client,tb1_name,tb2_name,'MidEast','Private')
-l1.condition_printer()
 
 #target1、统计不同驾驶风格（针对BEV），（前提，相同地理位置，相同用户类型，相同附件消耗）统计其全电续驶里程和能耗差别
 
