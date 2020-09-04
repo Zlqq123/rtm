@@ -778,7 +778,6 @@ class RtmAna():
 
 
 
-
 class feature_extract():
     '''
     用于提取特征
@@ -825,6 +824,7 @@ class feature_extract():
 
     def __call__(self):
         s1=self.get_static_feature()
+        return s1
 
 
 
