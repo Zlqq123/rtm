@@ -10,10 +10,13 @@ from rtm.RTM_ana import RtmAna
 from genarl_func import print_in_excel
 from genarl_func import time_cost
 import hist_func_np
+from en_client import en_client
 
 
-client=Client(host='10.122.17.69',port='9005',user='en' ,password='en1Q',database='en')
+client=en_client()
 path='D:/03RTM/ALL_RTM_data/0811/'
+
+
 tb1_name="en.rtm_6_2th"
 tb2_name="en.vehicle_vin"
 tb_join=' INNER JOIN en.vehicle_vin on en.rtm_6_2th.deviceid=en.vehicle_vin.deviceid'
@@ -21,34 +24,35 @@ con="en.vehicle_vin.project=='Lavida BEV 53Ah'  AND en.vehicle_vin.d_mileage > 1
 con="en.vehicle_vin.project=='Lavida BEV 53Ah'  AND en.vehicle_vin.d_mileage > 100 "
 sampling=1/6
 
-
-def RTM_june(proj):
-    start=time.time()
-    l1=RtmAna(path,proj,client,tb1_name,tb2_name)
-    l1(user_type='Taxi',province='Shan1Xi')
-    dt=time.time()-start
-    file=open(l1.log_filename,'a')
-    file.write("------------------\r\n")
-    file.write("running cost"+ str(round(dt,2))+"s \r\n")
-    file.close()
-
-
+def Start_charge_temp_soc1():
+    '''
+    考察di温环境下充电起始电池温度SOC分布
+    '''    
+    path='D:/03RTM/ALL_RTM_data/0723/'
+    tb1_name="en.rtm_2th"
+    tb2_name="en.vehicle_vin"
+    l1=RtmAna(path,'Lavida',client,tb1_name,tb2_name)
+    l1.datetime_select('2020-01-01','2020-01-31')
+    l1.generate_log_file()
+    __,__,__,__,charg_soc,charg_temp,__=l1.charge_ana()
+    a=charg_soc[0]
+    b=charg_temp[4]
+    workbook = xlsxwriter.Workbook("开始充电SOC_temp分布_diwen.xlsx")
+    hist_func_np.hist_cros_2con_show(workbook,['SOC_temp'],charg_soc[0],range(0,115,5),charg_temp[4],range(-20,62,2))
+    workbook.close()
 
 
 vin="LSVUY60T3L2028579"
 def for_1_car(vin):
-    client=Client(host='10.122.17.69',port='9005',user='en' ,password='en1Q',database='en')
     sql="select deviceid, uploadtime,vehiclespeed, accmiles FROM ods.rtm_details WHERE deviceid=='"+vin+"' "
     aus=client.execute(sql)
     print_in_excel(aus,vin+'.xlsx')
 
-#for_1_car(vin)
 
 def Start_charge_temp_soc():
     '''
     考察高温环境下充电起始电池温度SOC分布
     '''
-    client=Client(host='10.122.17.69',port='9005',user='en' ,password='en1Q',database='en')
     path='D:/03RTM/ALL_RTM_data/0723/'
     tb1_name="en.rtm_6_2th"
     tb2_name="en.vehicle_vin"
@@ -56,8 +60,6 @@ def Start_charge_temp_soc():
     l1.d_mile_condition_select(100)
     l1.generate_log_file()
     __, __, __, __, charg_soc, charg_temp, __ = l1.charge_ana()
-    a=charg_soc[0]
-    b=charg_temp[4]
     workbook = xlsxwriter.Workbook("开始充电SOC_temp分布.xlsx")
     hist_func_np.hist_cros_2con_show(workbook,['SOC_temp'],charg_soc[0],range(0,115,5),charg_temp[4],range(-20,62,2))
     workbook.close()
@@ -74,14 +76,13 @@ def Start_soc_mode():
     '''
     考察DC充电下开始充电SOC分布
     '''
-    client=Client(host='10.122.17.69',port='9005',user='en' ,password='en1Q',database='en')
     path='D:/03RTM/ALL_RTM_data/0723/'
     tb1_name="en.rtm_6_2th"
     tb2_name="en.vehicle_vin"
     l1=RtmAna(path,'Lavida',client,tb1_name,tb2_name)
     l1.d_mile_condition_select(100)
     l1.generate_log_file()
-    [time_h_s,time_d,time_d_c,mode,charg_soc,charg_pow,charg_temp]=l1.charge_ana()
+    [__,__,__,mode,charg_soc,__,__]=l1.charge_ana()
     workbook = xlsxwriter.Workbook("不同充电模式下开始充电SOC分布.xlsx")
     mode_interval=['mode2','mode3_2','mode3_1','DC']
     hist_func_np.hist_cros_con_dis_show(workbook,['dad'],charg_soc[0],range(0,110,5),mode,mode_interval)
@@ -89,9 +90,8 @@ def Start_soc_mode():
 
 #Start_soc_mode()
 
-@time_c
+
 def time_before_charge():
-    client=Client(host='10.122.17.69',port='9005',user='en' ,password='en1Q',database='en')
     sql1="SELECT deviceid,uploadtime,charg_s_c,vehicle_s_c,charg_mode FROM en.rtm_6_2th " \
             " WHERE (charg_s_c in (1,-1) or vehicle_s_c in (1,-1)) and deviceid like 'LSVA%' ORDER BY deviceid,uploadtime "
     aus=client.execute(sql1)
@@ -115,8 +115,6 @@ def time_before_charge():
 
 
 def BMS_temp_lavida():
-    client=Client(host='10.122.17.69',port='9005',user='en' ,password='en1Q',database='en')
-
     sql="SELECT cast(mxtemp,'Int32'),cast(mitemp,'Int32') FROM en.rtm_data_june WHERE cast(mxtemp,'Int32')<200 and chargingstatus=='NO_CHARGING' and deviceid like 'LSVA%'"
     aus=client.execute(sql)
     max_temp_6_dr,min_temp_6_dr=[],[]
@@ -159,13 +157,6 @@ def BMS_temp_lavida():
 
 
 
-NEDC_path='D:/11test/01BEV-NEDC/1-lavida 53Ah/14 LBE734/vp426/D/'
-NEDC_D=Rangetest('LBE734_NEDC_D',NEDC_path,'NEDC')
-#NEDC_D.cut_range()
-#range_dyno=295.9
-#E_AC=38.055
-#NEDC_D.sum_to_excel_NEDC(range_dyno,E_AC)
-#NEDC_D.plot_v()
 
 
 

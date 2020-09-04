@@ -186,25 +186,33 @@ class RtmAna():
 
         start_date,end_date:yyyy-mm-dd        eg: 2020-06-01,2020-06-13
         '''
-        if region!=0:
-            self.region_select(region)
-        if user_type!=0:
-            self.user_type_select(user_type)
+        file_name=self.proj
+
         if province!=0:
             self.province_select(province)
+            file_name+='_'+province
+        
+        if region!=0:
+            self.region_select(region)
+            file_name+='_'+region
+        if user_type!=0:
+            self.user_type_select(user_type)
+            file_name+='_'+user_type
         if d_mile_condition!=0:
             self.d_mile_condition_select(d_mile_condition)
         if start_mileage!=0 and end_mileage!=0:
             self.mileage_select(start_mileage,end_mileage)
+            file_name+="_mile("+str(start_mileage)+'~'+str(end_mileage)+")"
         if start_date!=0 and end_date!=0:
             self.datetime_select(start_date,end_date)
+            file_name+="_date("+start_date+'~'+end_date+")"
     
         self.condition_printer()
 
         n=self.generate_log_file()
 
-        if n!=0:
-            workbook = xlsxwriter.Workbook(self.path+self.proj+".xlsx")
+        if n!=0:            
+            workbook = xlsxwriter.Workbook(self.path+file_name+".xlsx")
             self.daily_mileage(workbook)
             self.percharge_mile(workbook)
             self.v_mode(workbook)
@@ -516,7 +524,6 @@ class RtmAna():
         name_list=['BMS_temp_charge','Max','Min','range']
         hist_func_np.hist_con_show(workbook,name_list,[np.array(max_temp),np.array(min_temp),np.array(temp_range)],range(-10,62,2),2)
 
-
     def get_Charge(self):
         '''
         return all_charge=i*[0vin,1time_start,2time_end,3soc_start,4soc_end,5mile_start,6 end_mile ]
@@ -768,7 +775,52 @@ class RtmAna():
             ir.append(val[0])
 
         name_list=['ir','ir(MΩ)']
-        hist_func_np.hist_con_show(workbook,name_list,[np.array(ir)],range(0,1,10),2)
+        hist_func_np.hist_con_show(workbook,name_list,[np.array(ir)],[8,9,9.1,9.2,9.3,9.4,9.5,9.6,9.7,9.8,9.9,10],2)
+
+class feature_extract():
+    def __init__(self,vin,start_date,end_date,target_date,tb_name,client):
+        '''
+        start,end:yyyy-mm-dd        eg: 2020-06-01,2020-06-13
+        '''
+        self.vin=vin
+        a=start_date+" 00:00:00"
+        b=end_date+" 23:59:59"
+        self.con1=" deviceid='"+self.vin+"' and uploadtime between '"+a+"' AND '"+b+"'"
+        a=target_date+" 00:00:00"
+        b=target_date+" 23:59:59"
+        self.con2=" deviceid='"+self.vin+"' and uploadtime between '"+a+"' AND '"+b+"'"
+        self.tb_name=tb_name
+        self.client=client
+    
+    def get_static_feature(self):
+        sql="select region,province,user_typ from en.vehicle_vin where deviceid='"+self.vin+"'"
+        aus=self.client.execute(sql)
+        s=[]
+        s.append(aus[0][0])
+        s.append(aus[0][1])
+        s.append(aus[0][2])
+        sql="select avg(accmiles),avg(ir) from "+self.tb_name+" Where charg_s=0 and deviceid='"+self.vin+"'"
+        aus=self.client.execute(sql)
+        s.append(aus[0][0])
+        s.append(aus[0][1])
+        return s
+
+    def get_drive(self):
+        pass
+
+    def BMS(self):
+        pass
+
+    def E_motor(self):
+        pass
+
+    def RTM_Warn(self):
+        pass
+
+    def __call__(self):
+        s1=self.get_static_feature()
+
+
 
 
 

@@ -1,0 +1,2 @@
+/back up/*
+/en.py

@@ -5,6 +5,7 @@ import csv
 from genarl_func import print_in_excel
 from genarl_func import time_cost
 from genarl_func import time_cost_all
+from en_client import en_client
 
 '''
 All data(without warmingsignal)----------------------------- ods.rtm_details  
@@ -12,14 +13,64 @@ All data(without warmingsignal)----------------------------- ods.rtm_details
 2020/06 Data(with warmingsignal)---------------------------- en.rtm_data_june
 2020/06 Data(with warmingsignal) after pre analyzing-------- en.rtm_6_2th
 VIN Usertype Project region province mileage---------------- en.vehicle_vin 
-VIN Usertype Project region province(had dropped)----------- en.vehicle_vin1 
-VIN mileage (had dropped)----------------------------------- en.vehicle_mile
+All data(without warmingsignal) after pre analyzing -------- en.rtm_2th
+warmingsignal------------------------ods.rtm_reissue_history
 '''
+client=en_client()
 
-client=Client(host='10.122.17.69',port='9005',user='en' ,password='en1Q',database='en')
-sql="desc en.rtm_vds"
-aus=client.execute(sql)
-print(aus)
+
+
+def delet_tb(tb_name):
+    sql="DROP TABLE "+tb_name
+    aus=client.execute(sql)
+    print(aus)
+    sql="DESC "+tb_name
+    aus=client.execute(sql)
+    print(aus)
+
+def CREATE_rtm_lavida():
+    sql="CREATE TABLE IF NOT EXISTS en.rtm_lavida " \
+            "(deviceid String, uploadtime DateTime,d_time Int, vehicle_s UInt8, vehicle_s_c Int8, charg_s UInt8, charg_s_c Int8, " \
+            " vehiclespeed Float32, accmiles Float32, soc UInt8, soc_c Int8, operationmode String, " \
+            " totalvolt Float64, totalcurrent Float64, BMS_pow Float32, charg_mode String, " \
+            " ir UInt32, accpedtrav UInt8, brakepedstat UInt8," \
+            " emstat String, emctltemp Int32, emtemp Int32, emspeed Float32, emtq Float32, em_me_pow Float32, " \
+            " emvolt Float32, emctlcut Float32, em_el_pow Float32, em_eff Float32, other_pow Float32, " \
+            " cocesprotemp1 Array(Int8), cocesprotemp1_mean Float32 " \
+            ") ENGINE = MergeTree() ORDER BY (deviceid, uploadtime )"
+    aus=client.execute(sql)
+    sql="desc en.rtm_lavida"
+    aus=client.execute(sql)
+    print(aus)
+
+    sql="INSERT INTO en.rtm_lavida " \
+            "SELECT deviceid, uploadtime,cast(runningDifference(uploadtime),'Int'), vehicle_s, runningDifference(vehicle_s), charg_s, runningDifference(charg_s), " \
+            "cast(vehiclespeed,'Float32'), cast(accmiles,'Float32')," \
+            "socp, runningDifference(socp), operationmode, totalvolt, totalcurrent, totalcurrent*totalvolt/1000 AS P, " \
+            "multiIf(P<-7.5,'DC',P>=-7.5 and P<-4,'mode3_1',P>=-4 and P<-2,'mode3_2',P>=-2 and P<0,'mode2','discharging'),  " \
+            "cast(ir,'UInt32'), if(accped<0,0,accped), if(brakeped<0,0,brakeped), " \
+            "emstat, cast(emctltemp,'Int32'),cast(emtemp,'Int32'), sp, tq, sp*tq/9550 as me_pow, em_v, em_i, em_v*em_i/1000 as el_pow, " \
+            "multiIf(emstat=='CLOSED' or el_pow*me_pow==0,0,emstat=='CONSUMING_POWER',me_pow/el_pow,emstat=='GENERATING_POWER',el_pow/me_pow,100), (P-el_pow), " \
+            "temp_list, arrayReduce('sum',temp_list)/length(temp_list) " \
+            "FROM (SELECT deviceid, uploadtime, if(vehiclestatus=='STARTED',1,0) AS vehicle_s, if(chargingstatus=='NO_CHARGING',0,1) AS charg_s, " \
+            "vehiclespeed, accmiles, if(soc<0,0,soc) as socp, operationmode, totalvolt, totalcurrent, " \
+            "ir, cast(accpedtrav,'Int32') as accped, cast(brakepedstat,'Int32') as brakeped, " \
+            "emstat, emctltemp, emtemp, cast(emspeed,'Float32') as sp, cast(emtq,'Float32') as tq, " \
+            "cast(emvolt,'Float32') as em_v, cast(emctlcut,'Float32') as em_i, " \
+            "cast(splitByChar(',',cocesprotemp1),'Array(Int8)') AS temp_list " \
+            "FROM ods.rtm_details WHERE vehiclestatus!='ERROR' and chargingstatus!='INVALID' and chargingstatus!='ERROR' and cocesprotemp1!='NULL' " \
+            "AND deviceid like 'LSVA%' AND uploadtime BETWEEN '2018-01-01 00:00:00' AND '2020-12-31 23:59:59' " \
+            "ORDER BY deviceid,uploadtime ) "
+    aus=client.execute(sql)
+    sql="SELECT COUNT(deviceid) from en.rtm_lavida"
+    aus=client.execute(sql)
+    print(aus)
+    sql="SELECT COUNT(DISTINCT deviceid) from en.rtm_lavida"
+    aus=client.execute(sql)
+    print(aus)
+    sql="SELECT * from en.rtm_lavida limit 10"
+    aus=client.execute(sql)
+    print(aus)
 
 def View_table(tb_name):
     sql="DESC " + tb_name
@@ -34,7 +85,7 @@ def View_table(tb_name):
     sql="SELECT topK(1)(toDate(t1)),topK(1)(toDate(t2)) " \
         "FROM (select deviceid,min(uploadtime) as t1,max(uploadtime) as t2 " \
         " From " +tb_name+" group by deviceid) "
-    aus=client.execute(sql)
+    #aus=client.execute(sql)
     print("------date------")
     print(aus)
     sql="SELECT topK(10)(toDate(t1)) FROM " \
@@ -48,10 +99,8 @@ def View_table(tb_name):
     aus=client.execute(sql)
     print_in_excel(aus,'rtm_details.xlsx')
 
+View_table("ods.rtm_reissue_history")
 
-#View_table("ods.rtm_details")
-
-sql="desc en.vehicle_vin"
 
 def db_pre_ana(client):
     sql="CREATE TABLE IF NOT EXISTS en.vehicle_mile " \
