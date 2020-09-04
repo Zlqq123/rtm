@@ -7,39 +7,38 @@ from datetime import datetime
 from genarl_func import time_cost1
 from genarl_func import time_cost_all
 
-'''
-V4.0
-统计函数采用numpy,统计函数速度提升99.9%
-hist function 138.67->0.88
-综合速度提升？
-passat 5421-> 1146 提升79%
-tiguan 2408->391 提升83%
-
-V4.1
-添加能耗计算模块 Change in 【percharge_mile(self,workbook)】
-添加每个小时的行驶时间和行驶距离统计create 【hourly_mileage(self,workbook)】
-BMS工作点，电机工作点，添加自定义采样频率 Change in 【E_motor_sample(self,workbook)，BMS_sample(self,workbook):】
-
-V4.2
-车型项目为5种：Lavida  Passat C5  Passat C6  Tiguan C5 Tiguan C6
-
-V4.3
-数据库tablename自定义
-
-V5.0
-基于预处理表en.rtm_6_2th更新程序
-六月数据预处理表：en.rtm_6_2th
-车辆vin码对应客户信息+里程：en.vehicle_vin 
-V5.1
-自定义region province usertype mileage_range d_mileage
-V5.2
-自定义处理数据时间选择
-添加call函数
-添加绝缘阻值统计
-
-'''
 
 class RtmAna():
+    '''
+    用于统计车辆行驶特性，包括里程，速度，驾驶模式，能耗估算，充电行为，电机工作点，电池工作点等。
+
+    V4.0：统计函数采用numpy,统计函数速度提升99.9%
+            hist function 138.67->0.88    passat 5421-> 1146 提升79%    tiguan 2408->391 提升83%
+
+    V4.1
+    添加能耗计算模块 Change in 【percharge_mile(self,workbook)】
+    添加每个小时的行驶时间和行驶距离统计create 【hourly_mileage(self,workbook)】
+    BMS工作点，电机工作点，添加自定义采样频率 Change in 【E_motor_sample(self,workbook)，BMS_sample(self,workbook):】
+
+    V4.2
+    车型项目为5种：Lavida  Passat C5  Passat C6  Tiguan C5 Tiguan C6
+
+    V4.3
+    数据库tablename自定义
+
+    V5.0
+    基于预处理表en.rtm_6_2th更新程序
+    六月数据预处理表：en.rtm_6_2th
+    车辆vin码对应客户信息+里程：en.vehicle_vin 
+    V5.1
+    自定义region province usertype mileage_range d_mileage
+    V5.2
+    自定义处理数据时间选择
+    添加call函数
+    添加绝缘阻值统计
+
+    '''
+
     def __init__ (self,path,proj,client,tb1_name,tb2_name):
         '''
         project must be in {'Lavida','Passat','Tiguan','Passat C5','Passat C6','Tiguan C5','Tiguan C6'}
@@ -140,7 +139,6 @@ class RtmAna():
         a=start+" 00:00:00"
         b=end+" 23:59:59"
         self.con+=" AND "+self.tb1_name+ ".uploadtime BETWEEN '"+a+"' AND '"+b+"'"
-
 
     def reset_select_condution(self):
         self.con=self.con_pro
@@ -777,7 +775,15 @@ class RtmAna():
         name_list=['ir','ir(MΩ)']
         hist_func_np.hist_con_show(workbook,name_list,[np.array(ir)],[8,9,9.1,9.2,9.3,9.4,9.5,9.6,9.7,9.8,9.9,10],2)
 
+
+
+
+
 class feature_extract():
+    '''
+    用于提取特征
+    20200904 v1.0
+    '''
     def __init__(self,vin,start_date,end_date,target_date,tb_name,client):
         '''
         start,end:yyyy-mm-dd        eg: 2020-06-01,2020-06-13
