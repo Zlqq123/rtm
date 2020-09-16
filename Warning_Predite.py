@@ -6,6 +6,7 @@ import time
 import csv
 import numpy as np
 from rtm.RTM_ana import RtmAna
+from rtm.RTM_ana import feature_extract
 from genarl_func import print_in_excel
 from genarl_func import time_cost
 import hist_func_np
@@ -13,6 +14,26 @@ from en_client import en_client
 import datetime
 
 client=en_client()
+tb1_name="en.rtm_6_2th"
+
+filename="D:/03RTM/报警预测/tiguan_warming.csv"
+rawdata_col_define={}
+all_feature=[]
+with open(filename) as f:
+    reader=csv.reader(f)
+    header_row=next(reader)
+    for index, column_header in enumerate(header_row):
+        rawdata_col_define[column_header]=index   # find raw data columns title & index {columst title: colunms index}
+    for row in reader:
+        vin=row[rawdata_col_define['VIN']]
+        start=row[rawdata_col_define['start']]
+        end=row[rawdata_col_define['end']]
+        target=row[rawdata_col_define['target date']]
+        l1=feature_extract(vin,start,end,target,tb1_name)
+        s=l1.get_static_feature()
+        a=l1()
+        all_feature.append(a)
+
 sql="desc ods.rtm_reissue_history"
 aus=client.execute(sql)
 print(aus)

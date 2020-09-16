@@ -19,6 +19,40 @@ warmingsignal------------------------ods.rtm_reissue_history
 client=en_client()
 
 
+#电芯电压值，执行时间较长
+sql="INSERT INTO en.rtm_6_2th (celv1) " \
+    "SELECT cast(splitByChar(',',celv1),'Array(Float32)') " \
+    "FROM en.rtm_data_june WHERE vehiclestatus!='ERROR' and chargingstatus!='INVALID' and chargingstatus!='ERROR' and cocesprotemp1!='NULL' " \
+    "ORDER BY deviceid,uploadtime "
+print(sql)
+aus=client.execute(sql)
+sql="select deviceid, uploadtime,celv1,arrayReduce('max',celv1),arrayReduce('min',celv1),arrayReduce('avg',celv1) from en.rtm_6_2th limit 15"
+aus=client.execute(sql)
+print(aus)
+
+
+a=1
+
+
+
+def ff1():
+    sql="ALTER TABLE en.rtm_6_2th ADD COLUMN celv1 Array(Float32) AFTER cocesprotemp1_mean"
+    aus=client.execute(sql)
+    sql="desc en.rtm_6_2th"
+    aus=client.execute(sql)
+    '''
+    sql="ALTER TABLE en.rtm_6_2th DROP COLUMN celv1 "
+    aus=client.execute(sql)
+    sql="desc en.rtm_6_2th"
+    aus=client.execute(sql)
+
+    sql="ALTER TABLE en.rtm_6_2th ADD COLUMN celv1 Int AFTER cocesprotemp1_mean"
+    aus=client.execute(sql)
+    sql="desc en.rtm_6_2th"
+    aus=client.execute(sql)
+    '''
+
+
 
 def delet_tb(tb_name):
     sql="DROP TABLE "+tb_name

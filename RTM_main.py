@@ -19,11 +19,12 @@ tb1_name="en.rtm_6_2th"
 tb2_name="en.vehicle_vin"
 sampling=1/6
 
+
 def f1(proj,u):
     path='D:/01zlq/0811_'+u+'/'
     start=time.time()
     print("----------"+proj+'---'+u+'-----------')
-    l1=RtmAna(path,proj,client,tb1_name,tb2_name)
+    l1=RtmAna(path,proj,tb1_name,tb2_name)
     l1(user_type=u)
     dt=time.time()-start
     file=open(l1.log_filename,'a')
@@ -97,7 +98,7 @@ def Start_soc_mode():
     path='D:/03RTM/ALL_RTM_data/0723/'
     tb1_name="en.rtm_6_2th"
     tb2_name="en.vehicle_vin"
-    l1=RtmAna(path,'Lavida',client,tb1_name,tb2_name)
+    l1=RtmAna(path,'Lavida',tb1_name,tb2_name)
     l1.d_mile_condition_select(100)
     l1.generate_log_file()
     [__,__,__,mode,charg_soc,__,__]=l1.charge_ana()
