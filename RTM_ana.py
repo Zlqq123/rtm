@@ -789,111 +789,262 @@ class feature_extract():
         self.con2=" deviceid='"+self.vin+"' and uploadtime between '"+a+"' AND '"+b+"'"
         self.tb_name=tb_name
     
+    def __call__(self):
+
+        y=self.RTM_Warn()
+        f1=self.get_static_feature()
+        f2=self.mileage_time()
+        f3=self.v_mode_acc()
+        f4=self.BMS_discharge()
+        f5=self.E_motor()
+        f6=self.BMS_charge()
+        f7=self.get_charge()
+
+        return y,f1,f2,f3,f4,f5,f6,f7
+        
+
+    def RTM_Warn(self):
+        sql="SELECT sum(bksyswn) FROM "+self.tb_name+" Where "+self.con2
+        aus=client.execute(sql)
+        if aus==[]:
+            return 'null'
+        if aus[0][0]>0:
+            y_label=1
+        else:
+            y_label=0
+        return y_label
+
     def get_static_feature(self):
         '''
         s=[地区，省份，用户类型，行驶里程，绝缘阻值大小]
         '''
         sql="select region,province,user_typ from en.vehicle_vin where deviceid='"+self.vin+"'"
         aus=client.execute(sql)
-        s=[]
-        if aus==[]:
-            s.append('-')
-            s.append('-')
-            s.append('-')
-        else:
-            s.append(aus[0][0])
-            s.append(aus[0][1])
-            s.append(aus[0][2])
-        sql="select avg(accmiles),avg(ir) from "+self.tb_name+" Where charg_s=0 and "+self.con1
+        s=['null']*5
+        if aus!=[]:
+            s[0]=aus[0][0]
+            s[1]=aus[0][1]
+            s[2]=aus[0][2]
+        sql="select accmiles from "+self.tb_name+" Where "+self.con1
+        aus1=client.execute(sql)
+        sql="select avg(accmiles),avg(ir) from "+self.tb_name+" Where "+self.con1
         aus=client.execute(sql)
-        s.append(aus[0][0])
-        s.append(aus[0][1])
+        if aus1!=[]:
+            s[3]=aus[0][0]
+            s[4]=aus[0][1]
+        
         return s
     
     def mileage_time(self):
         '''
         s=[行驶里程，平均每日行驶里程，行驶时间]
         '''
+        s=['null']*3
         sql="SELECT max(accmiles)-min(accmiles) FROM "+self.tb_name+" WHERE "+self.con1
         aus=client.execute(sql)
-        s=[]
-        s.append(aus[0][0])
+        if aus!=[]:
+            s[0]=aus[0][0]
+        
         sql="SELECT max(accmiles)-min(accmiles) FROM "+self.tb_name+" WHERE "+self.con1+" group by toDate(uploadtime) "
-        a=[]
         aus=client.execute(sql)
-        for v in aus:
-            a.append(v[0])
-        s.append(sum(a)/len(a))
+        if aus!=[]:
+            a=[]
+            for v in aus:
+                a.append(v[0])
+            s[1]=sum(a)/len(a)
+        
         sql="SELECT d_time from "+self.tb_name+" WHERE d_time<31 and charg_s=0 and "+self.con1
         aus=client.execute(sql)
-        a=[]
-        aus=client.execute(sql)
-        for v in aus:
-            a.append(v[0])
-        s.append(sum(a)/3600)
+        if aus!=[]:
+            a=[]
+            aus=client.execute(sql)
+            for v in aus:
+                a.append(v[0])
+            s[2]=sum(a)/3600
         return s
     
     def v_mode_acc(self):
         '''
         s=[车速（平均值，99分位，中位数），EV驾驶模式占比，FV驾驶模式占比，油门踏板开度（平均值，99分位，中位数），制动踏板开度（平均值，99分位，中位数）]
         '''
+        s=['null']*11
         sql="SELECT vehiclespeed,operationmode FROM "+self.tb_name+" WHERE vehiclespeed>0 and "+self.con1
         aus=client.execute(sql)
-        v=[]
-        mode_ev,mode_fv=0,0
-        for value in aus:
-            v.append(value[0])
-            if value[1]=="EV":
-                mode_ev+=1
-            if value[1]=="FV":
-                mode_fv+=1
-        vp=np.array(v)
-        s=[]
-        s.append(np.mean(vp))
-        s.append(np.percentile(vp,99))
-        s.append(np.percentile(vp,50))
-        s.append(mode_ev/len(aus))
-        s.append(mode_fv/len(aus))
+        if aus!=[]:
+            v=[]
+            mode_ev,mode_fv=0,0
+            for value in aus:
+                v.append(value[0])
+                if value[1]=="EV":
+                    mode_ev+=1
+                if value[1]=="FV":
+                    mode_fv+=1
+            vp=np.array(v)
+            s[0]=np.mean(vp)
+            s[1]=np.percentile(vp,99)
+            s[2]=np.percentile(vp,50)
+            s[3]=mode_ev/len(aus)
+            s[4]=mode_fv/len(aus)
+        
         sql="SELECT accpedtrav FROM "+self.tb_name+" WHERE accpedtrav>0 and "+self.con1
         aus=client.execute(sql)
-        a=[]
-        for value in aus:
-            a.append(value[0])
-        ap=np.array(a)
-        s.append(np.mean(ap))
-        s.append(np.percentile(ap,99))
-        s.append(np.percentile(ap,50))
+        if aus!=[]:
+            a=[]
+            for value in aus:
+                a.append(value[0])
+            ap=np.array(a)
+            s[5]=np.mean(ap)
+            s[6]=np.percentile(ap,99)
+            s[7]=np.percentile(ap,50)
+            
         sql="SELECT brakepedstat FROM "+self.tb_name+" WHERE brakepedstat>0 and "+self.con1
         aus=client.execute(sql)
-        a=[]
-        for value in aus:
-            a.append(value[0])
-        ap=np.array(a)
-        s.append(np.mean(ap))
-        s.append(np.percentile(ap,99))
-        s.append(np.percentile(ap,50))
+        if aus!=[]:
+            a=[]
+            for value in aus:
+                a.append(value[0])
+            ap=np.array(a)
+            s[8]=np.mean(ap)
+            s[9]=np.percentile(ap,99)
+            s[10]=np.percentile(ap,50)
+        return s
+
+    def BMS_discharge(self):
+        '''
+        s=[电池放电温度(最大值，平均值),电池放电功率(最大值，平均值)，
+            放电中电池单体温度（最高温度电芯最大值，最低电芯温度最小值，单体温差最大值，温差平均值），
+            #电池单体压差]
+        '''
+        s=['null']*8
+        #discharging
+        sql="SElECT cocesprotemp1_mean,BMS_pow FROM " +self.tb_name+ " WHERE charg_s==0 AND " + self.con1
+        aus=client.execute(sql)
+        if aus!=[]:
+            temp=[]
+            pow_bms=[]
+            for value in aus:
+                temp.append(value[0])
+                if value[1]>=0:
+                    pow_bms.append(value[1])
+            
+            s[0]=max(temp)
+            s[1]=sum(temp)/len(temp)
+            if pow_bms!=[]:
+                s[2]=max(pow_bms)
+                s[3]=sum(pow_bms)/len(pow_bms)
+            
+        sql="SELECT arrayReduce('max',cocesprotemp1),arrayReduce('min',cocesprotemp1) FROM "+self.tb_name+ " WHERE charg_s==0 AND " + self.con1 
+        aus=client.execute(sql)
+        if aus!=[]:
+            cel_temp_max,cel_temp_min,cel_temp_range=[],[],[]
+            for value in aus:
+                cel_temp_max.append(value[0])
+                cel_temp_min.append(value[1])
+                cel_temp_range.append(value[0]-value[1])
+            s[4]=max(cel_temp_max)
+            s[5]=min(cel_temp_min)
+            s[6]=max(cel_temp_range)
+            s[7]=sum(cel_temp_range)/len(cel_temp_range)
+
+        return s
+
+    def E_motor(self):
+        '''
+        s=[电机转速（最大值，平均值），正转矩（最大值，平均值），负转矩（最大值，平均值），负转矩占比，
+            电机温度（平均值，99分位，中位数，1分位），LE温度（平均值，99分位，中位数，1分位）]
+        '''
+        s=['null']*15
+        sql="SELECT emspeed,emtq,emctltemp,emtemp FROM " +self.tb_name+" WHERE emstat!='CLOSED' AND "+ self.con1
+        aus=client.execute(sql)
+        if aus!=[]:
+            temp_motor,temp_LE=[],[]
+            speed,torq1,torq2=[],[],[]
+            for value in aus:
+                temp_motor.append(value[3])
+                temp_LE.append(value[2])
+                if value[0]!=0 and value[1]!=0:
+                    speed.append(value[0])
+                    if value[1]>0:
+                        torq1.append(value[1])
+                    else:
+                        torq2.append(value[1])
+            s[0]=max(speed)
+            s[1]=sum(speed)/len(speed)
+            if torq1!=[]:
+                s[2]=max(torq1)
+                s[3]=sum(torq1)/len(torq1)
+            if torq2!=[]:
+                s[4]=min(torq2)
+                s[5]=sum(torq2)/len(torq2)
+            s[6]=len(torq2)/len(speed)
+            
+            tp=np.array(temp_motor)
+            s[7]=np.mean(tp)
+            s[8]=np.percentile(tp,99)
+            s[9]=np.percentile(tp,50)
+            s[10]=np.percentile(tp,1)
+
+            tp=np.array(temp_LE)
+            s[11]=np.mean(tp)
+            s[12]=np.percentile(tp,99)
+            s[13]=np.percentile(tp,50)
+            s[14]=np.percentile(tp,1)
+            
+        return s
+    
+    def BMS_charge(self):
+        '''
+        s=[电池充电温度(最大值，平均值),电池充电功率(最大值，平均值)，
+            充电中电池单体温度（最高温度电芯最大值，最低电芯温度最小值，单体温差最大值，温差平均值），
+            #电池单体压差]
+        '''
+        s=['null']*8
+        #charging
+        sql="SElECT cocesprotemp1_mean,BMS_pow FROM " +self.tb_name+ " WHERE charg_s==1 AND " + self.con1
+        aus=client.execute(sql)
+        if aus!=[]:
+            temp=[]
+            pow_bms=[]
+            for value in aus:
+                temp.append(value[0])
+                if value[1]<0:
+                    pow_bms.append(value[1])
+            s[0]=max(temp)
+            s[1]=sum(temp)/len(temp)
+            if pow_bms!=[]:
+                s[2]=max(pow_bms)
+                s[3]=sum(pow_bms)/len(pow_bms)
+
+        sql="SELECT arrayReduce('max',cocesprotemp1),arrayReduce('min',cocesprotemp1) FROM "+self.tb_name+ " WHERE charg_s==1 AND " + self.con1
+        aus=client.execute(sql)
+        if aus!=[]:
+            cel_temp_max,cel_temp_min,cel_temp_range=[],[],[]
+            for value in aus:
+                cel_temp_max.append(value[0])
+                cel_temp_min.append(value[1])
+                cel_temp_range.append(value[0]-value[1])
+            s[4]=max(cel_temp_max)
+            s[5]=min(cel_temp_min)
+            s[6]=max(cel_temp_range)
+            s[7]=sum(cel_temp_range)/len(cel_temp_range)
+        
         return s
 
     def get_charge(self):
         '''
-        s=[充电次数，开始充电soc(平均值，中位数)，结束充电SOC(平均值，中位数)，累计冲入电量，充电模式]
+        s=[充电次数，开始充电soc(平均值，中位数)，结束充电SOC(平均值，中位数)，累计冲入电量，平均每次冲入电量，充电模式2占比，模式3占比]
         '''
-        s=[]
-        sql1="SELECT uploadtime,charg_s_c,soc,soc_c,accmiles FROM " + self.tb_name + " WHERE charg_s_c IN (1,-1) AND "+ self.con1+" ORDER BY uploadtime"
-        aus=client.execute(sql1)
-        #aus=[0 time  1充电变化标志位  2 soc   3 d_soc  4 mileage ]
-        all_charge=[]        
-        #all_charge=[0time_start,1time_end]
-        temp=[]
-        #temp=[0soc_start,1soc_end,2mile_start,3end_mile ]
-        i=1
+        s=['null']*9
+        sql1="SELECT uploadtime,charg_s_c,soc,soc_c,accmiles,charg_mode FROM " + self.tb_name + " WHERE charg_s_c IN (1,-1) AND "+ self.con1+" ORDER BY uploadtime"
+        aus=client.execute(sql1)        #aus=[0 time  1充电变化标志位  2 soc   3 d_soc  4 mileage 5 mode ]
+        all_charge=[]        #all_charge=[0time_start, 1time_end, 2 charg_mode]
+        temp=[]        #temp=[0soc_start,1soc_end,2mile_start,3end_mile ]
 
+        i=1
         while i<len(aus):
             if aus[i-1][1]==1 and aus[i][1]==-1:#i-1时刻是开始充电，i是结束充电时刻
-                all_charge.append([aus[i-1][0],aus[i][0]])
-                #all_charge=[0time_start,1time_end]
-                temp.append([aus[i-1][2],aus[i][2],aus[i-1][4],aus[i][4]])
-                #temp=[0soc_start,1soc_end,2mile_start,3end_mile ]
+                all_charge.append([aus[i-1][0],aus[i][0],aus[i-1][5]])                #all_charge=[0time_start,1time_end]
+                temp.append([aus[i-1][2],aus[i][2],aus[i-1][4],aus[i][4]])                #temp=[0soc_start,1soc_end,2mile_start,3end_mile ]
                 i+=2
             else:
                 i+=1
@@ -910,169 +1061,37 @@ class feature_extract():
                 i+=1
         
         charge_times=len(all_charge)
+        s[0]=len(all_charge)
 
-        sql="SELECT uploadtime,charg_mode FROM " +self.tb_name + " WHERE charg_s==1 AND "+ self.con1+" ORDER BY uploadtime"
-        aus=client.execute(sql)
-        #aus=[i][0time, 1 charg_mode ]
+        if charge_times!=0:
+            mode,soc_s,soc_e,soc_d=[],[],[],[]
+            for i in range(len(all_charge)):
+                mode.append(all_charge[i][2])
+                soc_s.append(temp[i][0])
+                soc_e.append(temp[i][1])
+                soc_d.append(temp[i][1]-temp[i][0])
+            
+            modep=np.array(mode)
+            m1=len(modep[modep=='mode2'])
+            m2=len(modep[modep=='mode3_2'])
+            s[1]=m1/charge_times
+            s[2]=m2/charge_times
 
-        ss,ee=[],[]#用于存放aus中每段充电开始的index 和每次充电结束的index
-        i,j=0,0 #j为all_charge的index      i 为aus的index
-        mode=[]#与ss,ee过程变量相同长度的mode
+            soc_sp=np.array(soc_s)
+            soc_ep=np.array(soc_e)
 
-        for j in range(len(all_charge)):#根据all_charge中每次充电开始时间，找到aus中每次充电开始-结束时间
-            if ss==[]: 
-                i=0
-            else:
-                i=ee[-1]#每次i从上次充电结束的时候开始搜索
-            ff=0 # 找不找得到的flag ff=0开始点找不到，ff=1开始点找到了 结束点找不到，ff=2都找到了
-            while  ff==0 and i<len(aus): #如果vin码已经搜索到下一辆车，循环停止#如果找到了，ff=1循环停止
-                if  all_charge[j][0]==aus[i][0]:
-                    #找到aus中vin码和时间与all_charge中开始时间完全相同的数据条，index保存在ss中
-                    ff=1
-                    ss.append(i)
-                else:
-                    i+=1
-            while ff==1 and i<len(aus)-1:
-                if aus[i][0]<all_charge[j][1] and aus[i+1][0]>all_charge[j][1]:
-                    #找到aus中vin码和All_charge 相同，时间与all_charge中结束时间最接近的数据条，index保存在ee中
-                    ff=2
-                    ee.append(i)
-                else:
-                    i+=1
-            if ff==1:#如果只找到开始点，没找到结束点
-                ss.pop()
-
-        time_d,mode=[],[]
-        soc_s,soc_e,soc_d=[],[],[]
-        
-        for i in range(len(ss)):
-            mode.append(aus[ss[i]][5])
-            soc_s.append(aus[ss[i]][4])
-            soc_e.append(aus[ee[i]][4])
-            soc_d.append(aus[ee[i]][4]-aus[ss[i]][4])
-            d=aus[ee[i]][1]-aus[ss[i]][1]
-        
+            s[3]=np.mean(soc_sp)
+            s[4]=np.percentile(soc_sp,50)
+            s[5]=np.mean(soc_ep)
+            s[6]=np.percentile(soc_ep,50)
+            s[7]=sum(soc_d)/charge_times
+            s[8]=sum(soc_d)
 
         return s
 
-    def BMS(self):
-        '''
-        s=[电池放电温度(最大值，平均值),电池放电功率(最大值，平均值)，放电中电池单体温度（最高温度电芯最大值，最低电芯温度最小值，单体温差最大值，温差平均值），
-            电池充电温度(最大值，平均值),电池充电功率(最大值，平均值)，充电中电池单体温度（最高温度电芯最大值，最低电芯温度最小值，单体温差最大值，温差平均值），
-            #电池单体压差]
-        '''
-        s=[]
-        #discharging
-        sql="SElECT cocesprotemp1_mean,BMS_pow FROM " +self.tb_name+ " WHERE charg_s==0 AND " + self.con1
-        aus=client.execute(sql)
-        temp=[]
-        pow_bms=[]
-        for value in aus:
-            temp.append(value[0])
-            if value[1]>0:
-                pow_bms.append(value[1])
-        s.append(max(temp))
-        s.append(sum(temp)/len(temp))
-        s.append(max(pow_bms))
-        s.append(sum(pow_bms)/len(pow_bms))
+    
 
-        sql="SELECT arrayReduce('max',cocesprotemp1),arrayReduce('min',cocesprotemp1) FROM "+self.tb_name+ " WHERE charg_s==0 AND " + self.con1 
-        aus=client.execute(sql)
-        cel_temp_max,cel_temp_min,cel_temp_range=[],[],[]
-        for value in aus:
-            cel_temp_max.append(value[0])
-            cel_temp_min.append(value[1])
-            cel_temp_range.append(value[0]-value[1])
-        s.append(max(cel_temp_max))
-        s.append(min(cel_temp_min))
-        s.append(max(cel_temp_range))
-        s.append(sum(cel_temp_range)/len(cel_temp_range))
-
-        #charging
-        sql="SElECT cocesprotemp1_mean,BMS_pow FROM " +self.tb_name+ " WHERE charg_s==1 AND " + self.con1
-        aus=client.execute(sql)
-        temp=[]
-        pow_bms=[]
-        for value in aus:
-            temp.append(value[0])
-            if value[1]<0:
-                pow_bms.append(value[1])
-        s.append(max(temp))
-        s.append(sum(temp)/len(temp))
-        s.append(max(pow_bms))
-        s.append(sum(pow_bms)/len(pow_bms))
-
-        sql="SELECT arrayReduce('max',cocesprotemp1),arrayReduce('min',cocesprotemp1) FROM "+self.tb_name+ " WHERE charg_s==1 AND " + self.con1
-        aus=client.execute(sql)
-        cel_temp_max,cel_temp_min,cel_temp_range=[],[],[]
-        for value in aus:
-            cel_temp_max.append(value[0])
-            cel_temp_min.append(value[1])
-            cel_temp_range.append(value[0]-value[1])
-        s.append(max(cel_temp_max))
-        s.append(min(cel_temp_min))
-        s.append(max(cel_temp_range))
-        s.append(sum(cel_temp_range)/len(cel_temp_range))
-
-        return s
-
-    def E_motor(self):
-        '''
-        s=[电机转速（最大值，平均值），正转矩（最大值，平均值），负转矩（最大值，平均值），负转矩占比，
-            电机温度（平均值，99分位，中位数，1分位），LE温度（平均值，99分位，中位数，1分位）]
-        '''
-        s=[]
-        sql="SELECT emspeed,emtq,emctltemp,emtemp FROM" +self.tb_name+" WHERE emstat !='CLOSED' AND "+ self.con1
-        aus=client.execute(sql)
-        temp_motor,temp_LE=[],[]
-        speed,torq1,torq2=[],[],[]
-        for value in aus:
-            temp_motor.append(value[3])
-            temp_LE.append(value[2])
-            if value[0]!=0 and value[1]!=0:
-                speed.append(value[0])
-                if value[1]>0:
-                    torq1.append(value[1])
-                else:
-                    torq2.append(value[1])
-        
-        s.append(max(speed))
-        s.append(sum(speed)/len(speed))
-        s.append(max(torq1))
-        s.append(sum(torq1)/len(torq1))
-        s.append(min(torq2))
-        s.append(sum(torq2)/len(torq2))
-        s.append(len(torq2)/len(speed))
-        tp=np.array(temp_motor)
-        s.append(np.mean(tp))
-        s.append(np.percentile(tp,99))
-        s.append(np.percentile(tp,50))
-        s.append(np.percentile(tp,1))
-        tp=np.array(temp_LE)
-        s.append(np.mean(tp))
-        s.append(np.percentile(tp,99))
-        s.append(np.percentile(tp,50))
-        s.append(np.percentile(tp,1))
-
-        return s
-
-    def RTM_Warn(self):
-        sql="SELECT sum(bksyswn) FROM "+self.tb_name+" Where "+self.con2
-        aus=client.execute(sql)
-        if aus[0][0]>0:
-            y_label=1
-        else:
-            y_label=0
-        return y_label
-
-    def __call__(self):
-        f1=self.get_static_feature()
-        f2=self.mileage_time()
-        f3=self.v_mode_acc()
-        f4=self.BMS()
-        f5=self.E_motor()
-        y=self.RTM_Warn()
-        return f1,f2,f3,f4,f5,y
+    
 
 
 
