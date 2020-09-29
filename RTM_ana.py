@@ -800,7 +800,7 @@ class feature_extract():
         f6=self.BMS_charge()
         f7=self.get_charge()
 
-        return y,f1,f2,f3,f4,f5,f6,f7
+        return [y],f1,f2,f3,f4,f5,f6,f7
         
 
     def RTM_Warn(self):
@@ -911,11 +911,11 @@ class feature_extract():
 
     def BMS_discharge(self):
         '''
-        s=[电池放电温度(最大值，平均值),电池放电功率(最大值，平均值)，
+        s=[电池放电温度(最大值，最小值，平均值),电池放电功率(最大值，平均值)，
             放电中电池单体温度（最高温度电芯最大值，最低电芯温度最小值，单体温差最大值，温差平均值），
             #电池单体压差]
         '''
-        s=['null']*8
+        s=['null']*9
         #discharging
         sql="SElECT cocesprotemp1_mean,BMS_pow FROM " +self.tb_name+ " WHERE charg_s==0 AND " + self.con1
         aus=client.execute(sql)
@@ -928,10 +928,11 @@ class feature_extract():
                     pow_bms.append(value[1])
             
             s[0]=max(temp)
-            s[1]=sum(temp)/len(temp)
+            s[1]=min(temp)
+            s[2]=sum(temp)/len(temp)
             if pow_bms!=[]:
-                s[2]=max(pow_bms)
-                s[3]=sum(pow_bms)/len(pow_bms)
+                s[3]=max(pow_bms)
+                s[4]=sum(pow_bms)/len(pow_bms)
             
         sql="SELECT arrayReduce('max',cocesprotemp1),arrayReduce('min',cocesprotemp1) FROM "+self.tb_name+ " WHERE charg_s==0 AND " + self.con1 
         aus=client.execute(sql)
@@ -941,10 +942,10 @@ class feature_extract():
                 cel_temp_max.append(value[0])
                 cel_temp_min.append(value[1])
                 cel_temp_range.append(value[0]-value[1])
-            s[4]=max(cel_temp_max)
-            s[5]=min(cel_temp_min)
-            s[6]=max(cel_temp_range)
-            s[7]=sum(cel_temp_range)/len(cel_temp_range)
+            s[5]=max(cel_temp_max)
+            s[6]=min(cel_temp_min)
+            s[7]=max(cel_temp_range)
+            s[8]=sum(cel_temp_range)/len(cel_temp_range)
 
         return s
 
@@ -994,11 +995,11 @@ class feature_extract():
     
     def BMS_charge(self):
         '''
-        s=[电池充电温度(最大值，平均值),电池充电功率(最大值，平均值)，
+        s=[电池充电温度(最大值，最小值，平均值),电池充电功率(最大值，平均值)，
             充电中电池单体温度（最高温度电芯最大值，最低电芯温度最小值，单体温差最大值，温差平均值），
             #电池单体压差]
         '''
-        s=['null']*8
+        s=['null']*9
         #charging
         sql="SElECT cocesprotemp1_mean,BMS_pow FROM " +self.tb_name+ " WHERE charg_s==1 AND " + self.con1
         aus=client.execute(sql)
@@ -1010,10 +1011,11 @@ class feature_extract():
                 if value[1]<0:
                     pow_bms.append(value[1])
             s[0]=max(temp)
-            s[1]=sum(temp)/len(temp)
+            s[1]=min(temp)
+            s[2]=sum(temp)/len(temp)
             if pow_bms!=[]:
-                s[2]=max(pow_bms)
-                s[3]=sum(pow_bms)/len(pow_bms)
+                s[3]=max(pow_bms)
+                s[4]=sum(pow_bms)/len(pow_bms)
 
         sql="SELECT arrayReduce('max',cocesprotemp1),arrayReduce('min',cocesprotemp1) FROM "+self.tb_name+ " WHERE charg_s==1 AND " + self.con1
         aus=client.execute(sql)
@@ -1023,10 +1025,10 @@ class feature_extract():
                 cel_temp_max.append(value[0])
                 cel_temp_min.append(value[1])
                 cel_temp_range.append(value[0]-value[1])
-            s[4]=max(cel_temp_max)
-            s[5]=min(cel_temp_min)
-            s[6]=max(cel_temp_range)
-            s[7]=sum(cel_temp_range)/len(cel_temp_range)
+            s[5]=max(cel_temp_max)
+            s[6]=min(cel_temp_min)
+            s[7]=max(cel_temp_range)
+            s[8]=sum(cel_temp_range)/len(cel_temp_range)
         
         return s
 
