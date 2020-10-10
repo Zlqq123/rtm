@@ -19,6 +19,7 @@ s2=pd.read_csv(filename,encoding="gbk")
 print(s1.shape)
 print(s2.shape)
 s3=s1.sample(n=600)
+#s3=s1.sample(n=600,random_state=123,axis=0)#随机从rs数据集中抽取2000行数据，并且保证下次抽取时与此次抽取结果一样
 print(s3.shape)
 
 
