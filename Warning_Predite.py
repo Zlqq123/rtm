@@ -68,22 +68,45 @@ param = {'boosting_type':'gbdt',
          'objective' : 'binary:logistic', #任务类型
          #'objective' : 'regression', #任务类型
          'eval_metric' : 'auc',
-         'eta' : 0.01,
-         'max_depth' : 15,
-         'colsample_bytree':0.8,
-         'subsample': 0.9,
-         'subsample_freq': 8,
+         'eta' : 0.01,   # 如同学习率
+         'max_depth' : 15,     # 构建树的深度，越大越容易过拟合
+         'colsample_bytree':0.8,# 这个参数默认为1，是每个叶子里面h的和至少是多少
+    # 对于正负样本不均衡时的0-1分类而言，假设h在0.01附近，min_child_weight为1
+    #意味着叶子节点中最少需要包含100个样本。这个参数非常影响结果，
+    # 控制叶子节点中二阶导的和的最小值，该参数值越小，越容易过拟合
+         'subsample': 0.9,    # 随机采样训练样本
+         'subsample_freq': 8,  
          'alpha': 0.6,
-         'lambda': 0,
+         'lambda': 0,  # 控制模型复杂度的权重值的L2 正则化项参数，参数越大，模型越不容易过拟合
         }
 
 train_data = xgb.DMatrix(X_train, label=y_train)
 test_data = xgb.DMatrix(X_test_s, label=y_test_s)
 model = xgb.train(param, train_data, evals=[(train_data, 'train'), (test_data, 'valid')], num_boost_round = 10000, early_stopping_rounds=200, verbose_eval=25)
 y_pred = model.predict(test_data)
-y_pred = [1 if x>=0.5 else 0 for x in y_pred]
-print('XGBoost 预测结果', y_pred)
-print('XGBoost 准确率:', metrics.accuracy_score(y_test_s,y_pred))
+y_pred1 = [1 if x>=0.5 else 0 for x in y_pred]
+print('XGBoost 预测结果', y_pred1)
+print('XGBoost 准确率:', metrics.accuracy_score(y_test_s,y_pred1))
+
+from sklearn.metrics import roc_curve,auc
+
+
+fpr, tpr, thresholds = roc_curve(y_test_s, y_pred, pos_label=1)
+
+roc_auc = auc(fpr, tpr)  ###计算auc的值
+
+lw = 2
+plt.figure(figsize=(8, 5))
+plt.plot(fpr, tpr, color='darkorange',
+         lw=lw, label='ROC curve (area = %0.2f)' % roc_auc)  ###假正率为横坐标，真正率为纵坐标做曲线
+plt.plot([0, 1], [0, 1], color='navy', lw=lw, linestyle='--')
+plt.xlim([0.0, 1.0])
+plt.ylim([0.0, 1.05])
+plt.xlabel('False Positive Rate')
+plt.ylabel('True Positive Rate')
+plt.title('Receiver operating characteristic example')
+plt.legend(loc="lower right")
+plt.show()
 
 
 '''

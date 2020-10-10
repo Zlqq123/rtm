@@ -29,4 +29,4 @@ df[['vehiclespeed','accmiles','ir','accpedtrav','brakepedstat','emctltemp','emsp
     'mxtpno','mxtemp','mitsysno','mitpno','mitemp','cocessys1','vocesd1','cocesd1','cel1num1','sbofsn1','cfnum1']].apply(pd.to_numeric)
 
 #print(df.dtypes)
-df.to_csv('test.csv')
+df.to_csv('D:/21python/rtm/data_visualization/test.csv')
