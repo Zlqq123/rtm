@@ -18,8 +18,8 @@ filename="D:/21python/rtm/prediction_data/feature_warming.csv"
 s2=pd.read_csv(filename,encoding="gbk")
 print(s1.shape)
 print(s2.shape)
-s3=s1.sample(n=600)
-#s3=s1.sample(n=600,random_state=123,axis=0)#随机从rs数据集中抽取2000行数据，并且保证下次抽取时与此次抽取结果一样
+#s3=s1.sample(n=600)
+s3=s1.sample(n=600,random_state=123,axis=0)#随机从rs数据集中抽取2000行数据，并且保证下次抽取时与此次抽取结果一样
 print(s3.shape)
 
 
@@ -101,6 +101,7 @@ plt.figure(figsize=(8, 5))
 plt.plot(fpr, tpr, color='darkorange',
          lw=lw, label='ROC curve (area = %0.2f)' % roc_auc)  ###假正率为横坐标，真正率为纵坐标做曲线
 plt.plot([0, 1], [0, 1], color='navy', lw=lw, linestyle='--')
+plt.grid()
 plt.xlim([0.0, 1.0])
 plt.ylim([0.0, 1.05])
 plt.xlabel('False Positive Rate')

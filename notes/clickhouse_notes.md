@@ -307,9 +307,14 @@ END
 sql="DROP TABLE en.vehicle_vin"
 #删除表
 
-sql="INSERT INTO en.vehicle_vin (deviceid,project,city,province,region,user_typ) FORMAT Values ('LSVUZ60T1J2179379','Tiguan L PHEV C5','广州市','GuangDong','MidSouth','Private')"
+>>sql="INSERT INTO en.vehicle_vin (deviceid,project,city,province,region,user_typ) FORMAT Values ('LSVUZ60T1J2179379','Tiguan L PHEV C5','广州市','GuangDong','MidSouth','Private')"
 
 #click house 没有update语句 没有delete
+
+
+>>sql="Alter Table en.vehicle_vin DROP COLUMN d_mileage "
+
+#删除列，只能一列一列的删除
 
 ### CREATE TABLE
 CREATE TABLE [IF NOT EXISTS] [db.]table_name [ON CLUSTER cluster]
