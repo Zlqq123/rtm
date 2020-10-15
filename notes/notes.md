@@ -1,3 +1,46 @@
+## 机器学习评价指标
+
+ROC曲线全称为受试者工作特征曲线 （receiver operating characteristic curve），它是根据一系列不同的二分类方式（分界值或决定阈），以真阳性率（敏感性）为纵坐标，假阳性率（1-特异性）为横坐标绘制的曲线
+AUC就是衡量学习器优劣的一种性能指标。从定义可知，AUC可通过对ROC曲线下各部分的面积求和而得。
+ROC曲线的横坐标是伪阳性率（也叫假正类率，False Positive Rate），纵坐标是真阳性率（真正类率，True Positive Rate），相应的还有真阴性率（真负类率，True Negative Rate）和伪阴性率（假负类率，False Negative Rate）。这四类指标的计算方法如下：
+　　（1）伪阳性率（FPR）：判定为正例却不是真正例的概率，即真负例中判为正例的概率
+　　（2）真阳性率（TPR）：判定为正例也是真正例的概率，即真正例中判为正例的概率（也即正例召回率）
+　　（3）伪阴性率（FNR）：判定为负例却不是真负例的概率，即真正例中判为负例的概率。
+（4）真阴性率（TNR）：判定为负例也是真负例的概率，即真负例中判为负例的概率。
+ROC（Receiver Operating Characteristic）曲线，又称接受者操作特征曲线。该曲线最早应用于雷达信号检测领域，用于区分信号与噪声。后来人们将其用于评价模型的预测能力，ROC曲线是基于混淆矩阵得出的。一个二分类模型的阈值可能设定为高或低，每种阈值的设定会得出不同的 FPR 和 TPR ，将同一模型每个阈值的 (FPR, TPR) 坐标都画在 ROC 空间里，就成为特定模型的ROC曲线。ROC曲线横坐标为假正率（FPR），纵坐标为真正率（TPR）。
+AUC就是曲线下面积，在比较不同的分类模型时，可以将每个模型的ROC曲线都画出来，比较曲线下面积做为模型优劣的指标。ROC 曲线下方的面积(Area under the Curve)，其意义是：
+（1）因为是在1x1的方格里求面积，AUC必在0~1之间。
+（2）假设阈值以上是阳性，以下是阴性；
+（3）若随机抽取一个阳性样本和一个阴性样本，分类器正确判断阳性样本的值高于阴性样本的概率 = AUC 。
+（4）简单说：AUC值越大的分类器，正确率越高。
+从AUC 判断分类器（预测模型）优劣的标准：
+AUC = 1，是完美分类器。
+AUC = [0.85, 0.95], 效果很好
+AUC = [0.7, 0.85], 效果一般
+AUC = [0.5, 0.7],效果较低，但用于预测股票已经很不错了
+AUC = 0.5，跟随机猜测一样（例：丢铜板），模型没有预测价值。
+AUC < 0.5，比随机猜测还差；但只要总是反预测而行，就优于随机猜测
+
+>>from sklearn.metrics import roc_curve,auc
+
+>>fpr, tpr, thresholds = roc_curve(y_test_s, y_pred, pos_label=1)
+
+>>roc_auc = auc(fpr, tpr)  ###计算auc的值
+
+>>lw = 2
+>>plt.figure(figsize=(8, 5))
+>>plt.plot(fpr, tpr, color='darkorange', lw=lw, label='ROC curve (area = %0.2f)' % roc_auc)  ###假正率为横坐标，真正率为纵坐标做曲线
+>>plt.plot([0, 1], [0, 1], color='navy', lw=lw, linestyle='--')
+>>plt.grid()
+>>plt.xlim([0.0, 1.0])
+>>plt.ylim([0.0, 1.0])
+>>plt.xlabel('False Positive Rate')
+>>plt.ylabel('True Positive Rate')
+>>plt.title('Receiver operating characteristic example')
+>>plt.legend(loc="lower right")
+>>plt.show()
+
+
 ## 解决样本类别分布不均衡的问题
 
 ### 定义

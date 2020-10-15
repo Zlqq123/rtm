@@ -9,6 +9,22 @@ from vin import myself
 client=en_client()
 vin=myself()
 
+'''
+original table
+All data(without warmingsignal)----------------------------- ods.rtm_details  
+All data with warmingsignal------------------------ods.rtm_reissue_history
+
+2020/03 Data(without warmingsignal)------------------------- en.rtm_vds
+2020/06 Data(with warmingsignal)---------------------------- en.rtm_data_june
+
+attachment table:
+VIN Usertype Project region province mileage---------------- en.vehicle_vin
+
+pre analyzed tabel:
+2020/06 Data(with warmingsignal) after pre analyzing----- en.rtm_data_june-->-->--- en.rtm_6_2th
+All data(without warmingsignal) after pre analyzing -------- en.rtm_2th
+All data with warmingsignal Tiguan -------------en.rtm_tiguan
+'''
 
 sql="desc ods.rtm_details"
 title=pd.DataFrame(client.execute(sql))

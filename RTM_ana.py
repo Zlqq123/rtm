@@ -917,7 +917,7 @@ class feature_extract():
         '''
         s=['null']*9
         #discharging
-        sql="SElECT cocesprotemp1_mean,BMS_pow FROM " +self.tb_name+ " WHERE charg_s==0 AND " + self.con1
+        sql="SElECT arrayReduce('avg',cocesprotemp1),BMS_pow FROM " +self.tb_name+ " WHERE charg_s==0 AND " + self.con1
         aus=client.execute(sql)
         if aus!=[]:
             temp=[]
@@ -1001,7 +1001,7 @@ class feature_extract():
         '''
         s=['null']*9
         #charging
-        sql="SElECT cocesprotemp1_mean,BMS_pow FROM " +self.tb_name+ " WHERE charg_s==1 AND " + self.con1
+        sql="SElECT arrayReduce('avg',cocesprotemp1),BMS_pow FROM " +self.tb_name+ " WHERE charg_s==1 AND " + self.con1
         aus=client.execute(sql)
         if aus!=[]:
             temp=[]

@@ -12,9 +12,9 @@ from en_client import en_client
 
 client=en_client()
 
-filename="D:/21python/rtm/prediction_data/feature_no_warming.csv"
+filename="D:/21python/rtm/prediction_data/20200601_20200630_tiguan_7/feature_no_warming.csv"
 s1=pd.read_csv(filename,encoding="gbk")
-filename="D:/21python/rtm/prediction_data/feature_warming.csv"
+filename="D:/21python/rtm/prediction_data/20200601_20200630_tiguan_7/feature_warming.csv"
 s2=pd.read_csv(filename,encoding="gbk")
 print(s1.shape)
 print(s2.shape)
@@ -90,8 +90,6 @@ print('XGBoost 预测结果', y_pred1)
 print('XGBoost 准确率:', metrics.accuracy_score(y_test_s,y_pred1))
 
 from sklearn.metrics import roc_curve,auc
-
-
 fpr, tpr, thresholds = roc_curve(y_test_s, y_pred, pos_label=1)
 
 roc_auc = auc(fpr, tpr)  ###计算auc的值
@@ -103,7 +101,7 @@ plt.plot(fpr, tpr, color='darkorange',
 plt.plot([0, 1], [0, 1], color='navy', lw=lw, linestyle='--')
 plt.grid()
 plt.xlim([0.0, 1.0])
-plt.ylim([0.0, 1.05])
+plt.ylim([0.0, 1.0])
 plt.xlabel('False Positive Rate')
 plt.ylabel('True Positive Rate')
 plt.title('Receiver operating characteristic example')

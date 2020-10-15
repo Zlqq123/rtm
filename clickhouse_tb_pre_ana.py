@@ -2,9 +2,7 @@ import sys
 sys.path.append('./')
 from clickhouse_driver import Client
 import csv
-from genarl_func import print_in_excel
-from genarl_func import time_cost
-from genarl_func import time_cost_all
+from genarl_func import print_in_excel,time_cost,time_cost_all
 from en_client import en_client
 import pandas as pd
 
@@ -23,42 +21,13 @@ VIN Usertype Project region province mileage---------------- en.vehicle_vin
 pre analyzed tabel:
 2020/06 Data(with warmingsignal) after pre analyzing----- en.rtm_data_june-->-->--- en.rtm_6_2th
 All data(without warmingsignal) after pre analyzing -------- en.rtm_2th
-All data with warmingsignal Tiguan -------------en.rtm_tiguan
+All data with warmingsignal Tiguan -------------en.rtm_tiguan  {'2018-01-01 00:00:00' ~~ '2020-12-31 23:59:59'}
 '''
 client=en_client()
 
-def tiguan_sample():
-    import datetime
-    #提取所有的报警样本， 时间从2019-07-01~~2020-05-31
-    sql="SELECT c0, c1,c3 FROM " \
-    "(SELECT deviceid as c0, toDate(uploadtime) as c1, max(accmiles) as c3 " \
-    "FROM en.rtm_tiguan WHERE bksyswn==0 AND uploadtime BETWEEN '2018-01-01 00:00:00' AND '2020-12-31 23:59:59' " \
-    "GROUP BY deviceid,toDate(uploadtime) ORDER BY deviceid, toDate(uploadtime)) " \
-    " WHERE c3>200 "# 删除里程小于200km
-    aus=client.execute(sql)
-    print(len(aus))
-    df = pd.DataFrame(aus)
-    df = df.sample(n=60000)  #随机采样
-    print(df.shape)
-    df.columns=['deviceid','Target Date','mileage']
-    df['Start date']=df['Target Date']-datetime.timedelta(days=31)
-    df['end date']=df['Target Date']-datetime.timedelta(days=1)
-    df.to_csv('tiguan_NO_warning_bksyswn.csv')
-
-    sql="SELECT c0, c1,c2,c3 FROM " \
-    "(SELECT deviceid as c0, toDate(uploadtime) as c1, sum(bksyswn) as c2,max(accmiles) as c3 " \
-    "FROM en.rtm_tiguan WHERE bksyswn>0 AND uploadtime BETWEEN '2018-01-01 00:00:00' AND '2020-12-31 23:59:59' " \
-    "GROUP BY deviceid,toDate(uploadtime) ORDER BY deviceid, toDate(uploadtime)) " \
-    " WHERE c3>200 "# 删除里程小于200km
-    aus=client.execute(sql)
-    df = pd.DataFrame(aus)
-    df.columns=['deviceid','Target Date','bksyswn','mileage']
-    df['Start date']=df['Target Date']-datetime.timedelta(days=31)
-    df['end date']=df['Target Date']-datetime.timedelta(days=1)
-    df.to_csv('tiguan_warning_bksyswn.csv')
 
 
-tiguan_sample()
+
 
 def f1():
     #tiguan 总报警数
@@ -252,8 +221,8 @@ def View_table(tb_name):
     aus=client.execute(sql)
     print_in_excel(aus,'rtm_details.xlsx')
 
-#View_table("ods.rtm_reissue_history")
-
+View_table("ods.rtm_reissue_history")
+View_table("ods.rtm_details_v2")
 
 def db_pre_ana(client):
     sql="CREATE TABLE IF NOT EXISTS en.vehicle_mile " \
