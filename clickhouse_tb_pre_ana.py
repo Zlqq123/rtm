@@ -29,28 +29,10 @@ client=en_client()
 
 
 
-def f1():
-    #tiguan 总报警数
-    sql=" with if(tdfwn=='true',1,0) as wn01, if(celohwn=='true',1,0) as wn02, if(vedtovwn=='true',1,0) as wn03, " \
-        " if(vedtuvwn=='true',1,0) as wn04, if(lsocwn=='true',1,0) as wn05, if(celovwn=='true',1,0) as wn06, " \
-        " if(celuvwn=='true',1,0) as wn07, if(hsocwn=='true',1,0) as wn08, if(jpsocwn=='true',1,0) as wn09, " \
-        " if(cesysumwn=='true',1,0) as wn10, if(celpoorwn=='true',1,0) as wn11, if(inswn=='true',1,0) as wn12, " \
-        " if(dctpwn=='true',1,0) as wn13, if(bksyswn=='true',1,0) as wn14, if(dcstwn=='true',1,0) as wn15, " \
-        " if(emctempwn=='true',1,0) as wn16, if(hvlockwn=='true',1,0) as wn17, if(emtempwn=='true',1,0) as wn18, " \
-        " if(vesoc=='true',1,0)as wn19 SELECT deviceid, sum(wn01),sum(wn02), " \
-        " sum(wn03),sum(wn04), sum(wn05),sum(wn06),sum(wn07),sum(wn08),sum(wn09),sum(wn10), " \
-        " sum(wn11),sum(wn12),sum(wn13),sum(wn14),sum(wn15),sum(wn16),sum(wn17),sum(wn18),sum(wn19) " \
-        " FROM ods.rtm_reissue_history WHERE deviceid IN (SELECT deviceid FROM en.vehicle_vin WHERE project like 'Tiguan%') " \
-        " AND uploadtime BETWEEN '2019-06-01 00:00:00' AND '2020-05-31 23:59:59' group by deviceid "
 
-    #" FROM ods.rtm_reissue_history INNER JOIN en.vehicle_vin ON ods.rtm_reissue_history.deviceid=en.vehicle_vin.deviceid WHERE en.vehicle_vin.project like 'Tiguan%' group by deviceid "
-    aus=client.execute(sql)
-    df = pd.DataFrame(aus)
-    df.to_csv('tiguan_warning.csv')
 
-#f1()
 
-def C_tiguan():
+def pre_ana_tiguan():
     sql="CREATE TABLE IF NOT EXISTS en.rtm_tiguan " \
             "(deviceid String, uploadtime DateTime,d_time Int, vehicle_s UInt8, vehicle_s_c Int8, charg_s UInt8, charg_s_c Int8, " \
             " vehiclespeed Float32, accmiles Float32, soc UInt8, soc_c Int8, operationmode String, " \
@@ -122,23 +104,6 @@ def f2():
     aus=client.execute(sql)
     print(aus)
 
-
-def ff1():
-    sql="ALTER TABLE en.rtm_6_2th ADD COLUMN celv1 Array(Float32) AFTER cocesprotemp1_mean"
-    aus=client.execute(sql)
-    sql="desc en.rtm_6_2th"
-    aus=client.execute(sql)
-    '''
-    sql="ALTER TABLE en.rtm_6_2th DROP COLUMN celv1 "
-    aus=client.execute(sql)
-    sql="desc en.rtm_6_2th"
-    aus=client.execute(sql)
-
-    sql="ALTER TABLE en.rtm_6_2th ADD COLUMN celv1 Int AFTER cocesprotemp1_mean"
-    aus=client.execute(sql)
-    sql="desc en.rtm_6_2th"
-    aus=client.execute(sql)
-    '''
 
 
 
