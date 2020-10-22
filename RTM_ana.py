@@ -4,8 +4,7 @@ import numpy as np
 import hist_func_np
 import sys
 from datetime import datetime
-from genarl_func import time_cost1
-from genarl_func import time_cost_all
+from genarl_func import time_cost1,time_cost_all
 from en_client import en_client
 client=en_client()
 
@@ -788,6 +787,8 @@ class feature_extract():
         b=target_date+" 23:59:59"
         self.con2=" deviceid='"+self.vin+"' and uploadtime between '"+a+"' AND '"+b+"'"
         self.tb_name=tb_name
+        w=datetime.strptime(target_date,'%Y-%m-%d').strftime('%W')
+        self.week_num=int(w)
     
     def __call__(self):
 
@@ -799,8 +800,9 @@ class feature_extract():
         f5=self.E_motor()
         f6=self.BMS_charge()
         f7=self.get_charge()
+        w=self.week_num
 
-        return [y],f1,f2,f3,f4,f5,f6,f7
+        return [y], [w], f1, f2, f3, f4, f5, f6, f7
         
 
     def RTM_Warn(self):

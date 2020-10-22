@@ -27,11 +27,8 @@ client=en_client()
 
 
 
-
-
-
-
-
+# clickhouse中tiguan表预处理
+# ods.rtm_reissue_history>>------en.rtm_tiguan  [2019-06-01 2020-5-31]
 def pre_ana_tiguan():
     sql="CREATE TABLE IF NOT EXISTS en.rtm_tiguan " \
             "(deviceid String, uploadtime DateTime,d_time Int, vehicle_s UInt8, vehicle_s_c Int8, charg_s UInt8, charg_s_c Int8, " \
@@ -90,7 +87,7 @@ def pre_ana_tiguan():
     df.to_csv('rtm_tiguan.csv')
 
 
-#C_tiguan()
+#pre_ana_tiguan()
 
 def f2():
     #电芯电压值，执行时间较长
@@ -186,7 +183,7 @@ def View_table(tb_name):
     aus=client.execute(sql)
     print_in_excel(aus,'rtm_details.xlsx')
 
-View_table("ods.rtm_reissue_history")
+View_table("en.rtm_tiguan")
 View_table("ods.rtm_details_v2")
 
 def db_pre_ana(client):

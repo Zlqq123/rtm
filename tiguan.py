@@ -22,7 +22,8 @@ All data(without warmingsignal) after pre analyzing -------- en.rtm_2th
 All data with warmingsignal Tiguan -------ods.rtm_reissue_history>>------en.rtm_tiguan
 
 '''
-filepath="D:/21python/rtm/prediction_data/20190701_20200531_tiguan_30/"
+
+filepath="D:/21python/rtm/prediction_data/new/"
 
 
 def tiguan_warming_detective():
@@ -46,7 +47,7 @@ def tiguan_warming_detective():
 
 
 # clickhouse中tiguan表预处理
-# ods.rtm_reissue_history>>------en.rtm_tiguan  [2018-01-01 2020-12-31]
+# ods.rtm_reissue_history>>------en.rtm_tiguan  [2019-06-01 2020-5-31]
 def pre_ana_tiguan():
     sql="CREATE TABLE IF NOT EXISTS en.rtm_tiguan " \
             "(deviceid String, uploadtime DateTime,d_time Int, vehicle_s UInt8, vehicle_s_c Int8, charg_s UInt8, charg_s_c Int8, " \
@@ -108,6 +109,7 @@ def pre_ana_tiguan():
 # VIN码与报警的日期，作为特征提取的输入
 def tiguan_sample():
     import datetime
+    
     #提取训练集
     #提取所有的非报警样本， 
     sql="SELECT c0, c1, c2, c3 FROM " \
@@ -123,12 +125,12 @@ def tiguan_sample():
     df.columns=['VIN','target date','bksyswn','mileage']
     df['start']=df['target date']-datetime.timedelta(days=31)
     df['end']=df['target date']-datetime.timedelta(days=1)
-    df.to_csv(filepath + 'sample_no_warning.csv')
+    df.to_csv(filepath + 'train_sample_no_warning.csv')
 
     #提取所有的报警样本
     sql="SELECT c0, c1,c2,c3 FROM " \
     "(SELECT deviceid as c0, toDate(uploadtime) as c1, sum(bksyswn) as c2, max(accmiles) as c3 " \
-    "FROM en.rtm_tiguan WHERE bksyswn>0 AND uploadtime BETWEEN '2019-06-01 00:00:00' AND '2020-05-31 23:59:59' " \
+    "FROM en.rtm_tiguan WHERE bksyswn>0 AND uploadtime BETWEEN '2019-06-01 00:00:00' AND '2020-09-30 23:59:59' " \
     "GROUP BY deviceid,toDate(uploadtime) ORDER BY deviceid, toDate(uploadtime)) " \
     " WHERE c3>200 "# 删除里程小于200km
     aus=client.execute(sql)
@@ -136,22 +138,11 @@ def tiguan_sample():
     df.columns=['VIN','target date','bksyswn','mileage']
     df['start']=df['target date']-datetime.timedelta(days=31)
     df['end']=df['target date']-datetime.timedelta(days=1)
-    df.to_csv(filepath + 'sample_warning.csv')
+    df.to_csv(filepath + 'train_sample_warning.csv')
+    '''
+    #测试集暂时不单独提取，rtm_tiguan
 
     #提取测试集
-    #报警
-    sql="SELECT c0, c1,c2, c3 FROM " \
-    "(SELECT deviceid as c0, toDate(uploadtime) as c1, sum(bksyswn) as c2,max(accmiles) as c3 " \
-    "FROM en.rtm_tiguan WHERE bksyswn>0 AND uploadtime BETWEEN '2020-06-01 00:00:00' AND '2020-09-30 23:59:59' " \
-    "GROUP BY deviceid,toDate(uploadtime) ORDER BY deviceid, toDate(uploadtime)) " \
-    " WHERE c3>200 "# 删除里程小于200km
-    aus=client.execute(sql)
-    df = pd.DataFrame(aus)
-    df.columns=['VIN','target date','bksyswn','mileage']
-    df['start']=df['target date']-datetime.timedelta(days=31)
-    df['end']=df['target date']-datetime.timedelta(days=1)
-    df.to_csv(filepath + 'sample_test_warning.csv')
-
     #no报警
     sql="SELECT c0, c1, c2, c3 FROM " \
     "(SELECT deviceid as c0, toDate(uploadtime) as c1, sum(bksyswn) as c2, max(accmiles) as c3 " \
@@ -159,11 +150,30 @@ def tiguan_sample():
     "GROUP BY deviceid,toDate(uploadtime) ORDER BY deviceid, toDate(uploadtime)) " \
     " WHERE c3>200 AND c2==0 "# 删除里程小于200km
     aus=client.execute(sql)
+    print(len(aus))
+    df = pd.DataFrame(aus)
+    df = df.sample(n=60000)
+    df.columns=['VIN','target date','bksyswn','mileage']
+    df['start']=df['target date']-datetime.timedelta(days=31)
+    df['end']=df['target date']-datetime.timedelta(days=1)
+    df.to_csv(filepath + 'test_sample_no_warning.csv')
+
+    #报警
+    sql="SELECT c0, c1,c2, c3 FROM " \
+    "(SELECT deviceid as c0, toDate(uploadtime) as c1, sum(bksyswn) as c2,max(accmiles) as c3 " \
+    "FROM en.rtm_tiguan WHERE bksyswn>0 AND uploadtime BETWEEN '2020-06-01 00:00:00' AND '2020-09-30 23:59:59' " \
+    "GROUP BY deviceid,toDate(uploadtime) ORDER BY deviceid, toDate(uploadtime)) " \
+    " WHERE c3>200 "# 删除里程小于200km
+    aus=client.execute(sql)
+    print(len(aus))
     df = pd.DataFrame(aus)
     df.columns=['VIN','target date','bksyswn','mileage']
     df['start']=df['target date']-datetime.timedelta(days=31)
     df['end']=df['target date']-datetime.timedelta(days=1)
-    df.to_csv(filepath + 'sample_test_no_warning.csv')
+    df.to_csv(filepath + 'test_sample_warning.csv')
+    '''
+
+    
 
 
 # 获取样本特征值，获得完整训练数据
@@ -192,7 +202,7 @@ def feature_ex(filename,t_name):
         #print(v)
         fe=fe.append([v],ignore_index=True)
     print(fe.shape)
-    fe.columns=['VIN','Label','region','province','user_type','acc_mileage','ir','mile','daily mile (mean)','driving time', \
+    fe.columns=['VIN','Label','week_num', 'region','province','user_type','acc_mileage','ir','mile','daily mile (mean)','driving time', \
         'v (mean)','v 99%','v 50%','EV %','FV %','acc pedal(mean)','acc pedal(99%)','acc pedal(50%)','dec pedal(mean)','dec pedal(99%)','dec pedal(50%)', \
         'BMS discharge temp max','BMS discharge temp min','BMS discharge temp mean','BMS discharge power max','BMS discharge power mean','cell discharge temp max','cell discharge temp min','cell discharge temp diff max','cell discharge temp diff mean',\
         'E-motor speed max','E-motor speed mean','E-motor torque+ max','E-motor torque+ mean','E-motor torque- max','E-motor torque- mean',\
@@ -209,15 +219,24 @@ def feature_ex(filename,t_name):
     fe.to_csv(t_name,encoding="gbk",index=False)
 
 
-'''
-tiguan_sample()
-filename1 = filepath + "sample_no_warning.csv"
-t_name1 = filepath + 'no_warming_f.csv'
-filename2 = filepath + "sample_warning.csv"
-t_name2 = filepath + 'warming_f.csv'
-feature_ex(filename1,t_name1)
-feature_ex(filename2,t_name2)
-'''
+
+#tiguan_sample()
+filename = filepath + "train_sample_warning.csv"
+t_name = filepath + 'train_feature_warming.csv'
+feature_ex(filename,t_name)
+filename = filepath + "train_sample_no_warning.csv"
+t_name = filepath + 'train_feature_no_warming.csv'
+feature_ex(filename,t_name)
+
+
+filename = filepath + "test_sample_no_warning.csv"
+t_name = filepath + 'test_feature_no_warming.csv'
+feature_ex(filename,t_name)
+filename = filepath + "test_sample_warning.csv"
+t_name = filepath + 'test_feature_warming.csv'
+feature_ex(filename,t_name)
+
+
 
 # 训练数据预处理及感知
 def pre1():
@@ -326,8 +345,8 @@ from sklearn import metrics
 
 from sklearn.model_selection import GridSearchCV
 cv_params= {'max_depth': [3,4,5,6,7,8,9,10], 
-            'eta': [0.001, 0.002, 0.005, 0.01, 0.02, 0.05, 0.1]
-            'subsample':[0.5, 0.6, 0.7, 0.8, 0.9, 1]
+            'eta': [0.001, 0.002, 0.005, 0.01, 0.02, 0.05, 0.1],
+            'subsample': [0.5, 0.6, 0.7, 0.8, 0.9, 1],
             'colsample_bytree':[0.5, 0.6, 0.7, 0.8, 0.9, 1]
             }
 model = xgb.XGBClassifier(learning_rate=0.1,
@@ -341,7 +360,7 @@ model = xgb.XGBClassifier(learning_rate=0.1,
                         # binary:logistic    二分类任务返回概率值  binary：logitraw   二分类任务返回类别
                         # multi：softmax  num_class=n   多分类任务返回类别   multi：softprob   num_class=n   多分类任务返回概率
                          scale_pos_weight=5,        # 解决样本个数不平衡的问题
-                         random_state=27            # 随机数
+                         random_state=27,            # 随机数
                          eval_metric = auc,         # 回归任务  rmse:均方根误差(默认)   mae--平均绝对误差
                         # 分类任务  error--错误率（二分类）(默认)    auc--roc曲线下面积  logloss--负对数似然函数（二分类）merror--错误率（多分类）mlogloss--负对数似然函数（多分类）
                         )
