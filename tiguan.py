@@ -228,14 +228,14 @@ filename = filepath + "train_sample_no_warning.csv"
 t_name = filepath + 'train_feature_no_warming.csv'
 feature_ex(filename,t_name)
 
-
+'''
 filename = filepath + "test_sample_no_warning.csv"
 t_name = filepath + 'test_feature_no_warming.csv'
 feature_ex(filename,t_name)
 filename = filepath + "test_sample_warning.csv"
 t_name = filepath + 'test_feature_warming.csv'
 feature_ex(filename,t_name)
-
+'''
 
 
 # 训练数据预处理及感知

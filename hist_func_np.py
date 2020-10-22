@@ -1,8 +1,8 @@
 import sys
 import numpy as np
 import xlsxwriter
-from genarl_func import time_cost_all
-from genarl_func import time_cost_all1
+from genarl_func import time_cost_all, time_cost_all1
+
 '''
 given input_input and steps,output hist.
 input_data:array,interval:array

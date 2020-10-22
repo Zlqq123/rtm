@@ -1,0 +1,174 @@
+{% extends "layout.html" %}
+
+{% block left %}
+<div class="col-sm-3 col-md-2 sidebar">
+  <ul class="nav nav-sidebar">
+    <li><a href="/">概览 <span class="sr-only">(current)</span></a></li>
+    <li><a href="/worldcloud">词云<span class="sr-only">(current)</span></a></li>
+    <li><a href="/startinfo">实时统计 <span class="sr-only">(current)</span></a></li>
+    <li><a href="/contrast">对比分析</a></li>
+    <li class="active"><a href="/bcg_matrix">四象限分析</a></li>
+    <li><a href="/supplier_map" target="_blank">供应商地图</a></li>
+  </ul>
+</div>
+{% endblock %}        
+        
+{% block right %}
+<!--右边展示-->
+<div class="col-sm-9 col-sm-offset-3 col-md-10 col-md-offset-2 main">
+  <h1 class="page-header">{{ name }}</h1>
+
+  <div class="row placeholders">
+        <!--展示区-->
+        <!-- 为 ECharts 准备一个具备大小（宽高）的 DOM -->
+    <div class="col-xs-12 col-sm-8 col-lg-10 placeholder" style="height:500px;" id="main">
+
+    </div>
+
+  </div>
+</div>
+{% endblock %}
+
+{% block echarts_js %}
+
+<script type="text/javascript" >
+    $(function (ec) {
+            // 基于准备好的dom，初始化echarts实例
+            var myChart = echarts.init(document.getElementById('main'));
+            // 指定图表的配置项和数据
+            var option = {
+            title : {
+                text: '材料组分类',
+                //subtext: '数据来自于随机模拟'
+            },
+            grid: {
+                left: '3%',
+                right: '7%',
+                bottom: '3%',
+                containLabel: true
+            },
+            tooltip : {
+                trigger: 'axis',
+                showDelay : 0,
+                formatter : function (params) {
+                    if (params.value.length > 1) {
+                        return params.seriesName + ' :<br/>'
+                           + params.value[0]
+                           + params.value[1];
+                    }
+                    else {
+                        return params.seriesName + ' :<br/>'
+                           + params.name + ' : '
+                           + params.value;
+                    }
+                },
+                axisPointer:{
+                    show: true,
+                    type : 'cross',
+                    lineStyle: {
+                        type : 'dashed',
+                        width : 1
+                    }
+                }
+            },
+            toolbox: {
+                feature: {
+                    dataZoom: {},
+                    brush: {
+                        type: ['rect', 'polygon', 'clear']
+                    }
+                }
+            },
+            brush: {
+            },
+            legend: {
+                data: ['材料组'],
+                left: 'center'
+            },
+            xAxis : [
+                {
+                    type : 'value',
+                    scale:true,
+                    axisLabel : {
+                        formatter: '{value}'
+                    },
+                    splitLine: {
+                        show: false
+                    }
+                }
+            ],
+            yAxis : [
+                {
+                    type : 'value',
+                    scale:true,
+                    axisLabel : {
+                        formatter: '{value}'
+                    },
+                    splitLine: {
+                        show: false
+                    }
+                }
+            ],
+            series : [
+                {
+                    name:'材料组',
+                    type:'scatter',
+                    data: [[174.0, 65.6], [175.3, 71.8], [193.5, 80.7], [186.5, 72.6], [187.2, 78.8],
+                        [181.5, 74.8], [184.0, 86.4], [184.5, 78.4], [175.0, 62.0], [184.0, 81.6],
+                        [180.0, 76.6], [177.8, 83.6], [192.0, 90.0], [176.0, 74.6], [174.0, 71.0],
+                        [184.0, 79.6], [192.7, 93.8], [171.5, 70.0], [173.0, 72.4], [176.0, 85.9],
+                        [176.0, 78.8], [180.5, 77.8], [172.7, 66.2], [176.0, 86.4], [173.5, 81.8],
+                        [178.0, 89.6], [180.3, 82.8], [180.3, 76.4], [164.5, 63.2], [173.0, 60.9],
+                        [183.5, 74.8], [175.5, 70.0]
+                    ],
+                    markArea: {
+                        silent: true,
+                        itemStyle: {
+                            normal: {
+                                color: 'transparent',
+                                borderWidth: 0.5,
+                                borderType: 'dashed',
+                                borderColor: 'grey'
+                            }
+                        },
+                        data: [[{
+                            name: '材料组分布区间',
+                            xAxis: 'min',
+                            yAxis: 'min'
+                        }, {
+                            xAxis: 'max',
+                            yAxis: 'max'
+                        }]]
+                    },
+                    markPoint : {
+                        data : [
+                            {type : 'max', name: '最大值'},
+                            {type : 'min', name: '最小值'},
+                            {type : 'max', name: '最大值', valueDim:'x'},
+                            {type : 'min', name: '最小值', valueDim:'x'},
+                            {type : 'max', name: '最大值', valueDim:'y'},
+                            {type : 'min', name: '最小值', valueDim:'y'}
+                        ]
+                    },
+                    markLine : {
+                        lineStyle: {
+                            normal: {
+                                color: 'blue',
+                                type: 'solid'
+                            }
+                        },
+                        data : [
+                            {type : 'average', name: '平均值'},
+                            {type : 'average', valueDim:'x' }
+                        ]
+                    }
+                }
+            ]
+        };
+        
+                // 使用刚指定的配置项和数据显示图表。
+                myChart.setOption(option);
+                window.onresize = myChart.resize;
+        });
+</script>        
+{% endblock %}

@@ -1,27 +1,25 @@
 import sys
 sys.path.append('./')
-from clickhouse_driver import Client
 import xlsxwriter
 import time
 import csv
 import numpy as np
 #from range_test.range_test import Rangetest
 from rtm.RTM_ana import RtmAna
-from genarl_func import print_in_excel
-from genarl_func import time_cost
+from genarl_func import print_in_excel,time_cost
 import hist_func_np
 from en_client import en_client
 
 
 client=en_client()
-path='D:/03RTM/ALL_RTM_data/0811/'
+path='D:/03RTM/temp/'
 tb1_name="en.rtm_6_2th"
 tb2_name="en.vehicle_vin"
 sampling=1/6
 
 
 def f1(proj,u):
-    path='D:/01zlq/0811_'+u+'/'
+    #path='D:/01zlq/temp/_'+u+'/'
     start=time.time()
     print("----------"+proj+'---'+u+'-----------')
     l1=RtmAna(path,proj,tb1_name,tb2_name)
@@ -34,6 +32,10 @@ def f1(proj,u):
     print("all_cost"+str(round(dt/60,2))+"min" )
 
 f1("Lavida",'Taxi')
+f1("Lavida",'Fleet')
+f1("Lavida",'Private')
+
+
 f1("Tiguan C5",'Taxi')
 f1("Tiguan C6",'Taxi')
 f1("Passat C5",'Taxi')
@@ -45,7 +47,7 @@ f1("Tiguan C6",'Fleet')
 f1("Passat C5",'Fleet')
 f1("Passat C6",'Fleet')
 
-f1("Lavida",'Private')
+
 f1("Tiguan C5",'Private')
 f1("Tiguan C6",'Private')
 f1("Passat C5",'Private')
