@@ -5,9 +5,9 @@ import pandas as pd
 import numpy as np
 import seaborn as sns
 from en_client import en_client
-from vin import myself
+from personal_info import vin
 client=en_client()
-vin=myself()
+vin0=vin()
 
 '''
 original table
@@ -28,7 +28,7 @@ All data with warmingsignal Tiguan -------------en.rtm_tiguan
 
 sql="desc ods.rtm_details"
 title=pd.DataFrame(client.execute(sql))
-sql="SELECT * from ods.rtm_details WHERE deviceid=='"+vin+"' AND uploadtime between '2020/09/01 00:00:00' AND '2020/12/31 23:59:59' order by uploadtime "
+sql="SELECT * from ods.rtm_details WHERE deviceid=='"+vin0+"' AND uploadtime between '2020/09/01 00:00:00' AND '2020/12/31 23:59:59' order by uploadtime "
 aus=client.execute(sql)
 df = pd.DataFrame(aus)
 # 重命名列命
