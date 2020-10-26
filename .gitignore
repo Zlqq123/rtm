@@ -6,3 +6,5 @@
 /data_visualization/vin.py
 /data_visualization/personal_info.py
 /prediction_data/*
+/.ipynb_checkpoints/*
+/__pycache__/*

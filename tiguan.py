@@ -220,7 +220,7 @@ def feature_ex(filename,t_name):
 
 
 
-#tiguan_sample()
+tiguan_sample()
 filename = filepath + "train_sample_warning.csv"
 t_name = filepath + 'train_feature_warming.csv'
 feature_ex(filename,t_name)
@@ -241,11 +241,10 @@ feature_ex(filename,t_name)
 # 训练数据预处理及感知
 def pre1():
 
-    filename=filepath+"no_warming_f.csv"
-    s1=pd.read_csv(filename,encoding="gbk",index_col=0,header=0)
-    #index_col=0声明文件第一列为索引，header=0第一行为列名（默认就是，不必重新申明）
-    filename=filepath+"warming_f.csv"
-    s2=pd.read_csv(filename,encoding="gbk",index_col=0,header=0)
+    filename=filepath+'train_feature_no_warming.csv'
+    s1=pd.read_csv(filename,encoding="gbk")    #s1=pd.read_csv(filename,encoding="gbk",index_col=0,header=0)
+    filename=filepath+'train_feature_warming.csv'
+    s2=pd.read_csv(filename,encoding="gbk")
     print(s1.shape)
     print(s2.shape)
     s1 = s1.drop(s1[s1.Integrity == 1].index)
@@ -256,13 +255,16 @@ def pre1():
     print(s2.shape)
     s2 = s2.drop(s2[s2.Label == 0].index)
     print(s2.shape)
-    '''
+    
     des=s1.describe()
-    des.to_csv("no_warming_f_describe.csv",encoding="gbk")
+    des.to_csv(filepath+"no_warming_f_describe.csv",encoding="gbk")
     des=s2.describe()
-    des.to_csv("warming_f_describe.csv",encoding="gbk")
+    des.to_csv(filepath+"warming_f_describe.csv",encoding="gbk")
 
-    for i in range(6,64):
+    a=[2]
+    a.extend(range(6,64))
+
+    for i in a:
         plt.rcParams['font.sans-serif']=['Microsoft YaHei']
         plt.rcParams['axes.unicode_minus']=False
         plt.style.use('ggplot')
@@ -273,7 +275,7 @@ def pre1():
         #plt.show()
         plt.savefig(filepath+"pic/"+str(i)+"_"+s1.columns[i]+'.jpg')
 
-    '''
+    
     ss=s1.append(s2)
     print(ss.shape)
     del s1,s2
@@ -302,9 +304,9 @@ def pre1():
     print(c)
     sns.heatmap(c)
     #plt.show()
+    plt.savefig(filepath+"corr.jpg")
 
     #归一化
-    
     # 最大最小值归一化 将数值映射到 [-1, 1]之间
     from sklearn.preprocessing import MinMaxScaler
     scaler=MinMaxScaler()
@@ -322,13 +324,14 @@ def pre1():
     y.to_csv(filepath+'训练样本_y.csv',encoding="gbk")
 
 
-#pre1()
+pre1()
 
 #def xgb_search_param():
 
-#filename=filepath+"训练样本_x_StandardScaler.csv"
+
 filename=filepath+"训练样本_x_minmax.csv"
 X = pd.read_csv(filename, encoding="gbk", index_col=0, header=0)
+#index_col=0声明文件第一列为索引，header=0第一行为列名（默认就是，不必重新申明）
 print(X.columns)
 # 导入特征和label
 filename=filepath+"训练样本_y.csv"
@@ -361,7 +364,7 @@ model = xgb.XGBClassifier(learning_rate=0.1,
                         # multi：softmax  num_class=n   多分类任务返回类别   multi：softprob   num_class=n   多分类任务返回概率
                          scale_pos_weight=5,        # 解决样本个数不平衡的问题
                          random_state=27,            # 随机数
-                         eval_metric = auc,         # 回归任务  rmse:均方根误差(默认)   mae--平均绝对误差
+                         eval_metric = auc         # 回归任务  rmse:均方根误差(默认)   mae--平均绝对误差
                         # 分类任务  error--错误率（二分类）(默认)    auc--roc曲线下面积  logloss--负对数似然函数（二分类）merror--错误率（多分类）mlogloss--负对数似然函数（多分类）
                         )
 gs = GridSearchCV(model, cv_params, scoring='roc_auc', refit=True, verbose=2, cv=5, n_jobs=1)
