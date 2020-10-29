@@ -1,10 +1,11 @@
 import sys
 sys.path.append('./')
-from clickhouse_driver import Client
 import csv
-from genarl_func import print_in_excel,time_cost,time_cost_all
-from en_client import en_client
 import pandas as pd
+
+from genarl_func import time_cost,time_cost_all
+from en_client import en_client
+
 
 
 '''
@@ -181,7 +182,8 @@ def View_table(tb_name):
     sql="select deviceid,min(toDate(uploadtime)), max(toDate(uploadtime)) " \
         " From " +tb_name+ " group by deviceid"
     aus=client.execute(sql)
-    print_in_excel(aus,'rtm_details.xlsx')
+    df = pd.DataFrame(aus)
+    df.to_csv('detail.csv')
 
 View_table("en.rtm_tiguan")
 View_table("ods.rtm_details_v2")
@@ -268,7 +270,8 @@ def create_tb(client):
     aus=client.execute(sql)
     sql="desc en.rtm_6_2th"
     aus=client.execute(sql)
-    print_in_excel(aus,'june_2rd.xlsx')
+    df = pd.DataFrame(aus)
+    df.to_csv('june_2rd.csv')
 
 
 def insert_tb(client):

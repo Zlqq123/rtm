@@ -1,10 +1,10 @@
-
-from en_client import en_client
-from genarl_func import time_cost
 import pandas as pd
 import matplotlib.pyplot as plt
 import seaborn as sns
-client=en_client()
+
+from en_client import en_client
+from genarl_func import time_cost,mail_sender
+
 '''
 original table
 All data(without warmingsignal)----------------------------- ods.rtm_details  
@@ -22,7 +22,7 @@ All data(without warmingsignal) after pre analyzing -------- en.rtm_2th
 All data with warmingsignal Tiguan -------ods.rtm_reissue_history>>------en.rtm_tiguan
 
 '''
-
+client=en_client()
 filepath="D:/21python/rtm/prediction_data/new/"
 
 
@@ -173,8 +173,6 @@ def tiguan_sample():
     df.to_csv(filepath + 'test_sample_warning.csv')
     '''
 
-    
-
 
 # 获取样本特征值，获得完整训练数据
 @time_cost
@@ -218,24 +216,6 @@ def feature_ex(filename,t_name):
 
     fe.to_csv(t_name,encoding="gbk",index=False)
 
-
-
-tiguan_sample()
-filename = filepath + "train_sample_warning.csv"
-t_name = filepath + 'train_feature_warming.csv'
-feature_ex(filename,t_name)
-filename = filepath + "train_sample_no_warning.csv"
-t_name = filepath + 'train_feature_no_warming.csv'
-feature_ex(filename,t_name)
-
-'''
-filename = filepath + "test_sample_no_warning.csv"
-t_name = filepath + 'test_feature_no_warming.csv'
-feature_ex(filename,t_name)
-filename = filepath + "test_sample_warning.csv"
-t_name = filepath + 'test_feature_warming.csv'
-feature_ex(filename,t_name)
-'''
 
 
 # 训练数据预处理及感知
@@ -324,12 +304,61 @@ def pre1():
     y.to_csv(filepath+'训练样本_y.csv',encoding="gbk")
 
 
-pre1()
 
-#def xgb_search_param():
+@time_cost
+def xgb_search_param():
+    '''
+    网格搜索获得最优参数：
+    结果：
+    模型最优参数 {'learning_rate': 0.005, 'max_depth': 6}
+    最佳模型得分 0.6203925515304519
+    '''
+
+    filename=filepath+"训练样本_x.csv"
+    X = pd.read_csv(filename, encoding="gbk", index_col=0, header=0)
+    #index_col=0声明文件第一列为索引，header=0第一行为列名（默认就是，不必重新申明）
+    print(X.columns)
+    # 导入特征和label
+    filename=filepath+"训练样本_y.csv"
+    y = pd.read_csv(filename, encoding="gbk", index_col=0, header=0)
 
 
-filename=filepath+"训练样本_x_minmax.csv"
+    from sklearn.model_selection import train_test_split
+    X_train, X_test_s, y_train, y_test_s = train_test_split(X, y, test_size=0.2, random_state=1)
+
+
+    import xgboost as xgb
+    from sklearn import metrics
+    from sklearn.model_selection import GridSearchCV
+    cv_params= {'max_depth': [3,4,5,6,7,8,9,10], 
+                'learning_rate': [0.001, 0.002, 0.005, 0.01, 0.02, 0.05, 0.1]
+                }
+    model = xgb.XGBClassifier(#learning_rate=0.1,
+                            n_estimators=1000,         # 树的个数--1000棵树建立xgboost
+                            #max_depth=6,               # 树的深度
+                            min_child_weight = 1,      # 叶子节点最小权重
+                            gamma=0.,                  # 惩罚项中叶子结点个数前的参数
+                            subsample=0.8,             # 随机选择80%样本建立决策树
+                            #colsample_btree=0.8,       # 随机选择80%特征建立决策树
+                            objective='binary:logistic ', # 指定目标函数    reg:linear (默认)回归任务  reg:logistic
+                            # binary:logistic    二分类任务返回概率值  binary：logitraw   二分类任务返回类别
+                            # multi：softmax  num_class=n   多分类任务返回类别   multi：softprob   num_class=n   多分类任务返回概率
+                            scale_pos_weight=5,        # 解决样本个数不平衡的问题
+                            random_state=27,            # 随机数
+                            eval_metric = 'auc'         # 回归任务  rmse:均方根误差(默认)   mae--平均绝对误差
+                            # 分类任务  error--错误率（二分类）(默认)    auc--roc曲线下面积  logloss--负对数似然函数（二分类）merror--错误率（多分类）mlogloss--负对数似然函数（多分类）
+                            )
+    gs = GridSearchCV(model, cv_params, scoring='roc_auc', refit=True, verbose=2, cv=5, n_jobs=1)
+    gs.fit(X_train,y_train)
+
+    # 模型最优参数
+    print('模型最优参数', gs.best_params_)
+    print('最佳模型得分', gs.best_score_)
+
+
+
+
+filename=filepath+"训练样本_x.csv"
 X = pd.read_csv(filename, encoding="gbk", index_col=0, header=0)
 #index_col=0声明文件第一列为索引，header=0第一行为列名（默认就是，不必重新申明）
 print(X.columns)
@@ -341,48 +370,15 @@ y = pd.read_csv(filename, encoding="gbk", index_col=0, header=0)
 from sklearn.model_selection import train_test_split
 X_train, X_test_s, y_train, y_test_s = train_test_split(X, y, test_size=0.2, random_state=1)
 
-
 import xgboost as xgb
 from sklearn import metrics
-
-
-from sklearn.model_selection import GridSearchCV
-cv_params= {'max_depth': [3,4,5,6,7,8,9,10], 
-            'eta': [0.001, 0.002, 0.005, 0.01, 0.02, 0.05, 0.1],
-            'subsample': [0.5, 0.6, 0.7, 0.8, 0.9, 1],
-            'colsample_bytree':[0.5, 0.6, 0.7, 0.8, 0.9, 1]
-            }
-model = xgb.XGBClassifier(learning_rate=0.1,
-                         n_estimators=1000,         # 树的个数--1000棵树建立xgboost
-                         max_depth=6,               # 树的深度
-                         min_child_weight = 1,      # 叶子节点最小权重
-                         gamma=0.,                  # 惩罚项中叶子结点个数前的参数
-                         subsample=0.8,             # 随机选择80%样本建立决策树
-                         colsample_btree=0.8,       # 随机选择80%特征建立决策树
-                         objective='binary:logistic ', # 指定目标函数    reg:linear (默认)回归任务  reg:logistic
-                        # binary:logistic    二分类任务返回概率值  binary：logitraw   二分类任务返回类别
-                        # multi：softmax  num_class=n   多分类任务返回类别   multi：softprob   num_class=n   多分类任务返回概率
-                         scale_pos_weight=5,        # 解决样本个数不平衡的问题
-                         random_state=27,            # 随机数
-                         eval_metric = auc         # 回归任务  rmse:均方根误差(默认)   mae--平均绝对误差
-                        # 分类任务  error--错误率（二分类）(默认)    auc--roc曲线下面积  logloss--负对数似然函数（二分类）merror--错误率（多分类）mlogloss--负对数似然函数（多分类）
-                        )
-gs = GridSearchCV(model, cv_params, scoring='roc_auc', refit=True, verbose=2, cv=5, n_jobs=1)
-gs.fit(X_train,y_train)
-
-# 模型最优参数
-print('模型最优参数', gs.best_params_)
-print('最佳模型得分', gs.best_score_)
-
-
-'''
 param = {'boosting_type':'gbdt',
          'objective' : 'binary:logistic', #任务类型'logistic'逻辑   'regression'回归
          'eval_metric' : 'auc',
-         #'eta' : 0.01,                # 如同学习率   0.001~0.01
-         #'max_depth' : 7,             # 构建树的深度，越大越容易过拟合
+         'eta' : 0.005,                # 如同学习率   0.001~0.01
+         'max_depth' : 6,             # 构建树的深度，越大越容易过拟合
          'colsample_bytree':1,#  列采样， 这个参数默认为1
-         'subsample': 0.7,    # 随机采样训练样本行采样
+         'subsample': 0.8,    # 随机采样训练样本行采样
          'subsample_freq': 1,  
          'alpha': 0,      #正则化系数，越大越不容易过拟合
          'lambda': 1,  # 控制模型复杂度的权重值的L2 正则化项参数，参数越大，模型越不容易过拟合
@@ -395,7 +391,7 @@ y_pred = model.predict(test_data)
 y_pred1 = [1 if x>=0.5 else 0 for x in y_pred]
 #print('XGBoost 预测结果', y_pred1)
 print('XGBoost 准确率:', metrics.accuracy_score(y_test_s,y_pred1))
-'''
+
 from sklearn.metrics import roc_curve,auc
 fpr, tpr, thresholds = roc_curve(y_test_s, y_pred, pos_label=1)
 
@@ -413,8 +409,27 @@ plt.xlabel('False Positive Rate')
 plt.ylabel('True Positive Rate')
 plt.title('Receiver operating characteristic example')
 plt.legend(loc="lower right")
+plt.savefig(filepath+"roc.jpg")
 plt.show()
 
+tiguan_sample()
+filename = filepath + "train_sample_warning.csv"
+t_name = filepath + 'train_feature_warming.csv'
+feature_ex(filename,t_name)
+filename = filepath + "train_sample_no_warning.csv"
+t_name = filepath + 'train_feature_no_warming.csv'
+feature_ex(filename,t_name)
 
+'''
+filename = filepath + "test_sample_no_warning.csv"
+t_name = filepath + 'test_feature_no_warming.csv'
+feature_ex(filename,t_name)
+filename = filepath + "test_sample_warning.csv"
+t_name = filepath + 'test_feature_warming.csv'
+feature_ex(filename,t_name)
+'''
+pre1()
 
- 
+xgb_search_param()
+mail_sender()
+

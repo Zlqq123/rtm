@@ -1,7 +1,7 @@
 import sys
 import numpy as np
 import xlsxwriter
-from genarl_func import time_cost_all, time_cost_all1
+from genarl_func import time_cost_all, time_cost_all
 
 '''
 given input_input and steps,output hist.
@@ -23,7 +23,7 @@ def interval_str(interval):
     return block
 
 
-#@time_cost_all1()
+#@time_cost_all()
 def hist_con(input_data,interval,show_interval=1):
     BL=65536
     wa = np.zeros(len(interval),dtype=int)
@@ -39,7 +39,7 @@ def hist_con(input_data,interval,show_interval=1):
     return re
 
 
-#@time_cost_all1()
+#@time_cost_all()
 def hist_sortedcon(input_data,interval,show_interval=1):
     '''
     input_data had sorted in order from largest to smallest
@@ -53,7 +53,7 @@ def hist_sortedcon(input_data,interval,show_interval=1):
     return re
 
 
-#@time_cost_all1()
+#@time_cost_all()
 def hist_con_dis(input_data1,interval1,input_data2,interval2,show_interval=1,show_hist=0):
     '''
     input_data1 is continuous variable array #interval1 is for input_data1 array
@@ -89,7 +89,7 @@ def hist_con_dis(input_data1,interval1,input_data2,interval2,show_interval=1,sho
     return re
 
 
-#@time_cost_all1()
+#@time_cost_all()
 def hist_cros_2con(input_data1,interval1,input_data2,interval2,show_interval=1):
     '''
     input_data1 is continuous variable array
@@ -124,7 +124,7 @@ def hist_cros_2con(input_data1,interval1,input_data2,interval2,show_interval=1):
     return wa
 
 
-#@time_cost_all1()
+#@time_cost_all()
 def hist_con_show(workbook,name_list,in_list,step,need=0):
     '''
     统计输入变量in_list[in1,in2,in3...]在相同的间隔step下的分布，并将结果返回到excel中
@@ -204,7 +204,7 @@ def hist_con_show(workbook,name_list,in_list,step,need=0):
         worksheet.write(c+7,0,'mode')
 
 
-#@time_cost_all1()
+#@time_cost_all()
 def hist_cros_con_dis_show(workbook,name_list,input_data1,interval1,input_data2,interval2):
     '''
     统计不同 in2（离散变量）输入变量in1（连续变量）在间隔step下的分布，并将结果返回到excel中。(统计不同充电模式下，充电时长占比)
@@ -234,7 +234,7 @@ def hist_cros_con_dis_show(workbook,name_list,input_data1,interval1,input_data2,
     for i in range(8):
         worksheet.write(r+i,0,l[i])
 
-#@time_cost_all1()
+#@time_cost_all()
 def hist_cros_2con_show(workbook,name_list,in1,step1,in2,step2):
     '''
     统计两个连续变量的分布（eg:电机工作点）

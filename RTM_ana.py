@@ -5,7 +5,7 @@ from datetime import datetime
 import numpy as np
 
 import hist_func_np
-from genarl_func import time_cost1,time_cost_all
+from genarl_func import time_cost,time_cost_all
 from en_client import en_client
 client=en_client()
 

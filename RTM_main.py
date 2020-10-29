@@ -6,7 +6,7 @@ import csv
 import numpy as np
 #from range_test.range_test import Rangetest
 from rtm.RTM_ana import RtmAna
-from genarl_func import print_in_excel,time_cost
+from genarl_func import time_cost
 import hist_func_np
 from en_client import en_client
 
