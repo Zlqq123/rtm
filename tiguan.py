@@ -356,61 +356,70 @@ def xgb_search_param():
     print('最佳模型得分', gs.best_score_)
 
 
+def trian_coment():
+    filename=filepath+"训练样本_x.csv"
+    X = pd.read_csv(filename, encoding="gbk", index_col=0, header=0)
+    #index_col=0声明文件第一列为索引，header=0第一行为列名（默认就是，不必重新申明）
+    print(X.columns)
+    # 导入特征和label
+    filename=filepath+"训练样本_y.csv"
+    y = pd.read_csv(filename, encoding="gbk", index_col=0, header=0)
 
 
-filename=filepath+"训练样本_x.csv"
-X = pd.read_csv(filename, encoding="gbk", index_col=0, header=0)
-#index_col=0声明文件第一列为索引，header=0第一行为列名（默认就是，不必重新申明）
-print(X.columns)
-# 导入特征和label
-filename=filepath+"训练样本_y.csv"
-y = pd.read_csv(filename, encoding="gbk", index_col=0, header=0)
+    from sklearn.model_selection import train_test_split
+    X_train, X_test_s, y_train, y_test_s = train_test_split(X, y, test_size=0.2, random_state=1)
+
+    import xgboost as xgb
+    from sklearn import metrics
+    param = {'boosting_type':'gbdt',
+            'objective' : 'binary:logistic', #任务类型'logistic'逻辑   'regression'回归
+            'eval_metric' : 'auc',
+            'eta' : 0.005,                # 如同学习率   0.001~0.01
+            'max_depth' : 6,             # 构建树的深度，越大越容易过拟合
+            'colsample_bytree':1,#  列采样， 这个参数默认为1
+            'subsample': 0.8,    # 随机采样训练样本行采样
+            'subsample_freq': 1,  
+            'alpha': 0,      #正则化系数，越大越不容易过拟合
+            'lambda': 1,  # 控制模型复杂度的权重值的L2 正则化项参数，参数越大，模型越不容易过拟合
+            'scale_pos_weight':5#原始数据集中，负样本（label=0)数量比上正样本（label=1)数量
+                }
+    train_data = xgb.DMatrix(X_train, label=y_train)
+    test_data = xgb.DMatrix(X_test_s, label=y_test_s)
+    model = xgb.train(param, train_data, evals=[(train_data, 'train'), (test_data, 'valid')], num_boost_round = 5000, early_stopping_rounds=50, verbose_eval=25)
+    y_pred = model.predict(test_data)
+    y_pred1 = [1 if x>=0.5 else 0 for x in y_pred]
+    #print('XGBoost 预测结果', y_pred1)
+    print('XGBoost 准确率:', metrics.accuracy_score(y_test_s,y_pred1))
+
+    '''
+    from sklearn.metrics import roc_curve,auc
+    fpr, tpr, thresholds = roc_curve(y_test_s, y_pred, pos_label=1)
+    roc_auc = auc(fpr, tpr)  ###计算auc的值
+    lw = 2
+    plt.figure(figsize=(8, 5))
+    plt.plot(fpr, tpr, color='darkorange',
+            lw=lw, label='ROC curve (area = %0.2f)' % roc_auc)  ###假正率为横坐标，真正率为纵坐标做曲线
+    plt.plot([0, 1], [0, 1], color='navy', lw=lw, linestyle='--')
+    plt.grid()
+    plt.xlim([0.0, 1.0])
+    plt.ylim([0.0, 1.0])
+    plt.xlabel('False Positive Rate')
+    plt.ylabel('True Positive Rate')
+    plt.title('Receiver operating characteristic example')
+    plt.legend(loc="lower right")
+    plt.savefig(filepath+"roc.jpg")
+    plt.show()
+    '''
+    xgb.plot_importance(model,max_num_features=20,importance_type='gain')
+    plt.savefig(filepath+"importance_gain.jpg")
+    plt.show()
+
+    xgb.plot_importance(model,max_num_features=20,importance_type='weight')
+    plt.savefig(filepath+"importance_weight.jpg")
+    plt.show()
 
 
-from sklearn.model_selection import train_test_split
-X_train, X_test_s, y_train, y_test_s = train_test_split(X, y, test_size=0.2, random_state=1)
-
-import xgboost as xgb
-from sklearn import metrics
-param = {'boosting_type':'gbdt',
-         'objective' : 'binary:logistic', #任务类型'logistic'逻辑   'regression'回归
-         'eval_metric' : 'auc',
-         'eta' : 0.005,                # 如同学习率   0.001~0.01
-         'max_depth' : 6,             # 构建树的深度，越大越容易过拟合
-         'colsample_bytree':1,#  列采样， 这个参数默认为1
-         'subsample': 0.8,    # 随机采样训练样本行采样
-         'subsample_freq': 1,  
-         'alpha': 0,      #正则化系数，越大越不容易过拟合
-         'lambda': 1,  # 控制模型复杂度的权重值的L2 正则化项参数，参数越大，模型越不容易过拟合
-         'scale_pos_weight':5#原始数据集中，负样本（label=0)数量比上正样本（label=1)数量
-        }
-train_data = xgb.DMatrix(X_train, label=y_train)
-test_data = xgb.DMatrix(X_test_s, label=y_test_s)
-model = xgb.train(param, train_data, evals=[(train_data, 'train'), (test_data, 'valid')], num_boost_round = 5000, early_stopping_rounds=50, verbose_eval=25)
-y_pred = model.predict(test_data)
-y_pred1 = [1 if x>=0.5 else 0 for x in y_pred]
-#print('XGBoost 预测结果', y_pred1)
-print('XGBoost 准确率:', metrics.accuracy_score(y_test_s,y_pred1))
-
-from sklearn.metrics import roc_curve,auc
-fpr, tpr, thresholds = roc_curve(y_test_s, y_pred, pos_label=1)
-
-roc_auc = auc(fpr, tpr)  ###计算auc的值
-
-lw = 2
-plt.figure(figsize=(8, 5))
-plt.plot(fpr, tpr, color='darkorange',
-         lw=lw, label='ROC curve (area = %0.2f)' % roc_auc)  ###假正率为横坐标，真正率为纵坐标做曲线
-plt.plot([0, 1], [0, 1], color='navy', lw=lw, linestyle='--')
-plt.grid()
-plt.xlim([0.0, 1.0])
-plt.ylim([0.0, 1.0])
-plt.xlabel('False Positive Rate')
-plt.ylabel('True Positive Rate')
-plt.title('Receiver operating characteristic example')
-plt.legend(loc="lower right")
-plt.savefig(filepath+"roc.jpg")
-plt.show()
+trian_coment()
 
 tiguan_sample()
 filename = filepath + "train_sample_warning.csv"

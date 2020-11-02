@@ -1,5 +1,197 @@
 
-### clickhouse in python
+## MySQL
+### 
+SQL 语句不区分大小写，所有语句以;结尾
+
+语法描述项
+<>：表示在语句中必须指定的数据对象， 是不可缺少
+[]：表示可以根据需要进行选择，也可以不选
+|：表示多个选项只能择其一，
+{}：表示必选项
+
+语句分类：
+DDL (Data Deginition Language)  create drop alter
+DML (Data Manipulation laanguage) insert,delete update select 
+DCL (Data Control Languange) grant revoke
+
+### 数据库操作
+#### create
+CREATE Database [IF NOT EXISTS] <Db_name> 
+[[DEFAULT] CHARACTER SET <字符集> | [DEFAULT] COLLATE <校对规则名>]
+指定字符集（utf8....)
+
+#### SHOW
+SHOW DATABASES [LIKE <数据库名>]
+
+#### ALTER 修改
+ALTER DATABASE [db_name]
+{[DEFAULT] CHARACTER SET <字符集>}
+
+#### DROP
+DROP DATABASE [IF EXISTS] <DB_name>
+
+### table
+#### create
+create table [IF NOT EXISTS] <tb_name>
+(col1  type,col2  type,......
+primary key (col) #指定主键
+)
+
+
+create tabele tb_name like tb_name1 #同结构的表复制，只复制结构，不复制数据
+
+
+DROP TABLE IF EXISTS t_company;
+CREATE TABLE IF NOT EXISTS t_company (
+id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT COMMENT '公司ID', code VARCHAR (10) NOT NULL COMMENT '公司编码',
+short_name VARCHAR (10) NOT NULL COMMENT '公司简称', full_name VARCHAR (20) NOT NULL COMMENT '公司全称',
+address VARCHAR (100) COMMENT '公司详细地址', create_date date NOT NULL COMMENT '成立日期',
+PRIMARY KEY (id)
+) ENGINE=INNODB DEFAULT CHARSET=utf8;
+
+
+drop table if exists t_car;
+create table if not exists t_car(
+id bigint not null auto_increment,
+brand_name varchar(20) COMMENT '品牌名称',
+model_name varchar(20) COMMENT '型号名称',
+color INT COMMENT '颜色',
+height float(10,2) COMMENT '高度',
+width double(10,2) COMMENT '宽度',
+weight decimal(10,2) COMMENT '重量',
+factory_no varchar(10) COMMENT '出厂编号',
+company_id BIGINT UNSIGNED COMMENT '公司ID',
+product_date date COMMENT '生产日期',
+start_time datetime COMMENT '组装开始时间',
+end_time datetime COMMENT '组装结束时间',
+employee_id BIGINT UNSIGNED COMMENT '员工ID',
+foreign key (company_id) REFERENCES t_company(id),
+foreign key (employee_id) REFERENCES t_employee(id),   #指定外键
+primary key(id)  
+) ENGINE=INNODB DEFAULT CHARSET=utf8;
+
+
+
+#### 查看表结构
+desc tb_name
+
+#### insert into
+Insert into tb_name (col1, col2, col3) values (v1,v2,v3)
+
+#### delete
+delete from tb_name [WHERE expr]
+
+#### select
+
+
+#### update
+update tb_name set 
+
+#### where epr
+like '%sh%'#字符里面含sh %是通配符
+
+like 'sh__'#字符是shxx,后面正好只有两位
+ 
+=  与  <=>
+
+非 NOT !
+
+且 AND &&
+
+或 OR ||
+
+异或 XOR
+
+### 数据类型
+整形：
+
+| type | storage(bytes) | min~max (sigend) |min~max(unsigned)
+| :------:| :------: | :----------: | :----------: |
+| TINYINT | 1 | -128~127 | 0~255 |
+| SMALLINT | 2 | -32768~32768 | 0~65535 |
+| MEDIUMT | 3 | -2e15~2e15-1 | 0~2e16-1 |
+| int | 4 | -2e31~2e31-1 | 0~2e32-1 |
+| bigint | 5 | -2e63~2e63-1 | 0~2e64-1 |
+
+时间日期：
+| type | storage(bytes) | min~max (sigend) | zero value | formate |
+| :------:| :------: | :-----------------: | :-----------: | :-----------: |
+| YEAR | 1 | 1901~2155 |  |  |  |
+| TIME | 3 | -838:59:59 ~ 838:59:59 |  |  |  |
+| DATE | 3 | 1000-01-01~9999-12-31 |  |  |  |
+| DATETIME | 8 | 1000-01-01 00:00:00 ~9999-12-31 23:59:59  |  |  |  |
+| TIMESTAMP | 4 | 1901~2155 UTC | UTC |  |  |
+
+
+
+### 权限管理
+create user 'kevin'@'localhost' identified by '123456';
+创建角色权限
+grant insert,select,create on  <databasename.tbname>dbcar. * to 'kevin'@'%';
+
+revoke all on dbcar. * from 'kevin'@'%';
+删除权限
+show grants for 'kevin'@'%';
+显示用户的所有权限
+flush pr
+设置权限立即生效
+
+drop user 
+删除用户
+
+select * from mysql.'user';
+查看数据库的所有用户
+
+### 联合查询：
+SELECT tb1.colx, tb2.coly 
+FROM tb1,tb2 WHERE tb1.colz=tb2.colw
+
+
+SELECT 列1，列2，列3....
+FROM 表1
+INNER JOIN 表2 on 表1.列x=表2.列y 
+WHERE  表1.列4 > xx  and 表2.列5 > xx and  ......
+
+
+
+SELECT 列1，列2，列3....
+FROM 表1
+WHERE 表1.列x in ( SELECT 列y from 表2 where 表2.列5 > xx )
+and  表1.列4 > xx  and......
+
+
+### 函数
+
+#### 聚合函数
+count sum max min avg
+
+select col1, count(*) from t_car group by col1
+
+select col1, sum(col2) from tb group by col1 order by sum(col2) desc
+
+select col1, sum(col2) from tb group by col1 
+HAVING sum(col2)>20
+
+
+SELECT * FROM TB_NAME ORDER BY col1 DESC LIMIT 10,10
+#选取col1中第10名到第20 名
+
+SELECT * FROM TB_NAME WHERE col1=(select max(col1) from tb_name)
+
+
+#### 字符串函数
+left
+right
+mid
+substring
+contract
+contract_ws()
+trim()
+insert()
+#### 数值函数
+
+
+## clickhouse in python
 from clickhouse_driver import Client
 
 client=Client(host='xx.xxx.xx.xx',port='xxxx',user='xxxx' ,password='xxxx',database='xxxx')
