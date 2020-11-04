@@ -52,24 +52,41 @@ import numpy as np
 >> df.fillna(x)：用x替换DataFrame对象中所有的空值
 >> s.astype(float)：将Series中的数据类型更改为float类型
 >> s.replace(1,'one')：用‘one’代替所有等于1的值
+
 >> s.replace([1,3],['one','three'])：用'one'代替1，用'three'代替3
+
 >> df.rename(columns=lambda x: x + 1)：批量更改列名
+
 >> df.rename(columns={'old_name': 'new_ name'})：选择性更改列名
+
 >> df.set_index('column_one')：更改索引列
+
 >> df.rename(index=lambda x: x + 1)：批量重命名索引
 
 ### 数据处理：Filter、Sort和GroupBy
+
 >> df[df[col] > 0.5]：选择col列的值大于0.5的行
+
 >> df.sort_values(col1)：按照列col1排序数据，默认升序排列
+
 >> df.sort_values(col2, ascending=False)：按照列col1降序排列数据
+
 >> df.sort_values([col1,col2], ascending=[True,False])：先按列col1升序排列，后按col2降序排列数据
+
 >> df.groupby(col)：返回一个按列col进行分组的Groupby对象
+
 >> df.groupby([col1,col2])：返回一个按多列进行分组的Groupby对象
+
 >> df.groupby(col1)[col2]：返回按列col1进行分组后，列col2的均值
+
 >> df.pivot_table(index=col1, values=[col2,col3], aggfunc=max)：创建一个按列col1进行分组，并计算col2和col3的最大值的数据透视表
+
 >> df.groupby(col1).agg(np.mean)：返回按列col1分组的所有列的均值
+
 >> data.apply(np.mean)：对DataFrame中的每一列应用函数np.mean
+
 >> data.apply(np.max,axis=1)：对DataFrame中的每一行应用函数np.max
+
 
 ### 数据合并
 >> df1.append(df2)：将df2中的行添加到df1的尾部

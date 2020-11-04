@@ -25,10 +25,11 @@ pre analyzed tabel:
 All data(without warmingsignal) after pre analyzing -------- en.rtm_2th
 All data with warmingsignal Tiguan -------------en.rtm_tiguan
 '''
-
-sql="desc ods.rtm_details"
+tb_name='ods.rtm_details'
+sql="desc "+tb_name
 title=pd.DataFrame(client.execute(sql))
-sql="SELECT * from ods.rtm_details WHERE deviceid=='"+vin0+"' AND uploadtime between '2020/09/01 00:00:00' AND '2020/12/31 23:59:59' order by uploadtime "
+
+sql="SELECT * from " + tb_name + " WHERE deviceid=='"+vin0+"' AND uploadtime between '2020/09/01 00:00:00' AND '2020/12/31 23:59:59' order by uploadtime "
 aus=client.execute(sql)
 df = pd.DataFrame(aus)
 # 重命名列命

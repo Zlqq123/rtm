@@ -1,0 +1,32 @@
+{% extends "layout.html" %}
+
+{% block left %}
+<div class="col-sm-3 col-md-2 sidebar">
+  <ul class="nav nav-sidebar">
+    <li class="active"><a href="/">车辆概览</a></li>
+    <li><a href="/mile">里程与能耗信息</a></li>
+    <li><a href="/velocity">车速分布</a></li>
+    <li><a href="/e_motor">电机工作情况</a></li>
+    <li><a href="/battery">电池工作情况</a></li>
+    <li><a href="/Charge">充电信息</a></li>
+  </ul>
+</div>
+{% endblock %}
+
+
+
+{% block right %}
+<!--右边展示-->
+<div class="col-sm-9 col-sm-offset-3 col-md-10 col-md-offset-2 main">
+  <h1 class="page-header">基于RTM数据的用户工况对比</h1>
+
+  <div class="row placeholders">
+        <!--展示区-->
+        <!-- 为 ECharts 准备一个具备大小（宽高）的 DOM -->
+    <div class="col-xs-12 col-sm-8 col-lg-10 placeholder" style="height:500px;" id="main">
+
+    </div>
+
+  </div>
+</div>
+{% endblock %}
