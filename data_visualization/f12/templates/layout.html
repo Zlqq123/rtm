@@ -1,0 +1,217 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=0, minimal-ui">
+  <title>SVW 新能源车运行大数据分析</title>
+  
+  <link rel="stylesheet" href="../static/libs/bower/font-awesome/css/font-awesome.min.css">
+  <link rel="stylesheet" href="../static/libs/bower/material-design-iconic-font/dist/css/material-design-iconic-font.css">
+  <!-- build:css ../static/css/app.min.css -->
+  <link rel="stylesheet" href="../static/libs/bower/animate.css/animate.min.css">
+  <link rel="stylesheet" href="../static/libs/bower/fullcalendar/dist/fullcalendar.min.css">
+  <link rel="stylesheet" href="../static/libs/bower/perfect-scrollbar/css/perfect-scrollbar.css">
+  <link rel="stylesheet" href="../static/css/bootstrap.css">
+  <link rel="stylesheet" href="../static/css/core.css">
+  <link rel="stylesheet" href="../static/css/app.css">
+  <!-- endbuild -->
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Raleway:400,500,600,700,800,900,300">
+  <script src="../static/libs/bower/breakpoints.js/dist/breakpoints.min.js"></script>
+  <script>
+    Breakpoints();
+  </script>
+</head>
+  
+<body class="menubar-left menubar-unfold menubar-light theme-primary">
+<!--============= start main area -->
+
+<!-- APP NAVBAR ==========-->
+<nav id="app-navbar" class="navbar navbar-inverse navbar-fixed-top primary">
+  
+  <!-- navbar header -->
+  <div class="navbar-header">
+    <button type="button" id="menubar-toggle-btn" class="navbar-toggle visible-xs-inline-block navbar-toggle-left hamburger hamburger--collapse js-hamburger">
+      <span class="sr-only">Toggle navigation</span>
+      <span class="hamburger-box"><span class="hamburger-inner"></span></span>
+    </button>
+
+    <button type="button" class="navbar-toggle navbar-toggle-right collapsed" data-toggle="collapse" data-target="#app-navbar-collapse" aria-expanded="false">
+      <span class="sr-only">Toggle navigation</span>
+      <span class="zmdi zmdi-hc-lg zmdi-more"></span>
+    </button>
+
+    <button type="button" class="navbar-toggle navbar-toggle-right collapsed" data-toggle="collapse" data-target="#navbar-search" aria-expanded="false">
+      <span class="sr-only">Toggle navigation</span>
+      <span class="zmdi zmdi-hc-lg zmdi-search"></span>
+    </button>
+
+    <a href="javascript:void(0)" class="navbar-brand">
+      <span class="brand-name">上汽大众</span>
+    </a>
+  </div><!-- .navbar-header -->
+  
+  <div class="navbar-container container-fluid">
+    <div class="collapse navbar-collapse" id="app-navbar-collapse">
+      <ul class="nav navbar-toolbar navbar-toolbar-left navbar-left">
+        <li class="hidden-float hidden-menubar-top">
+          <a href="javascript:void(0)" role="button" id="menubar-fold-btn" class="hamburger hamburger--arrowalt is-active js-hamburger">
+            <span class="hamburger-box"><span class="hamburger-inner"></span></span>
+          </a>
+        </li>
+        <li>
+          <h5 class="page-title hidden-menubar-top hidden-float">SVW 新能源车运行大数据分析</h5>
+        </li>
+      </ul>
+
+    </div>
+  </div><!-- navbar-container -->
+</nav>
+<!--========== END app navbar -->
+
+<!-- APP ASIDE ==========-->
+<aside id="menubar" class="menubar light">
+
+  <div class="menubar-scroll">
+    <div class="menubar-scroll-inner">
+      <ul class="app-menu">
+
+        <li class="has-submenu">
+          <a href="overview.html" class="submenu-toggle">
+            <i class="menu-icon zmdi zmdi-chart zmdi-hc-lg"></i>
+            <span class="menu-text">总览</span>
+          </a>
+        </li>
+
+
+        <li class="has-submenu">
+          <a href="javascript:void(0)" class="submenu-toggle">
+            <i class="menu-icon zmdi zmdi-storage zmdi-hc-lg"></i>
+            <span class="menu-text">里程与能耗统计</span>
+            <i class="menu-caret zmdi zmdi-hc-sm zmdi-chevron-right"></i>
+          </a>
+          <ul class="submenu">
+            <li><a href="daily.html"><span class="menu-text">每日行驶里程</span></a></li>
+            <li><a href="per_charging_mile.html"><span class="menu-text">每次充电行驶里程</span></a></li>
+            <li><a href="mile_convert.html"><span class="menu-text">折算满放里程(BEV)</span></a></li>
+            <li><a href="e_consumption.html"><span class="menu-text">折算电耗(BEV)</span></a></li>
+          </ul>
+        </li>
+        
+        <li class="has-submenu">
+          <a href="javascript:void(0)" class="submenu-toggle">
+            <i class="menu-icon zmdi zmdi-storage zmdi-hc-lg"></i>
+            <span class="menu-text">用户工况速度统计</span>
+            <i class="menu-caret zmdi zmdi-hc-sm zmdi-chevron-right"></i>
+          </a>
+          <ul class="submenu">
+            <li><a href="velocity.html"><span class="menu-text">车速分布</span></a></li>
+            <li><a href="velocity_mode.html"><span class="menu-text">不同驾驶模式下的车速分布(PHEV)</span></a></li>
+          </ul>
+        </li>
+
+        <li class="has-submenu">
+          <a href="javascript:void(0)" class="submenu-toggle">
+            <i class="menu-icon zmdi zmdi-storage zmdi-hc-lg"></i>
+            <span class="menu-text">电机工作情况</span>
+            <i class="menu-caret zmdi zmdi-hc-sm zmdi-chevron-right"></i>
+          </a>
+          <ul class="submenu">
+            <li><a href="e_motor_speed_torque.html"><span class="menu-text">电机工作点分布</span></a></li>
+            <li><a href="e_motor_eff.html"><span class="menu-text">电机效率</span></a></li>
+            <li><a href="e_motor_temp.html"><span class="menu-text">电机定子温度</span></a></li>
+            <li><a href="LE_temp.html"><span class="menu-text">LE温度</span></a></li>
+          </ul>
+        </li>
+
+        <li class="has-submenu">
+          <a href="javascript:void(0)" class="submenu-toggle">
+            <i class="menu-icon zmdi zmdi-storage zmdi-hc-lg"></i>
+            <span class="menu-text">电池工作情况</span>
+            <i class="menu-caret zmdi zmdi-hc-sm zmdi-chevron-right"></i>
+          </a>
+          <ul class="submenu">
+            <li><a href="datatables.html"><span class="menu-text">放电soc-温度分布</span></a></li>
+            <li><a href="datatables.html"><span class="menu-text">充电soc-温度分布</span></a></li>
+          </ul>
+        </li>
+
+        <li class="has-submenu">
+          <a href="ir.html" class="submenu-toggle">
+            <i class="menu-icon zmdi zmdi-storage zmdi-hc-lg"></i>
+            <span class="menu-text">绝缘阻值分布</span>
+          </a>
+        </li>
+
+        <li class="has-submenu">
+          <a href="javascript:void(0)" class="submenu-toggle">
+            <i class="menu-icon zmdi zmdi-storage zmdi-hc-lg"></i>
+            <span class="menu-text">充电信息</span>
+            <i class="menu-caret zmdi zmdi-hc-sm zmdi-chevron-right"></i>
+          </a>
+          <ul class="submenu">
+            <li><a href="Charge_mode.html"><span class="menu-text">充电模式分布</span></a></li>
+            <li><a href="datatables.html"><span class="menu-text">充电开始SOC</span></a></li>
+            <li><a href="datatables.html"><span class="menu-text">充电结束SOC</span></a></li>
+            <li><a href="datatables.html"><span class="menu-text">开始充电时刻</span></a></li>
+            <li><a href="datatables.html"><span class="menu-text">充电时长</span></a></li>
+            <li><a href="datatables.html"><span class="menu-text">折算满充时长</span></a></li>
+            <li><a href="datatables.html"><span class="menu-text">充电平均温度</span></a></li>
+            <li><a href="datatables.html"><span class="menu-text">充电温升</span></a></li>
+            <li><a href="datatables.html"><span class="menu-text">充电平均功率</span></a></li>
+            <li><a href="datatables.html"><span class="menu-text">充电最大功率</span></a></li>
+          </ul>
+        </li>
+
+        <li class="has-submenu">
+          <a href="rtm_warm.html" class="submenu-toggle">
+            <i class="menu-icon zmdi zmdi-storage zmdi-hc-lg"></i>
+            <span class="menu-text">RTM报警统计</span>
+          </a>
+        </li>
+
+
+      </ul><!-- .app-menu -->
+    </div><!-- .menubar-scroll-inner -->
+  </div><!-- .menubar-scroll -->
+</aside>
+<!--========== END app ·aside -->
+
+<!-- navbar search -->
+<div id="navbar-search" class="navbar-search collapse">
+  <div class="navbar-search-inner">
+    <form action="#">
+      <span class="search-icon"><i class="fa fa-search"></i></span>
+      <input class="search-field" type="search" placeholder="search..."/>
+    </form>
+    <button type="button" class="search-close" data-toggle="collapse" data-target="#navbar-search" aria-expanded="false">
+      <i class="fa fa-close"></i>
+    </button>
+  </div>
+  <div class="navbar-search-backdrop" data-toggle="collapse" data-target="#navbar-search" aria-expanded="false"></div>
+</div><!-- .navbar-search -->
+
+{% block main %}
+{% endblock %}
+
+
+  <!-- build:js ../static/js/core.min.js -->
+  <script src="../static/libs/bower/jquery/dist/jquery.js"></script>
+  <script src="../static/libs/bower/jquery-ui/jquery-ui.min.js"></script>
+  <script src="../static/libs/bower/jQuery-Storage-API/jquery.storageapi.min.js"></script>
+  <script src="../static/libs/bower/bootstrap-sass/assets/javascripts/bootstrap.js"></script>
+  <script src="../static/libs/bower/jquery-slimscroll/jquery.slimscroll.js"></script>
+  <script src="../static/libs/bower/perfect-scrollbar/js/perfect-scrollbar.jquery.js"></script>
+  <script src="../static/libs/bower/PACE/pace.min.js"></script>
+  <!-- endbuild -->
+
+  <!-- build:js ../static/js/app.min.js -->
+  <script src="../static/js/library.js"></script>
+  <script src="../static/js/plugins.js"></script>
+  <script src="../static/js/app.js"></script>
+  <!-- endbuild -->
+  <script src="../static/libs/bower/moment/moment.js"></script>
+  <script src="../static/libs/bower/fullcalendar/dist/fullcalendar.min.js"></script>
+  <script src="../static/js/fullcalendar.js"></script>
+</body>
+</html>

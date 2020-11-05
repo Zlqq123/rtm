@@ -18,7 +18,7 @@ def create_app(test_config=None):
         """
         主界面
         """
-        return render_template('over_view.html')
+        return render_template('overview.html')
 
     @app.route('/mile')
     def mileage():

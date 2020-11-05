@@ -7,4 +7,5 @@
 /data_visualization/personal_info.py
 /prediction_data/*
 /.ipynb_checkpoints/*
-/__pycache__/*
+*.pyc
+__pycache__/

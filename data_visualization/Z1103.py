@@ -7,7 +7,9 @@ import seaborn as sns
 from en_client import en_client
 from personal_info import vin
 client=en_client()
-
+'''
+13辆质保提出的维修车辆检查
+'''
 
 vinlist=['LSVUZ60T8J2217528','LSVUZ60T6J2235946','LSVUZ60T8J2212247','LSVCZ6C48JN034824',
          'LSVUZ60T4J2224654','LSVCZ2C4XKN029912','LSVUZ60T5J2215199','LSVCZ6C41KN029367',
