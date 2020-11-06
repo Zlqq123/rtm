@@ -1,22 +1,24 @@
 {% extends "layout.html" %}
 
-{% block left %}
-<div class="col-sm-3 col-md-2 sidebar">
-  <ul class="nav nav-sidebar">
-    <li class="active"><a href="/">车辆概览</a></li>
-    <li><a href="/mile">里程与能耗信息</a></li>
-    <li><a href="/velocity">车速分布</a></li>
-    <li><a href="/e_motor">电机工作情况</a></li>
-    <li><a href="/battery">电池工作情况</a></li>
-    <li><a href="/Charge">充电信息</a></li>
-  </ul>
-</div>
-{% endblock %}
-
-
-
-{% block right %}
+{% block main %}
 <!--右边展示-->
+
+<!-- APP MAIN ==========-->
+<main id="app-main" class="app-main">
+  <div class="wrap">
+  <section class="app-content">
+    <div class="row">
+      <div class="col-md-6 col-sm-6">
+        <div class="widget p-md clearfix">
+          <div class="pull-left">
+            <h3 class="widget-title">SVW新能源车运行大数据概览</h3>
+            <small class="text-color">Number of views</small>
+          </div>
+          <span class="pull-right fz-lg fw-500 counter" data-plugin="counterUp">102</span>
+        </div><!-- .widget -->
+      </div>
+
+
 <div class="col-sm-9 col-sm-offset-3 col-md-10 col-md-offset-2 main">
   <h1 class="page-header">基于RTM数据的用户工况对比</h1>
 
