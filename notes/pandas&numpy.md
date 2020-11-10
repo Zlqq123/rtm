@@ -7,7 +7,7 @@ import numpy as np
 ### 导入数据
 >> pd.read_csv(filename)：从CSV文件导入数据
 >> pd.read_table(filename)：从限定分隔符的文本文件导入数据
->> pd.read_excel(filename)：从Excel文件导入数据
+>> pd.read_excel(filename,sheet_name=0)：从Excel文件导入数据
 >> pd.read_sql(query, connection_object)：从SQL表/库导入数据
 >> pd.read_json(json_string)：从JSON格式的字符串导入数据
 >> pd.read_html(url)：解析URL、字符串或者HTML文件，抽取其中的tables表格

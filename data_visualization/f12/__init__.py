@@ -4,6 +4,8 @@ from flask_script import Manager
 
 import pandas as pd
 
+path="D:/21python/rtm/data_visualization/f12/"
+
 def create_app(test_config=None):
     # create and configure the app
     app = Flask(__name__) #创建Flask 实例
@@ -18,7 +20,12 @@ def create_app(test_config=None):
         """
         主界面
         """
-        return render_template('overview.html')
+        df1 = pd.read_excel(path+'data/vehicle_distribution.xlsx', sheet_name = 0)
+        df2 = pd.read_excel(path+'data/vehicle_distribution.xlsx', sheet_name = 1)
+        col1 = df1.columns
+        df_project=df2.pivot_table(index='车型', values=['车辆数目'], aggfunc=sum)
+
+        return render_template('overview.html',col1=col1,df1=df1,df_project=df_project)
 
     @app.route('/mile')
     def mileage():

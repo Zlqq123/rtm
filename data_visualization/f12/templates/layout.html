@@ -17,11 +17,17 @@
   <link rel="stylesheet" href="../static/css/app.css">
   <!-- endbuild -->
   <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Raleway:400,500,600,700,800,900,300">
+
   <script src="../static/libs/bower/breakpoints.js/dist/breakpoints.min.js"></script>
   <script>
     Breakpoints();
   </script>
+   
 </head>
+<script src="../static/js/echarts.js" charset="utf-8"></script>
+<script type=text/javascript>
+    $SCRIPT_ROOT = {{ request.script_root|tojson|safe }};
+</script>
   
 <body class="menubar-left menubar-unfold menubar-light theme-primary">
 <!--============= start main area -->

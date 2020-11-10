@@ -8,27 +8,232 @@
   <div class="wrap">
   <section class="app-content">
     <div class="row">
-      <div class="col-md-6 col-sm-6">
-        <div class="widget p-md clearfix">
-          <div class="pull-left">
-            <h3 class="widget-title">SVW新能源车运行大数据概览</h3>
-            <small class="text-color">Number of views</small>
-          </div>
-          <span class="pull-right fz-lg fw-500 counter" data-plugin="counterUp">102</span>
+
+      <div class="col-md-6 col-sm-6 ">
+        <div class=widget>
+          <header class="widget-header">
+            <h4 class="widget-title">SVW新能源车运行大数据概览</h4>
+          </header>
+          <hr class="widget-separator">
+          <div class="widget-body">
+            <div class="table-responsive">
+              <table class="table table-striped" cellspacing="0" width="100%">
+                <thead>
+                  </tr>
+                    {% for col in col1: %}
+                      <th>{{col}}</th>
+                    {%endfor%}
+                  </tr>
+                </thead>
+                <tbody>
+                  {% for indexs in df1.index: %}
+                    <tr>
+                      <td>{{df1.loc[indexs].values[0]}}</td>
+                      <td>{{df1.loc[indexs].values[1]}}</td>
+                    </tr>
+                  {%endfor%}
+                </tbody>
+              </table>
+            </div>
+          </div><!-- .widget-body -->
         </div><!-- .widget -->
-      </div>
+      </div><!-- END column -->
 
+      <div class="col-md-6">
+        <div class=widget>
+          <header class="widget-header">
+            <h4 class="widget-title">不同车型地理位置分布</h4>
+          </header>
+          <hr class="widget-separator">
+          <div class="widget-body">
+            <div data-plugin="plot" data-options="
+              [[ ['January', 10], ['February', 8], ['March', 4], ['April', 13], ['May', 17], ['June', 9] ]],
+              {
+                series: {
+                  bars: { show: true, barWidth: 0.6, align: 'center', fillColor: '#2ecc71' }
+                },
+                xaxis: { mode: 'categories', tickLength: 0 },
+                grid:{ show: true, borderWidth: 0, color: '#eeeeee', hoverable: true },
+                colors: ['#27ae60'],
+                tooltip: true,
+                tooltipOpts: { content: 'X: %x.0, Y: %y.2',  defaultTheme: false, shifts: { x: 0, y: -40 } }
+              }" style="height: 300px;width: 100%;">
+            </div>
+          </div><!-- .widget-body -->
+        </div><!-- .widget -->
+      </div><!-- END column -->
+    </div><!-- END row -->
 
-<div class="col-sm-9 col-sm-offset-3 col-md-10 col-md-offset-2 main">
-  <h1 class="page-header">基于RTM数据的用户工况对比</h1>
-
-  <div class="row placeholders">
-        <!--展示区-->
-        <!-- 为 ECharts 准备一个具备大小（宽高）的 DOM -->
-    <div class="col-xs-12 col-sm-8 col-lg-10 placeholder" style="height:500px;" id="main">
-
-    </div>
-
+    <div class="row">
+      <div class="col-md-12">
+        <div class=widget>
+          <header class="widget-header">
+            <h4 class="widget-title">lavida 不同用户类型地理位置分布</h4>
+          </header>
+          <hr class="widget-separator">
+          <div class="widget-body">
+            <div class="row placeholders">
+            <!--展示区-->
+            <!-- 为 ECharts 准备一个具备大小（宽高）的 DOM -->
+            <div class="col-xs-6 col-sm-6 col-lg-6 placeholder" style="height:300px;" id="lavida">
+            </div>
+          </div>
+          </div><!-- .widget-body -->
+        </div><!-- .widget -->
+      </div><!-- END column -->
+    </div><!-- END row -->
   </div>
 </div>
+
+</main>
+
+{% endblock %}
+
+{% block echarts_js %}
+
+<script type="text/javascript" >
+         $(function (ec) {
+            // 基于准备好的dom，初始化echarts实例
+            var myChart = echarts.init(document.getElementById('lavida'));
+            myChart.showLoading(); // 加载动画
+            // 指定图表的配置项和数据
+            var option = {
+                    legend: {
+                        top: 10,
+                        width: 500,
+                        itemWidth: 40,
+                        data: {{ car_name|safe }}
+                    },
+                    toolbox: {
+                        show: true,
+                        feature: {
+                            magicType: {
+                                show:true,
+                                title:{
+                                    line:'切换为折线图',
+                                    bar:'切换为柱状图',
+
+                                },
+                                type: ['line', 'bar']},
+                            // restore: {show:true, title:'重置'},
+                            saveAsImage: {show:true, title:'保存为图片图'}
+                        }
+                    },
+                    xAxis: [{
+                        type: 'category',
+                        axisTick:{
+                            show:true
+                        },
+
+                        data: ['一月', '二月', '三月', '四月', '五月','六月']
+                    }],
+                    yAxis: [{
+                        type: 'value',
+                        min: 0.5,
+                        name:"单位：%",
+                        axisTick:{
+                            show:true
+                        },
+                        axisLine:{
+                            show:true
+                        },
+                        splitLine:{
+                            show:false
+                        },
+                    }],
+                    tooltip: {
+                        trigger: 'axis',
+                        axisPointer: { // 坐标轴指示器，坐标轴触发有效
+                            type: 'shadow' // 默认为直线，可选为：'line' | 'shadow'
+                        }
+                    },
+                    series: [{
+                        name: '{{ car_name[0]|safe }}',
+                        type: 'bar',
+                        itemStyle:{
+                          normal:{
+                              barBorderRadius:5
+                          }
+                        },
+                        label: {
+                            normal: {
+                                show: true,
+                                position: 'top'
+                                }
+                    },
+                        data: []
+                    }, {
+                        name: '{{ car_name[1]|safe }}',
+                        type: 'bar',
+                        barGap: 0,
+                        itemStyle:{
+                          normal:{
+                              barBorderRadius:5
+                          }
+                        },
+                        label: {
+                            normal: {
+                                show: true,
+                                position: 'top'
+                                }
+                    },
+                        data: []
+                    }, {
+                        name: '{{ car_name[2]|safe }}',
+                        type: 'bar',
+                        itemStyle:{
+                          normal:{
+                              barBorderRadius:5
+                          }
+                        },
+                        label: {
+                            normal: {
+                                show: true,
+                                position: 'top'
+                                }
+                            },
+                        data: []
+                    }]
+                };
+                
+                myChart.showLoading(); // 加载动画
+                $.ajax({
+                    cache: false,
+                    type: "POST",
+                    url: "/get_contrast", //把表单数据发送到/weather
+                    data: null, // 发送的数据
+                    dataType : "json",  //返回数据形式为json
+                    async: false,
+                    error: function(request) {
+                        alert("发送请求失败！");
+                    },
+                    success: function(result) {
+                        //console.log(result);
+                        for (i = 0, max = result.data[0].length; i < max; i++) { //注意：result.data.length
+                            option.series[0].data.push(result.data[0][i]);
+                            option.series[1].data.push(result.data[1][i]);
+                            option.series[2].data.push(result.data[2][i]);
+                        };
+
+                        // 为echarts对象加载数据--------------
+                        myChart.hideLoading(); // 隐藏加载动画
+                        myChart.setOption(option);
+                    }
+                 });
+
+                // 使用刚指定的配置项和数据显示图表。
+                myChart.setOption(option);
+                window.onresize = myChart.resize;
+
+                myChart.on('click', function(param){
+                    var date_list = ["周一", "周二", "周三", "周四", "周五", "周六", "周日"];
+                    var name = param.name
+                    if (date_list.indexOf(name) > -1){
+                        window.location.href="/source_data/" + name;
+                    }
+                })
+
+        });
+</script>        
+
 {% endblock %}
