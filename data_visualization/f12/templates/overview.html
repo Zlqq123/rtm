@@ -75,8 +75,53 @@
             <div class="row placeholders">
             <!--展示区-->
             <!-- 为 ECharts 准备一个具备大小（宽高）的 DOM -->
-            <div class="col-xs-6 col-sm-6 col-lg-6 placeholder" style="height:300px;" id="lavida">
-            </div>
+            <div  style="width: 1000px;height:400px;" id="lavida"></div>
+
+
+            <script type="text/javascript" >
+              var myChart = echarts.init(document.getElementById('lavida'));
+              var option ={
+                        legend: { top: 10, width: 500, itemWidth: 40,
+                                  data: ['产品A', '产品B', '产品C']
+                                },
+                        title:{},
+                        toolbox: { show: true,
+                                  feature: {magicType: {show:true,
+                                                        title:{line:'切换为折线图',bar:'切换为柱状图'},
+                                                        type: ['line', 'bar']},
+                                                        saveAsImage: {show:true, title:'保存为图片图'}
+                                                        }
+                                },
+                        xAxis: [{ type: 'category',axisTick:{show:true},
+                                  data: ['一月', '二月', '三月', '四月', '五月','六月']
+                              }],
+                        yAxis: [{type: 'value',min: 0.5,name:"单位：%",
+                                axisTick:{show:true},
+                                axisLine:{show:true},
+                                splitLine:{show:false},
+                                }],
+                        tooltip: {trigger: 'axis',
+                                  axisPointer: { type: 'shadow' }// 坐标轴指示器，坐标轴触发有效// 默认为直线，可选为：'line' | 'shadow'
+                                  },
+                        series: [{  name: '产品A',type: 'bar',
+                                    itemStyle:{normal:{barBorderRadius:5}},
+                                    label: {normal: {show: true,position: 'top'}},
+                                    data: [10,20,30,20,10,14]  }, 
+                                  { name: '产品B',type: 'bar',barGap: 0,
+                                    itemStyle:{normal:{barBorderRadius:5}},
+                                    label: {normal: {show: true,position: 'top'}},
+                                    data: [11,23,12,43,21,32]  }, 
+                                  { name: '产品C', type: 'bar',
+                                    itemStyle:{ normal:{ barBorderRadius:5 } },
+                                    label: {  normal: { show: true, position: 'top' } },
+                                    data: [3,21,31,43,12,23] }
+                                ]
+                      }
+              myChart.setOption(option);
+            
+            </script>  
+
+
           </div>
           </div><!-- .widget-body -->
         </div><!-- .widget -->
@@ -89,151 +134,3 @@
 
 {% endblock %}
 
-{% block echarts_js %}
-
-<script type="text/javascript" >
-         $(function (ec) {
-            // 基于准备好的dom，初始化echarts实例
-            var myChart = echarts.init(document.getElementById('lavida'));
-            myChart.showLoading(); // 加载动画
-            // 指定图表的配置项和数据
-            var option = {
-                    legend: {
-                        top: 10,
-                        width: 500,
-                        itemWidth: 40,
-                        data: {{ car_name|safe }}
-                    },
-                    toolbox: {
-                        show: true,
-                        feature: {
-                            magicType: {
-                                show:true,
-                                title:{
-                                    line:'切换为折线图',
-                                    bar:'切换为柱状图',
-
-                                },
-                                type: ['line', 'bar']},
-                            // restore: {show:true, title:'重置'},
-                            saveAsImage: {show:true, title:'保存为图片图'}
-                        }
-                    },
-                    xAxis: [{
-                        type: 'category',
-                        axisTick:{
-                            show:true
-                        },
-
-                        data: ['一月', '二月', '三月', '四月', '五月','六月']
-                    }],
-                    yAxis: [{
-                        type: 'value',
-                        min: 0.5,
-                        name:"单位：%",
-                        axisTick:{
-                            show:true
-                        },
-                        axisLine:{
-                            show:true
-                        },
-                        splitLine:{
-                            show:false
-                        },
-                    }],
-                    tooltip: {
-                        trigger: 'axis',
-                        axisPointer: { // 坐标轴指示器，坐标轴触发有效
-                            type: 'shadow' // 默认为直线，可选为：'line' | 'shadow'
-                        }
-                    },
-                    series: [{
-                        name: '{{ car_name[0]|safe }}',
-                        type: 'bar',
-                        itemStyle:{
-                          normal:{
-                              barBorderRadius:5
-                          }
-                        },
-                        label: {
-                            normal: {
-                                show: true,
-                                position: 'top'
-                                }
-                    },
-                        data: []
-                    }, {
-                        name: '{{ car_name[1]|safe }}',
-                        type: 'bar',
-                        barGap: 0,
-                        itemStyle:{
-                          normal:{
-                              barBorderRadius:5
-                          }
-                        },
-                        label: {
-                            normal: {
-                                show: true,
-                                position: 'top'
-                                }
-                    },
-                        data: []
-                    }, {
-                        name: '{{ car_name[2]|safe }}',
-                        type: 'bar',
-                        itemStyle:{
-                          normal:{
-                              barBorderRadius:5
-                          }
-                        },
-                        label: {
-                            normal: {
-                                show: true,
-                                position: 'top'
-                                }
-                            },
-                        data: []
-                    }]
-                };
-                
-                myChart.showLoading(); // 加载动画
-                $.ajax({
-                    cache: false,
-                    type: "POST",
-                    url: "/get_contrast", //把表单数据发送到/weather
-                    data: null, // 发送的数据
-                    dataType : "json",  //返回数据形式为json
-                    async: false,
-                    error: function(request) {
-                        alert("发送请求失败！");
-                    },
-                    success: function(result) {
-                        //console.log(result);
-                        for (i = 0, max = result.data[0].length; i < max; i++) { //注意：result.data.length
-                            option.series[0].data.push(result.data[0][i]);
-                            option.series[1].data.push(result.data[1][i]);
-                            option.series[2].data.push(result.data[2][i]);
-                        };
-
-                        // 为echarts对象加载数据--------------
-                        myChart.hideLoading(); // 隐藏加载动画
-                        myChart.setOption(option);
-                    }
-                 });
-
-                // 使用刚指定的配置项和数据显示图表。
-                myChart.setOption(option);
-                window.onresize = myChart.resize;
-
-                myChart.on('click', function(param){
-                    var date_list = ["周一", "周二", "周三", "周四", "周五", "周六", "周日"];
-                    var name = param.name
-                    if (date_list.indexOf(name) > -1){
-                        window.location.href="/source_data/" + name;
-                    }
-                })
-
-        });
-</script>        
-
-{% endblock %}
