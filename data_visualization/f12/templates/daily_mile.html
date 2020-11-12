@@ -1,0 +1,75 @@
+{% extends "layout.html" %}
+
+{% block main %}
+
+<main id="app-main" class="app-main">
+    <div class="wrap">
+    <section class="app-content">
+      <div class="row">
+        <div class="col-md-12">
+            <div class=widget>
+              <header class="widget-header">
+                <h4 class="widget-title">用户每日行驶里程分布</h4>
+              </header>
+              <hr class="widget-separator">
+              <div class="widget-body">
+                <div class="row placeholders">
+                  <!--展示区-->
+                  <!-- 为 ECharts 准备一个具备大小（宽高）的 DOM -->
+                  
+              <div  style="height:400px;" id="project"></div>
+
+              <script type="text/javascript" >
+                var myChart = echarts.init(document.getElementById('project'),'macarons');
+                var option ={
+                          legend: { orient: 'vertical',right:"10%",top: '10%',
+                                    data: ['Lavida BEV 53AH', 'Passat PHEV', 'Tiguan L PHEV',]
+                                  },
+                          title:{ text: '不同车型地理位置分布',x:'center', y: 'top',},
+                          toolbox: { show: true,
+                                    feature: {magicType: {show:true,
+                                                          title:{line:'切换为折线图',bar:'切换为柱状图'},
+                                                          type: ['line', 'bar']},
+                                                          saveAsImage: {show:true, title:'保存为图片图'}
+                                                          }
+                                  },
+                          xAxis: [{ type: 'category',axisTick:{show:true},
+                                    data: ['东北', '华北', '华东', '华中', "华南",'西北','西南']
+                                }],
+                          yAxis: [{type: 'value',min: 0,name:"车辆数目",
+                                  axisTick:{show:true},
+                                  axisLine:{show:true},
+                                  splitLine:{show:false},
+                                  }],
+                          tooltip: {trigger: 'axis',
+                                    axisPointer: { type: 'shadow' }// 坐标轴指示器，坐标轴触发有效// 默认为直线，可选为：'line' | 'shadow'
+                                    },
+                          series: [{  name: 'Lavida BEV 53AH',type: 'bar',
+                                      itemStyle:{normal:{barBorderRadius:5}},
+                                      label: {normal: {show: true,position: 'top'}},
+                                      data: [1,1029,4590,372,422,110,258]  }, 
+                                    { name: 'Passat PHEV',type: 'bar',barGap: 0,
+                                      itemStyle:{normal:{barBorderRadius:5}},
+                                      label: {normal: {show: true,position: 'top'}},
+                                      data: [774,2929,7499,4341,2738,1278,2816]  }, 
+                                    { name: 'Tiguan L PHEV', type: 'bar',
+                                      itemStyle:{ normal:{ barBorderRadius:5 } },
+                                      label: {  normal: { show: true, position: 'top' } },
+                                      data: [551,1152,3928,2672,1912,697,1808] }
+                                  ]
+                        }
+                myChart.setOption(option);
+              
+              </script>  
+              
+          </div>
+        </div><!-- .widget-body -->
+      </div><!-- .widget -->
+    </div><!-- END column -->
+  </div><!-- END row -->
+</div>
+</div>
+
+</main>
+
+{% endblock %}

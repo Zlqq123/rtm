@@ -28,6 +28,12 @@
 <script type=text/javascript>
     $SCRIPT_ROOT = {{ request.script_root|tojson|safe }};
 </script>
+ <!-- echarts主题-->
+<script src="../static/js/walden.js"></script>
+<script src="../static/js/macarons.js"></script>
+<script src="../static/js/essos.js"></script>
+<script src="../static/js/infographic.js"></script>
+
   
 <body class="menubar-left menubar-unfold menubar-light theme-primary">
 <!--============= start main area -->
@@ -99,7 +105,7 @@
             <i class="menu-caret zmdi zmdi-hc-sm zmdi-chevron-right"></i>
           </a>
           <ul class="submenu">
-            <li><a href="daily.html"><span class="menu-text">每日行驶里程</span></a></li>
+            <li><a href="daily_mile.html"><span class="menu-text">每日行驶里程</span></a></li>
             <li><a href="per_charging_mile.html"><span class="menu-text">每次充电行驶里程</span></a></li>
             <li><a href="mile_convert.html"><span class="menu-text">折算满放里程(BEV)</span></a></li>
             <li><a href="e_consumption.html"><span class="menu-text">折算电耗(BEV)</span></a></li>

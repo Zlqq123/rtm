@@ -42,22 +42,43 @@
       <div class="col-md-6">
         <div class=widget>
           <header class="widget-header">
-            <h4 class="widget-title">不同车型地理位置分布</h4>
+            <h4 class="widget-title">车型占比</h4>
           </header>
           <hr class="widget-separator">
           <div class="widget-body">
-            <div data-plugin="plot" data-options="
-              [[ ['January', 10], ['February', 8], ['March', 4], ['April', 13], ['May', 17], ['June', 9] ]],
-              {
-                series: {
-                  bars: { show: true, barWidth: 0.6, align: 'center', fillColor: '#2ecc71' }
-                },
-                xaxis: { mode: 'categories', tickLength: 0 },
-                grid:{ show: true, borderWidth: 0, color: '#eeeeee', hoverable: true },
-                colors: ['#27ae60'],
-                tooltip: true,
-                tooltipOpts: { content: 'X: %x.0, Y: %y.2',  defaultTheme: false, shifts: { x: 0, y: -40 } }
-              }" style="height: 300px;width: 100%;">
+            <div class="row placeholders">
+              <!--展示区-->
+              <!-- 为 ECharts 准备一个具备大小（宽高）的 DOM -->
+              <div  style="height:400px;" id="project"></div>
+
+              <script type="text/javascript" >
+                var myChart = echarts.init(document.getElementById('project'),'macarons');
+                var option ={
+                          legend: { type: 'scroll',orient: 'vertical',right: 10,top: 20,
+                                    data: ['Lavida BEV 53Ah', 'Passat PHEV C5','Passat PHEV C6', 'Tiguan L PHEV C5', 'Tiguan L PHEV C6']
+                                  },
+                          title:{ },
+                          toolbox: { show: true,
+                                    feature: {magicType: { saveAsImage: {show:true, title:'保存为图片图'}}}
+                                  },                          
+                          tooltip: {trigger: 'item'},
+                          series: [{  name: 'project',
+                                      type: 'pie',
+                                      radius: '55%',
+                                      center: ['40%', '50%'],
+                                      data: [
+                                        {value: 6782, name: 'Lavida BEV 53Ah'},
+                                        {value: 18583, name: 'Passat PHEV C5'},
+                                        {value: 3792, name: 'Passat PHEV C6'},
+                                        {value: 13656, name: 'Tiguan L PHEV C5'},
+                                        {value: 104, name: 'Tiguan L PHEV C6'},
+                                        ]  }]
+                            }
+                myChart.setOption(option);
+              
+              </script>  
+
+
             </div>
           </div><!-- .widget-body -->
         </div><!-- .widget -->
@@ -68,23 +89,172 @@
       <div class="col-md-12">
         <div class=widget>
           <header class="widget-header">
-            <h4 class="widget-title">lavida 不同用户类型地理位置分布</h4>
+            <h4 class="widget-title">用户类型分布</h4>
           </header>
           <hr class="widget-separator">
           <div class="widget-body">
             <div class="row placeholders">
+              <!--展示区-->
+              <!-- 为 ECharts 准备一个具备大小（宽高）的 DOM -->
+              
+              <div  class="col-md-4" style="height:300px;" id="u1"></div>
+
+              <script type="text/javascript" >
+                var myChart = echarts.init(document.getElementById('u1'),'macarons');
+                var option ={
+                          legend: { type: 'scroll',orient: 'vertical',right: 5,top: 20,
+                                    data: ['Private', 'Taxi','Fleet']
+                                  },
+                          title:{text: 'Lavida BEV 53Ah',x:'center', y: 'top' },
+                          toolbox: { show: true,
+                                    feature: {magicType: { saveAsImage: {show:true, title:'保存为图片图'}}}
+                                  },                          
+                          tooltip: {trigger: 'item'},
+                          series: [{  name: 'project',
+                                      type: 'pie',
+                                      radius: '55%',
+                                      center: ['40%', '50%'],
+                                      data: [
+                                        {value: 2438, name: 'Private'},
+                                        {value: 291, name: 'Taxi'},
+                                        {value: 4053, name: 'Fleet'},
+                                        ]  }]
+                            }
+                myChart.setOption(option);
+
+              </script>
+
+
+              <div  class="col-md-4" style="height:300px;" id="u2"></div>
+
+              <script type="text/javascript" >
+                var myChart = echarts.init(document.getElementById('u2'),'macarons');
+                var option ={
+                          legend: { type: 'scroll',orient: 'vertical',right: 5,top: 20,
+                                    data: ['Private', 'Taxi','Fleet']
+                                  },
+                          title:{text: 'Passat PHEV',x:'center', y: 'top' },
+                          toolbox: { show: true,
+                                    feature: {magicType: { saveAsImage: {show:true, title:'保存为图片图'}}}
+                                  },                          
+                          tooltip: {trigger: 'item'},
+                          series: [{  name: 'project',
+                                      type: 'pie',
+                                      radius: '55%',
+                                      center: ['40%', '50%'],
+                                      data: [
+                                        {value: 18856, name: 'Private'},
+                                        {value: 3519, name: 'Fleet'},
+                                        ]  }]
+                            }
+                myChart.setOption(option);
+              </script>
+
+              <div  class="col-md-4" style="height:300px;" id="u3"></div>
+
+              <script type="text/javascript" >
+                var myChart = echarts.init(document.getElementById('u3'),'macarons');
+                var option ={
+                          legend: { type: 'scroll',orient: 'vertical',right: 5,top: 20,
+                                    data: ['Private', 'Taxi','Fleet']
+                                  },
+                          title:{text: 'Tiguan L PHEV',x:'center', y: 'top' },
+                          toolbox: { show: true,
+                                    feature: {magicType: { saveAsImage: {show:true, title:'保存为图片图'}}}
+                                  },                          
+                          tooltip: {trigger: 'item'},
+                          series: [{  name: 'project',
+                                      type: 'pie',
+                                      radius: '55%',
+                                      center: ['40%', '50%'],
+                                      data: [
+                                        {value: 13760, name: 'Private'},
+                                        ]  }]
+                            }
+                myChart.setOption(option);
+              </script>
+
+
+
+
+            </div>
+          </div><!-- .widget-body -->
+        </div><!-- .widget -->
+      </div><!-- END column -->
+    </div><!-- END row -->
+
+
+
+
+    <div class="row">
+      <div class="col-md-12">
+        <div class=widget>
+          <header class="widget-header">
+            <h4 class="widget-title">地理位置分布</h4>
+          </header>
+          <hr class="widget-separator">
+          <div class="widget-body">
+            <div class="row placeholders">
+              <!--展示区-->
+              <!-- 为 ECharts 准备一个具备大小（宽高）的 DOM -->
+              <div  style="height:400px;" id="geo"></div>
+
+              <script type="text/javascript" >
+                var myChart = echarts.init(document.getElementById('geo'),'macarons');
+                var option ={
+                          legend: { orient: 'vertical',right:"10%",top: '10%',
+                                    data: ['Lavida BEV 53AH', 'Passat PHEV', 'Tiguan L PHEV',]
+                                  },
+                          title:{ text: '不同车型地理位置分布',x:'center', y: 'top',},
+                          toolbox: { show: true,
+                                    feature: {magicType: {show:true,
+                                                          title:{line:'切换为折线图',bar:'切换为柱状图'},
+                                                          type: ['line', 'bar']},
+                                                          saveAsImage: {show:true, title:'保存为图片图'}
+                                                          }
+                                  },
+                          xAxis: [{ type: 'category',axisTick:{show:true},
+                                    data: ['东北', '华北', '华东', '华中', "华南",'西北','西南']
+                                }],
+                          yAxis: [{type: 'value',min: 0,name:"车辆数目",
+                                  axisTick:{show:true},
+                                  axisLine:{show:true},
+                                  splitLine:{show:false},
+                                  }],
+                          tooltip: {trigger: 'axis',
+                                    axisPointer: { type: 'shadow' }// 坐标轴指示器，坐标轴触发有效// 默认为直线，可选为：'line' | 'shadow'
+                                    },
+                          series: [{  name: 'Lavida BEV 53AH',type: 'bar',
+                                      itemStyle:{normal:{barBorderRadius:5}},
+                                      label: {normal: {show: true,position: 'top'}},
+                                      data: [1,1029,4590,372,422,110,258]  }, 
+                                    { name: 'Passat PHEV',type: 'bar',barGap: 0,
+                                      itemStyle:{normal:{barBorderRadius:5}},
+                                      label: {normal: {show: true,position: 'top'}},
+                                      data: [774,2929,7499,4341,2738,1278,2816]  }, 
+                                    { name: 'Tiguan L PHEV', type: 'bar',
+                                      itemStyle:{ normal:{ barBorderRadius:5 } },
+                                      label: {  normal: { show: true, position: 'top' } },
+                                      data: [551,1152,3928,2672,1912,697,1808] }
+                                  ]
+                        }
+                myChart.setOption(option);
+              
+              </script>  
+  
+
             <!--展示区-->
             <!-- 为 ECharts 准备一个具备大小（宽高）的 DOM -->
-            <div  style="width: 1000px;height:400px;" id="lavida"></div>
+            <div  style="height:400px;" id="lavida"></div>
 
 
             <script type="text/javascript" >
-              var myChart = echarts.init(document.getElementById('lavida'));
+              var myChart = echarts.init(document.getElementById('lavida'),'macarons');
               var option ={
-                        legend: { top: 10, width: 500, itemWidth: 40,
-                                  data: ['产品A', '产品B', '产品C']
+                        legend: { right:"10%",top: '10%',orient: 'vertical',
+                                  data: ['Fleet', 'Private', 'Taxi']
                                 },
-                        title:{},
+                        title:{ text: 'lavida 不同用户类型地理位置分布',x:'center', y: 'top'},
                         toolbox: { show: true,
                                   feature: {magicType: {show:true,
                                                         title:{line:'切换为折线图',bar:'切换为柱状图'},
@@ -93,9 +263,9 @@
                                                         }
                                 },
                         xAxis: [{ type: 'category',axisTick:{show:true},
-                                  data: ['一月', '二月', '三月', '四月', '五月','六月']
+                                  data: ['东北', '华北', '华东', '华中', "华南",'西北','西南']
                               }],
-                        yAxis: [{type: 'value',min: 0.5,name:"单位：%",
+                        yAxis: [{type: 'value',min: 0,name:"车辆数目",
                                 axisTick:{show:true},
                                 axisLine:{show:true},
                                 splitLine:{show:false},
@@ -103,18 +273,18 @@
                         tooltip: {trigger: 'axis',
                                   axisPointer: { type: 'shadow' }// 坐标轴指示器，坐标轴触发有效// 默认为直线，可选为：'line' | 'shadow'
                                   },
-                        series: [{  name: '产品A',type: 'bar',
+                        series: [{  name: 'Fleet',type: 'bar',
                                     itemStyle:{normal:{barBorderRadius:5}},
                                     label: {normal: {show: true,position: 'top'}},
-                                    data: [10,20,30,20,10,14]  }, 
-                                  { name: '产品B',type: 'bar',barGap: 0,
+                                    data: [1,218,3512,159,67,62,34]  }, 
+                                  { name: 'Private',type: 'bar',barGap: 0,
                                     itemStyle:{normal:{barBorderRadius:5}},
                                     label: {normal: {show: true,position: 'top'}},
-                                    data: [11,23,12,43,21,32]  }, 
-                                  { name: '产品C', type: 'bar',
+                                    data: [0,701,903,212,355,48,219]  }, 
+                                  { name: 'Taxi', type: 'bar',
                                     itemStyle:{ normal:{ barBorderRadius:5 } },
                                     label: {  normal: { show: true, position: 'top' } },
-                                    data: [3,21,31,43,12,23] }
+                                    data: [0,110,175,1,0,0,5] }
                                 ]
                       }
               myChart.setOption(option);
