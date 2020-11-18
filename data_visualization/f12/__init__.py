@@ -48,6 +48,13 @@ def daily_mile():
     """
     return render_template('mile.html')
 
+@app.route('/velocity')
+def velocity():
+    """
+    里程与能耗daily
+    """
+    return render_template('velocity.html')
+
 @app.route('/E_motor')
 def e_motor():
     """
@@ -55,7 +62,7 @@ def e_motor():
     """
     return render_template('e_motor.html')
 
-'''
+
 @app.route('/battery')
 def battery():
     """
@@ -63,11 +70,65 @@ def battery():
     """
     return render_template('battery.html')
 
-@app.route('/Charge')
-def Charge():
+@app.route('/ir')
+def ir():
     """
     充电
     """
-    return render_template('Charge.html')
+    return render_template('ir.html')
 
-'''
+@app.route('/charge')
+def charge_overview():
+    """
+    充电
+    """
+    return render_template('charge_overview.html')
+
+@app.route('/charge_soc')
+def charge_soc():
+    """
+    充电
+    """
+    return render_template('charge_soc.html')
+
+@app.route('/charge_time')
+def charge_time():
+    """
+    充电
+    """
+    return render_template('charge_time.html')
+
+@app.route('/charge_temp')
+def charge_temp():
+    """
+    充电
+    """
+    return render_template('charge_temp.html')
+
+@app.route('/charge_power')
+def charge_power():
+    """
+    充电
+    """
+    return render_template('charge_power.html')
+
+@app.route('/rtm_warm')
+def warm_hist():
+    """
+    充电
+    """
+    return render_template('warm_hist.html')
+
+@app.route('/hist_default')
+def hist_default():
+    """
+    充电
+    """
+    return render_template('hist_default.html')
+
+@app.route('/warming_pre')
+def warming_pre():
+    """
+    充电
+    """
+    return render_template('warm_prediction.html')
