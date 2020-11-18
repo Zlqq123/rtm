@@ -18,7 +18,7 @@
   <!-- endbuild -->
   <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Raleway:400,500,600,700,800,900,300">
 
-  <script src="../static/libs/bower/breakpoints.js/dist/breakpoints.min.js"></script>
+  <script src="../static/js/breakpoints.min.js"></script>
   <script>
     Breakpoints();
   </script>
@@ -29,10 +29,10 @@
     $SCRIPT_ROOT = {{ request.script_root|tojson|safe }};
 </script>
  <!-- echarts主题-->
-<script src="../static/js/walden.js"></script>
-<script src="../static/js/macarons.js"></script>
-<script src="../static/js/essos.js"></script>
-<script src="../static/js/infographic.js"></script>
+<script src="../static/js/echarts_theme/essos.js"></script>
+<script src="../static/js/echarts_theme/infographic.js"></script>
+<script src="../static/js/echarts_theme/macarons.js"></script>
+<script src="../static/js/echarts_theme/walden.js"></script>
 
   
 <body class="menubar-left menubar-unfold menubar-light theme-primary">
@@ -89,7 +89,7 @@
       <ul class="app-menu">
 
         <li class="has-submenu">
-          <a href="overview.html" class="submenu-toggle">
+          <a href="overview" class="submenu-toggle">
             <i class="menu-icon zmdi zmdi-chart zmdi-hc-lg"></i>
             <!-- i class="menu-icon zmdi zmdi-view-dashboard zmdi-hc-lg" -->
             <!-- i class="menu-icon zmdi zmdi-storage zmdi-hc-lg" -->
@@ -101,86 +101,50 @@
         <li class="has-submenu">
           <a href="javascript:void(0)" class="submenu-toggle">
             <i class="menu-icon zmdi zmdi-storage zmdi-hc-lg"></i>
-            <span class="menu-text">里程与能耗统计</span>
+            <span class="menu-text">行驶特性</span>
             <i class="menu-caret zmdi zmdi-hc-sm zmdi-chevron-right"></i>
           </a>
           <ul class="submenu">
-            <li><a href="daily_mile.html"><span class="menu-text">每日行驶里程</span></a></li>
-            <li><a href="per_charging_mile.html"><span class="menu-text">每次充电行驶里程</span></a></li>
-            <li><a href="mile_convert.html"><span class="menu-text">折算满放里程(BEV)</span></a></li>
-            <li><a href="e_consumption.html"><span class="menu-text">折算电耗(BEV)</span></a></li>
+            <li><a href="mile"><span class="menu-text">里程与能耗</span></a></li>
+            <li><a href="velocity"><span class="menu-text">行驶速度</span></a></li>
+            <li><a href="Battery"><span class="menu-text">电池工作点</span></a></li>
+            <li><a href="E_motor"><span class="menu-text">电机工作情况</span></a></li>
+            <li><a href="ir"><span class="menu-text">绝缘电阻阻值</span></a></li>
           </ul>
         </li>
         
         <li class="has-submenu">
-          <a href="javascript:void(0)" class="submenu-toggle">
+          <a href="charge_overview" coverviewlass="submenu-toggle">
             <i class="menu-icon zmdi zmdi-storage zmdi-hc-lg"></i>
-            <span class="menu-text">用户工况速度统计</span>
+            <span class="menu-text">充电特性</span>
             <i class="menu-caret zmdi zmdi-hc-sm zmdi-chevron-right"></i>
           </a>
           <ul class="submenu">
-            <li><a href="velocity.html"><span class="menu-text">车速分布</span></a></li>
-            <li><a href="velocity_mode.html"><span class="menu-text">不同驾驶模式下的车速分布(PHEV)</span></a></li>
+            <li><a href="charge_soc"><span class="menu-text">充电SOC</span></a></li>
+            <li><a href="charge_time"><span class="menu-text">充电时刻与时长</span></a></li>
+            <li><a href="charge_temp"><span class="menu-text">充电温度</span></a></li>
+            <li><a href="charge_power"><span class="menu-text">充电功率</span></a></li>
           </ul>
         </li>
 
         <li class="has-submenu">
-          <a href="javascript:void(0)" class="submenu-toggle">
-            <i class="menu-icon zmdi zmdi-storage zmdi-hc-lg"></i>
-            <span class="menu-text">电机工作情况</span>
-            <i class="menu-caret zmdi zmdi-hc-sm zmdi-chevron-right"></i>
-          </a>
-          <ul class="submenu">
-            <li><a href="e_motor_speed_torque.html"><span class="menu-text">电机工作点分布</span></a></li>
-            <li><a href="e_motor_eff.html"><span class="menu-text">电机效率</span></a></li>
-            <li><a href="e_motor_temp.html"><span class="menu-text">电机定子温度</span></a></li>
-            <li><a href="LE_temp.html"><span class="menu-text">LE温度</span></a></li>
-          </ul>
-        </li>
-
-        <li class="has-submenu">
-          <a href="javascript:void(0)" class="submenu-toggle">
-            <i class="menu-icon zmdi zmdi-storage zmdi-hc-lg"></i>
-            <span class="menu-text">电池工作情况</span>
-            <i class="menu-caret zmdi zmdi-hc-sm zmdi-chevron-right"></i>
-          </a>
-          <ul class="submenu">
-            <li><a href="datatables.html"><span class="menu-text">放电soc-温度分布</span></a></li>
-            <li><a href="datatables.html"><span class="menu-text">充电soc-温度分布</span></a></li>
-          </ul>
-        </li>
-
-        <li class="has-submenu">
-          <a href="ir.html" class="submenu-toggle">
-            <i class="menu-icon zmdi zmdi-storage zmdi-hc-lg"></i>
-            <span class="menu-text">绝缘阻值分布</span>
-          </a>
-        </li>
-
-        <li class="has-submenu">
-          <a href="javascript:void(0)" class="submenu-toggle">
-            <i class="menu-icon zmdi zmdi-storage zmdi-hc-lg"></i>
-            <span class="menu-text">充电信息</span>
-            <i class="menu-caret zmdi zmdi-hc-sm zmdi-chevron-right"></i>
-          </a>
-          <ul class="submenu">
-            <li><a href="Charge_mode.html"><span class="menu-text">充电模式分布</span></a></li>
-            <li><a href="datatables.html"><span class="menu-text">充电开始SOC</span></a></li>
-            <li><a href="datatables.html"><span class="menu-text">充电结束SOC</span></a></li>
-            <li><a href="datatables.html"><span class="menu-text">开始充电时刻</span></a></li>
-            <li><a href="datatables.html"><span class="menu-text">充电时长</span></a></li>
-            <li><a href="datatables.html"><span class="menu-text">折算满充时长</span></a></li>
-            <li><a href="datatables.html"><span class="menu-text">充电平均温度</span></a></li>
-            <li><a href="datatables.html"><span class="menu-text">充电温升</span></a></li>
-            <li><a href="datatables.html"><span class="menu-text">充电平均功率</span></a></li>
-            <li><a href="datatables.html"><span class="menu-text">充电最大功率</span></a></li>
-          </ul>
-        </li>
-
-        <li class="has-submenu">
-          <a href="rtm_warm.html" class="submenu-toggle">
+          <a href="rtm_warm" class="submenu-toggle">
             <i class="menu-icon zmdi zmdi-storage zmdi-hc-lg"></i>
             <span class="menu-text">RTM报警统计</span>
+          </a>
+        </li>
+
+        <li class="has-submenu">
+          <a href="hist_default" class="submenu-toggle">
+            <i class="menu-icon zmdi zmdi-view-dashboard zmdi-hc-lg"></i>
+            <span class="menu-text">用户工况特性自定义统计</span>
+          </a>
+        </li>
+
+        <li class="has-submenu">
+          <a href="warming_pre" class="submenu-toggle">
+            <i class="menu-icon zmdi zmdi-view-dashboard zmdi-hc-lg"></i>
+            <span class="menu-text">报警预测</span>
           </a>
         </li>
 
