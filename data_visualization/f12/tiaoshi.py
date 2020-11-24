@@ -1,6 +1,76 @@
 import pandas as pd
 import os
+import json
+#-*- coding:utf-8 -*-  
 path="D:/21python/rtm/data_visualization/f12/"
+df1=pd.read_excel(path+'data/mile.xlsx', sheet_name = 'Sheet3',index_col=0,header=0)
+j_all={}
+columns1 = df1.columns.tolist()
+index1 = df1.index.tolist()
+#j_all['index']=df1.index.tolist()
+
+
+for column in columns1:
+    j_all[column] =[i*100 for i in df1[column].values.tolist() ] 
+
+dat1=json.dumps(j_all,ensure_ascii=False)
+print(dat1)
+
+df1=pd.read_excel(path+'data/mile.xlsx', sheet_name = 'consumption',index_col=0,header=0)
+j_all={}
+columns1 = df1.columns.tolist()
+index1 = df1.index.tolist()
+j_all['index']=df1.index.tolist()
+for column in columns1:
+    j_all[column] =df1[column].values.tolist()
+
+dat1=json.dumps(j_all,ensure_ascii=False)
+print(dat1)
+
+
+df3=pd.read_excel(path+'data/vehicle_distribution.xlsx', sheet_name = 'passat')
+re=[]
+
+for index, row in df3.iterrows():
+    temp = {}
+    temp["name"]=row["name"]
+    temp["value"]=row["value"]
+    re.append(temp)
+
+
+
+dat1=json.dumps(re,ensure_ascii=False)
+print(dat1)
+
+
+df3=pd.read_excel(path+'data/vehicle_distribution.xlsx', sheet_name = 'Tiguan')
+re=[]
+
+for index, row in df3.iterrows():
+    temp = {}
+    temp["name"]=row["name"]
+    temp["value"]=row["value"]
+    re.append(temp)
+
+
+import json
+dat1=json.dumps(re,ensure_ascii=False)
+print(dat1)
+
+path="D:/21python/rtm/data_visualization/f12/"
+df3=pd.read_excel(path+'data/vehicle_distribution.xlsx', sheet_name = 'lavida')
+re=[]
+
+for index, row in df3.iterrows():
+    temp = {}
+    temp["name"]=row["name"]
+    temp["value"]=row["value"]
+    re.append(temp)
+
+
+import json
+dat1=json.dumps(re,ensure_ascii=False)
+print(dat1)
 
 df1 = pd.read_excel(path+'data/vehicle_distribution.xlsx', sheet_name = 0)
 df2 = pd.read_excel(path+'data/vehicle_distribution.xlsx', sheet_name = 1)

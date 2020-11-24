@@ -33,13 +33,13 @@ def over_view1():
     """
     主界面
     """
+    print('overview')
     df1 = pd.read_excel(path+'data/vehicle_distribution.xlsx', sheet_name = 0)
     df2 = pd.read_excel(path+'data/vehicle_distribution.xlsx', sheet_name = 1)
     col1 = df1.columns
     df_project=df2.pivot_table(index='车型', values=['车辆数目'], aggfunc=sum)
 
     return render_template('overview.html',col1=col1,df1=df1,df_project=df_project)
-
 
 @app.route('/mile')
 def daily_mile():
@@ -48,6 +48,33 @@ def daily_mile():
     """
     return render_template('mile.html')
 
+
+'''
+@app.route('/mile')
+def daily_mile():
+    """
+    里程与能耗daily
+    """
+    df1=pd.read_excel(path+'data/mile.xlsx', sheet_name='consumption')
+    columns1 = df1.columns.tolist()
+    index1 = df1.index.tolist()
+    print(columns1)
+    columns1.pop(0)
+    print(columns1)
+    result1 = []
+    data_max1 = 0
+    for column in columns1:
+        temp = {}
+        temp['name'] = column
+        temp['type'] = 'bar'
+        temp['data'] = df1[column].values.tolist()
+        #print('temp=', temp)
+        if max(temp['data']) > data_max1:
+            data_max1 = max(temp['data'])
+        result1.append(temp)
+    #print(result)
+    return render_template('mile.html', data=result1, columns=columns1, index=index1, data_max=data_max1)
+'''
 @app.route('/velocity')
 def velocity():
     """
@@ -112,6 +139,10 @@ def charge_power():
     """
     return render_template('charge_power.html')
 
+@app.route('/get_data')
+def get_data():
+    return 'hhhhh'
+
 @app.route('/rtm_warm')
 def warm_hist():
     """
@@ -119,12 +150,16 @@ def warm_hist():
     """
     return render_template('warm_hist.html')
 
-@app.route('/hist_default')
+@app.route('/hist_default', methods=['GET', 'POST'])
 def hist_default():
     """
     充电
     """
-    return render_template('hist_default.html')
+    if request.method == "POST":
+        data = request.values
+        print('brand {}, start {}, end {}'.format(data['brand'], data['start_date'], data['end_date']))
+        test='print'
+    return render_template('hist_default.html',test=test)
 
 @app.route('/warming_pre')
 def warming_pre():

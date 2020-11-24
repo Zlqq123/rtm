@@ -17,40 +17,13 @@
                   <!--展示区-->
                   <!-- 为 ECharts 准备一个具备大小（宽高）的 DOM -->
                   
-                  <div  style="height:400px;" id="p1"></div>
+                  <div  style="height:400px;" id="mile_f1"></div>
+                  <script src="../static/js/figure_default/p2_mile.js"></script>
 
-                  <script type="text/javascript" >
-                    var myChart = echarts.init(document.getElementById('p1'),'macarons');
+                  <div  style="height:400px;" id="mile_f2"></div>
+                  <script src="../static/js/figure_default/p2_mile.js"></script>
 
-                    var option = {
-                            title:{ text: 'Lavida不同地理位置车辆每日行驶里程分布',x:'center', y: 'top',},
-                            tooltip: {trigger: 'axis',
-                                      axisPointer: {type: 'cross',crossStyle: {color: '#999'}}},
-                            toolbox: {feature: {dataView: {show: true, readOnly: false},
-                                                magicType: {show: true, type: ['line', 'bar']},
-                                                restore: {show: true},
-                                                saveAsImage: {show: true}}},
-                            legend: {data: ['华北','华北累计百分比'],x:'center', y: 'top'},
-                            xAxis: [{type: 'category',
-                                    data: ['0~20', '20~40', '40~60', '60~80', '80~100', '100~120', '120~140', '140~160', '160~180', '180~200', '200~220', 
-                                    '220~240','240~260','260~280','280~300','300~320','320~340','340~360','360~380','380~400','400~420','420~440'],
-                                    axisPointer: { type: 'shadow'}
-                                    }],
-                            yAxis: [{type: 'value',name: '占比',min: 0,max: 40,
-                                    interval: 5,axisLabel: {formatter: '{value} %'}},
-                                  {type: 'value',name: '累计百分比', min: 0,max: 120,
-                                    interval: 10,axisLabel: { formatter: '{value} %'}}
-                                    ],
-                            series: [{name: '华北',type: 'bar',
-                                    data: [33.8,26.1,19.7,13.6,8.4,6.1,3.7,4.7,5.2,5.4,5.6,5.3,4.6,3.7,2.7,1.8,1.3,0.9,0.6,0.3,0.3,0.2]},
-                                    {name: '华北累计百分比',type: 'line',yAxisIndex: 1,
-                                    data: [25.3,44.7,59.4,69.6,75.9,80.4,83.2,84.9,86.5,88,89.5,91,92,93.8,95,96,96.9,97.6,98.2,98.7,99.2,99.6,99.8,100]}
-                                    ]
-                                };
-                    myChart.setOption(option);
                   
-                  </script>  
-              
                 </div>
               </div><!-- .widget-body -->
             </div><!-- .widget -->
@@ -66,40 +39,44 @@
               <hr class="widget-separator">
               <div class="widget-body">
                 <div class="row placeholders">
+                  <div  style="height:400px;" id="mile_f3"></div>
+                  <script src="../static/js/figure_default/p2_mile.js"></script>
+              
+
                   <!--展示区-->
                   <!-- 为 ECharts 准备一个具备大小（宽高）的 DOM -->
-                  
+                  <!--<div  style="height:400px;" id="mile_con"></div>
+                    
                   <div  style="height:400px;" id="mile_con"></div>
 
                   <script type="text/javascript" >
-                    var myChart = echarts.init(document.getElementById('mile_con'),'macarons');
+                  var myChart = echarts.init(document.getElementById('mile_con'),'macarons');
 
-                    var option = {
-                            title:{ text: 'Lavida不同地理位置估算全电里程',x:'center', y: 'top',},
-                            tooltip: {trigger: 'axis',
-                                      axisPointer: {type: 'cross',crossStyle: {color: '#999'}}},
-                            toolbox: {feature: {dataView: {show: true, readOnly: false},
-                                                magicType: {show: true, type: ['line', 'bar']},
-                                                restore: {show: true},
-                                                saveAsImage: {show: true}}},
-                            legend: {data: ['华中','华东']},
-                            xAxis: [{type: 'category',
-                                    data: [ '<160', '160~180', '180~200', '200~220', '220~240','240~260',
-                                    '260~280','280~300','300~320','320~340','340~360','360~380','380~400','>400'],
-                                    axisPointer: { type: 'shadow'}
-                                    }],
-                            yAxis: [{type: 'value',name: '占比',min: 0,max: 25,
-                                    interval: 5,axisLabel: {formatter: '{value} %'}}
-                                    ],
-                            series: [{name: '华中',type: 'bar',
-                                    data: [1,3,5,10,15,18,17,12,9,5,3,1,1,1]},
-                                    {name: '华东',type: 'bar',
-                                    data: [0,1,4,9,15,20,19,14,9,4,2,1,0,0]},
-                                    ]
-                                };
-                    myChart.setOption(option);
-                  
-                  </script>  
+                  var option = {
+                          title:{ text: 'Lavida不同地理位置估算全电里程',
+                                  padding:[-20, -20,  100, 100],
+                                  },
+                          tooltip: {trigger: 'axis',
+                                    axisPointer: {type: 'cross',crossStyle: {color: '#999'}}},
+                          toolbox: {feature: {dataView: {show: true, readOnly: false},
+                                              magicType: {show: true, type: ['line', 'bar']},
+                                              restore: {show: true},
+                                              saveAsImage: {show: true}}},
+                          legend: {data: {{columns|safe}}},
+                          xAxis: [{type: 'category',
+                                  data: {{index}},
+                                  axisPointer: { type: 'shadow'}
+                                  }],
+                          yAxis: [{type: 'value',name: '占比',min: 0,max: {{data_max}},
+                                  interval: 0.02,axisLabel: {formatter: '{value} %'}}
+                                  ],
+                          series: {{data|safe}}
+                              };
+                  myChart.setOption(option);
+                </script>
+-->
+
+
               
                 </div>
               </div><!-- .widget-body -->
@@ -107,7 +84,45 @@
         </div><!-- END column -->
       </div><!-- END row -->
 
+      <div class="row">
+        <div class="col-md-12">
+            <div class=widget>
+              <header class="widget-header">
+                <h4 class="widget-title">估算能耗</h4>
+              </header>
+              <hr class="widget-separator">
+              <div class="widget-body">
+                <div class="row placeholders">
+                  <!--展示区-->
+                  <!-- 为 ECharts 准备一个具备大小（宽高）的 DOM -->
+                  <div  style="height:400px;" id="mile_f4"></div>
+                  <script src="../static/js/figure_default/p2_mile.js"></script>
 
+                </div>
+              </div><!-- .widget-body -->
+            </div><!-- .widget -->
+        </div><!-- END column -->
+      </div><!-- END row -->
+
+      <div class="row">
+        <div class="col-md-12">
+            <div class=widget>
+              <header class="widget-header">
+                <h4 class="widget-title">每次充电之间里程</h4>
+              </header>
+              <hr class="widget-separator">
+              <div class="widget-body">
+                <div class="row placeholders">
+                  <!--展示区-->
+                  <!-- 为 ECharts 准备一个具备大小（宽高）的 DOM -->
+                  <div  style="height:400px;" id="mile_f5"></div>
+                  <script src="../static/js/figure_default/p2_mile.js"></script>
+
+                </div>
+              </div><!-- .widget-body -->
+            </div><!-- .widget -->
+        </div><!-- END column -->
+      </div><!-- END row -->
 
 
     </div>

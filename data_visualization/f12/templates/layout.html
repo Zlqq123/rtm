@@ -33,8 +33,11 @@
 <script src="../static/js/echarts_theme/infographic.js"></script>
 <script src="../static/js/echarts_theme/macarons.js"></script>
 <script src="../static/js/echarts_theme/walden.js"></script>
+<script>var theme = "essos"; </script>
+<script>var theme1 = "infographic"; </script>
 
-  
+<script src="../static/libs/bower/jquery/dist/jquery.js" charset="utf-8"></script>
+<script src="../static/js/china.js" charset="utf-8"></script>
 <body class="menubar-left menubar-unfold menubar-light theme-primary">
 <!--============= start main area -->
 
@@ -89,8 +92,8 @@
       <ul class="app-menu">
 
         <li class="has-submenu">
-          <a href="overview" class="submenu-toggle">
-            <i class="menu-icon zmdi zmdi-chart zmdi-hc-lg"></i>
+          <a href="/overview" >
+            <i class="menu-icon zmdi zmdi-cast zmdi-hc-lg"></i>
             <!-- i class="menu-icon zmdi zmdi-view-dashboard zmdi-hc-lg" -->
             <!-- i class="menu-icon zmdi zmdi-storage zmdi-hc-lg" -->
             <span class="menu-text">总览</span>
@@ -128,21 +131,21 @@
         </li>
 
         <li class="has-submenu">
-          <a href="rtm_warm" class="submenu-toggle">
+          <a href="rtm_warm" >
             <i class="menu-icon zmdi zmdi-storage zmdi-hc-lg"></i>
             <span class="menu-text">RTM报警统计</span>
           </a>
         </li>
 
         <li class="has-submenu">
-          <a href="hist_default" class="submenu-toggle">
+          <a href="hist_default" >
             <i class="menu-icon zmdi zmdi-view-dashboard zmdi-hc-lg"></i>
             <span class="menu-text">用户工况特性自定义统计</span>
           </a>
         </li>
 
         <li class="has-submenu">
-          <a href="warming_pre" class="submenu-toggle">
+          <a href="warming_pre" >
             <i class="menu-icon zmdi zmdi-view-dashboard zmdi-hc-lg"></i>
             <span class="menu-text">报警预测</span>
           </a>
@@ -162,7 +165,7 @@
 
 
   <!-- build:js ../static/js/core.min.js -->
-  <script src="../static/libs/bower/jquery/dist/jquery.js"></script>
+
   <script src="../static/libs/bower/jquery-ui/jquery-ui.min.js"></script>
   <script src="../static/libs/bower/jQuery-Storage-API/jquery.storageapi.min.js"></script>
   <script src="../static/libs/bower/bootstrap-sass/assets/javascripts/bootstrap.js"></script>
