@@ -167,7 +167,7 @@ var myChart4 = echarts.init(document.getElementById('velocity_f4'),theme);
 var option4 = {
         title : {text: 'PHEV 用户工况 & NEDC & WLTP 车速分布',left: '20%'},
         tooltip: {trigger: 'axis',axisPointer: {type: 'cross',crossStyle: {color: '#999'}}},
-        grid:{x:"5%",y:'15%',x2:"22%",y2:'15%'},
+        grid:{x:"5%",y:'20%',x2:"22%",y2:'15%'},
         legend: { orient: 'vertical',left:"85%",top: '12%',
                 data: ['EV', 'PHEV','FV']},
         toolbox: { show: true,feature: {dataView: {show: true, readOnly: false, title:'查看数据'}, 
@@ -178,15 +178,14 @@ var option4 = {
                 axisTick:{show:true,alignWithLabel:true,interval:0,rotate:40,},
                 data: data1.index
                 },
-        yAxis: {type: 'value',min: 0,name:"占比",
-            interval: 5,axisLabel: {formatter: '{value} %'},
+        yAxis: {type: 'value',min: 0,name:"占比",max:100,
+            interval: 10,axisLabel: {formatter: '{value} %'},
             axisTick:{show:true},axisLine:{show:true},splitLine:{show:false}
             },
         series: [
-            {name:"Tiguan 用户工况",type: 'bar',stack: 'mode',data:data1.June.tiguan},
-            {name:"Passat 用户工况",type: 'bar',stack: 'mode',data:data1.June.passat},
-            {name:"NEDC",type: 'bar',stack: 'mode',data:data1.NEDC},
-            {name:"WLTP",type: 'bar',stack: 'mode',data:data1.WLTP},
+            {name:"EV",type: 'bar',stack: 'mode',data:data1.drive_mode_v.passat.EV},
+            {name:"PHEV",type: 'bar',stack: 'mode',data:data1.drive_mode_v.passat.PHEV},
+            {name:"FV",type: 'bar',stack: 'mode',data:data1.drive_mode_v.passat.FV}
             ]
         };
 myChart4.setOption(option4);

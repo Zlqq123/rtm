@@ -224,13 +224,9 @@ var option2={
         tooltip: {trigger: 'axis',axisPointer: {type: 'cross',crossStyle: {color: '#999'}}},
         legend: { orient: 'vertical',right:"10%",top: '10%',
                 data: ['Tiguan', 'Passat','Tiguan（累积）', 'Passat（累积）']},
-        toolbox: { show: true,
-            feature: {magicType: {show:true,
-                                dataView: {show: true, readOnly: false, title:'查看数据'},
-                                title:{line:'切换为折线图',bar:'切换为柱状图'},
-                                type: ['line', 'bar']},
-                                saveAsImage: {show:true, title:'保存为图片图'},
-                                restore: {show: true, title:'重置'}
+        toolbox: { show: true,feature: {dataView: {show: true, readOnly: false, title:'查看数据'}, 
+                                        saveAsImage: {show:true, title:'保存为图片图'},
+                                        restore: {show: true, title:'重置'}
                                     }},
         xAxis: { type: 'category',name:"里程[km]",nameLocation: 'middle',nameGap: 25,
                 axisTick:{show:true},data: data1.index},
@@ -258,13 +254,9 @@ var option3={
         tooltip: {trigger: 'axis',axisPointer: {type: 'cross',crossStyle: {color: '#999'}}},
         legend: { orient: 'vertical',right:"10%",top: '10%',
                 data: ['三月', '六月']},
-        toolbox: { show: true,
-            feature: {magicType: {show:true,
-                                dataView: {show: true, readOnly: false, title:'查看数据'},
-                                title:{line:'切换为折线图',bar:'切换为柱状图'},
-                                type: ['line', 'bar']},
-                                saveAsImage: {show:true, title:'保存为图片图'},
-                                restore: {show: true, title:'重置'}
+        oolbox: { show: true,feature: {dataView: {show: true, readOnly: false, title:'查看数据'}, 
+                                        saveAsImage: {show:true, title:'保存为图片图'},
+                                        restore: {show: true, title:'重置'}
                                     }},
         xAxis: { type: 'category',name:"里程[km]",nameLocation: 'middle',nameGap: 25,
                 axisTick:{show:true},data: data1.index},
@@ -317,17 +309,20 @@ var option5={
                     dataView : {show: true, readOnly: false, title:'查看数据'},
                     restore : {show: true, title:'重置'},
                     saveAsImage : {show: true, title:'保存为图片图'}},
-            legend: {orient: 'vertical',right:"10%",top: '10%',data: ['三月', '六月']},
+            legend: {orient: 'vertical',right:"10%",top: '10%',
+                    data: ['Lavida', 'Tiguan','Passat','Lavida(累积)','Tiguan(累积)','Passat(累积)']},
             xAxis: { type: 'category',name:"里程[km]",nameLocation: 'middle',nameGap: 25,
                     axisTick:{show:true},data: data1.index},
-            yAxis: {type: 'value',min: 0,name:"占比",interval: 2,axisLabel: {formatter: '{value} %'},
+            yAxis: [{type: 'value',min: 0,name:"占比",interval: 2,axisLabel: {formatter: '{value} %'},
                     axisTick:{show:true},axisLine:{show:true},splitLine:{show:false}},
-            series: [{name:"Lavida",type: 'bar',data:data2.March},
-                    {name:"Tiguan",type: 'bar',data:data2.June},
-                    {name:"Passat",type: 'bar',data:data1.daily_mile_June.passat},
-                    {name:"Lavida（累积）",type: 'line',yAxisIndex: 1,data:data1.daily_mile_June.passat_acc},
-                    {name:"Tiguan（累积）",type: 'line',yAxisIndex: 1,data:data1.daily_mile_June.tiguan_acc},
-                    {name:"Passat（累积）",type: 'line',yAxisIndex: 1,data:data1.daily_mile_June.passat_acc}
+                    {type: 'value',min: 0,name:"累计百分比",interval: 10,axisLabel: {formatter: '{value} %'},
+                    axisTick:{show:true},axisLine:{show:true},splitLine:{show:false}}],
+            series: [{name:"Lavida",type: 'bar',data:data1.mile_perchanging_June.lavida},
+                    {name:"Tiguan",type: 'bar',data:data1.mile_perchanging_June.tiguan},
+                    {name:"Passat",type: 'bar',data:data1.mile_perchanging_June.passat},
+                    {name:"Lavida(累积)",type: 'line',yAxisIndex: 1,data:data1.mile_perchanging_June.lavida_acc},
+                    {name:"Tiguan(累积)",type: 'line',yAxisIndex: 1,data:data1.mile_perchanging_June.tiguan_acc},
+                    {name:"Passat(累积)",type: 'line',yAxisIndex: 1,data:data1.mile_perchanging_June.passat_acc}
                     ]
             };
 myChart5.setOption(option5);

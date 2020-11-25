@@ -4,8 +4,8 @@ from flask_script import Manager
 
 import pandas as pd
 
-path="D:/21python/rtm/data_visualization/f12/"
-
+path=os.getcwd()
+print(path)
 
 # create and configure the app
 app = Flask(__name__) #创建Flask 实例
@@ -21,8 +21,8 @@ def over_view():
     """
     主界面
     """
-    df1 = pd.read_excel(path+'data/vehicle_distribution.xlsx', sheet_name = 0)
-    df2 = pd.read_excel(path+'data/vehicle_distribution.xlsx', sheet_name = 1)
+    df1 = pd.read_excel(path+'/f12/data/vehicle_distribution.xlsx', sheet_name = 0)
+    df2 = pd.read_excel(path+'/f12/data/vehicle_distribution.xlsx', sheet_name = 1)
     col1 = df1.columns
     df_project=df2.pivot_table(index='车型', values=['车辆数目'], aggfunc=sum)
 
@@ -34,8 +34,8 @@ def over_view1():
     主界面
     """
     print('overview')
-    df1 = pd.read_excel(path+'data/vehicle_distribution.xlsx', sheet_name = 0)
-    df2 = pd.read_excel(path+'data/vehicle_distribution.xlsx', sheet_name = 1)
+    df1 = pd.read_excel(path+'/f12/data/vehicle_distribution.xlsx', sheet_name = 0)
+    df2 = pd.read_excel(path+'/f12/data/vehicle_distribution.xlsx', sheet_name = 1)
     col1 = df1.columns
     df_project=df2.pivot_table(index='车型', values=['车辆数目'], aggfunc=sum)
 

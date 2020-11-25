@@ -13,7 +13,8 @@ import numpy as np
 >> pd.read_html(url)：解析URL、字符串或者HTML文件，抽取其中的tables表格
 >> pd.read_clipboard()：从你的粘贴板获取内容，并传给read_table()
 >> pd.DataFrame(dict)：从字典对象导入数据，Key是列名，Value是数据
-s1=pd.read_csv(filename,encoding="gbk",index_col=0,header=0)
+>>s1=pd.read_csv(filename,encoding="gbk",index_col=0,header=0)
+
 ### 导出数据
 >> df.to_csv(filename)：导出数据到CSV文件
 >> df.to_excel(filename)：导出数据到Excel文件
@@ -66,7 +67,7 @@ fe.to_csv(t_name,encoding="gbk",index=False)
 
 ### 数据处理：Filter、Sort和GroupBy
 
->> df[df[col] > 0.5]：选择col列的值大于0.5的行
+>> df[ df[col] > 0.5]：选择col列的值大于0.5的行
 
 >> df.sort_values(col1)：按照列col1排序数据，默认升序排列
 
