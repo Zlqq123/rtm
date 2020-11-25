@@ -49,6 +49,13 @@ def daily_mile():
     return render_template('mile.html')
 
 
+@app.route('/velocity')
+def velocity():
+    """
+    里程与能耗daily
+    """
+    return render_template('velocity.html')
+
 '''
 @app.route('/mile')
 def daily_mile():
@@ -75,12 +82,7 @@ def daily_mile():
     #print(result)
     return render_template('mile.html', data=result1, columns=columns1, index=index1, data_max=data_max1)
 '''
-@app.route('/velocity')
-def velocity():
-    """
-    里程与能耗daily
-    """
-    return render_template('velocity.html')
+
 
 @app.route('/E_motor')
 def e_motor():

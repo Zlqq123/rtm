@@ -189,19 +189,18 @@ var data1={
 
 var myChart1 = echarts.init(document.getElementById('mile_f1'),theme);
 var option1={
-        title : {text: 'Lavida 每日行驶里程',left: 'center'},
-        legend: { orient: 'vertical',right:"10%",top: '10%',
-                data: ['March', 'June','March_acc', 'June_acc']},
-        toolbox: { show: true,
-            feature: {magicType: {show:true,
-                                dataView: {show: true, readOnly: false, title:'查看数据'},
-                                title:{line:'切换为折线图',bar:'切换为柱状图'},
-                                type: ['line', 'bar']},
-                                saveAsImage: {show:true, title:'保存为图片图'},
-                                restore: {show: true, title:'重置'}
+        title : {text: 'Lavida 每日行驶里程',left: '20%'},
+        grid:{x:"5%",y:'15%',x2:"22%",y2:'15%'},
+        tooltip: {trigger: 'axis',axisPointer: {type: 'cross',crossStyle: {color: '#999'}}},
+        legend: { orient: 'vertical',left:"85%",top: '12%',
+                data: ['三月', '六月','三月（累积）', '六月（累积）']},
+        toolbox: { show: true,feature: {dataView: {show: true, readOnly: false, title:'查看数据'}, 
+                                        saveAsImage: {show:true, title:'保存为图片图'},
+                                        restore: {show: true, title:'重置'}
                                     }},
         xAxis: { type: 'category',name:"里程[km]",nameLocation: 'middle',nameGap: 25,
-                axisTick:{show:true},data: data1.index},
+                axisTick:{show:true,alignWithLabel:true,interval:0,rotate:40,},
+                data: data1.index},
         yAxis: [{type: 'value',min: 0,name:"占比",
             interval: 5,axisLabel: {formatter: '{value} %'},
             axisTick:{show:true},axisLine:{show:true},splitLine:{show:false}},
@@ -210,19 +209,21 @@ var option1={
             axisTick:{show:true},axisLine:{show:true},splitLine:{show:false}}
         ],
         series: [
-            {name:"March",type: 'bar',data:data1.daily_mile_March.lavida},
-            {name:"June",type: 'bar',data:data1.daily_mile_June.lavida},
-            {name:"March_acc",type: 'line',yAxisIndex: 1,data:data1.daily_mile_March.lavida_acc},
-            {name:"June_acc",type: 'line',yAxisIndex: 1,data:data1.daily_mile_June.lavida_acc},
+            {name:"三月",type: 'bar',data:data1.daily_mile_March.lavida},
+            {name:"六月",type: 'bar',data:data1.daily_mile_June.lavida},
+            {name:"三月（累积）",type: 'line',yAxisIndex: 1,data:data1.daily_mile_March.lavida_acc},
+            {name:"六月（累积）",type: 'line',yAxisIndex: 1,data:data1.daily_mile_June.lavida_acc},
             ]
             };
 myChart1.setOption(option1);
 
 var myChart2 = echarts.init(document.getElementById('mile_f2'),theme);
 var option2={
-        title : {text: 'PHEV 每日行驶里程',left: 'center'},
+        title : {text: 'PHEV 每日行驶里程',left: '20%'},
+        grid:{x:"5%",y:'15%',x2:"22%",y2:'15%'},
+        tooltip: {trigger: 'axis',axisPointer: {type: 'cross',crossStyle: {color: '#999'}}},
         legend: { orient: 'vertical',right:"10%",top: '10%',
-                data: ['Tiguan', 'Passat','Tiguan_acc', 'Passat_acc']},
+                data: ['Tiguan', 'Passat','Tiguan（累积）', 'Passat（累积）']},
         toolbox: { show: true,
             feature: {magicType: {show:true,
                                 dataView: {show: true, readOnly: false, title:'查看数据'},
@@ -243,8 +244,8 @@ var option2={
         series: [
             {name:"Tiguan",type: 'bar',data:data1.daily_mile_June.tiguan},
             {name:"Passat",type: 'bar',data:data1.daily_mile_June.passat},
-            {name:"Tiguan_acc",type: 'line',yAxisIndex: 1,data:data1.daily_mile_June.tiguan_acc},
-            {name:"Passat_acc",type: 'line',yAxisIndex: 1,data:data1.daily_mile_June.passat_acc}
+            {name:"Tiguan（累积）",type: 'line',yAxisIndex: 1,data:data1.daily_mile_June.tiguan_acc},
+            {name:"Passat（累积）",type: 'line',yAxisIndex: 1,data:data1.daily_mile_June.passat_acc}
             ]
             };
 myChart2.setOption(option2);
@@ -253,9 +254,10 @@ myChart2.setOption(option2);
 var myChart3 = echarts.init(document.getElementById('mile_f3'),theme);
 var option3={
         title : {text: 'Lavida 估算全电里程',left: 'center'},
+        grid:{x:"5%",y:'15%',x2:"22%",y2:'15%'},
         tooltip: {trigger: 'axis',axisPointer: {type: 'cross',crossStyle: {color: '#999'}}},
         legend: { orient: 'vertical',right:"10%",top: '10%',
-                data: ['March', 'June']},
+                data: ['三月', '六月']},
         toolbox: { show: true,
             feature: {magicType: {show:true,
                                 dataView: {show: true, readOnly: false, title:'查看数据'},
@@ -269,59 +271,63 @@ var option3={
         yAxis: {type: 'value',min: 0,name:"占比",
             interval: 5,axisLabel: {formatter: '{value} %'},
             axisTick:{show:true},axisLine:{show:true},splitLine:{show:false}},
-        series: [{name:"March",type: 'bar',data:data1.mile_convert.March},
-            {name:"June",type: 'bar',data:data1.mile_convert.June}]
+        series: [{name:"三月",type: 'bar',data:data1.mile_convert.March},
+            {name:"六月",type: 'bar',data:data1.mile_convert.June}]
             };
 myChart3.setOption(option3);
 
-
-
 var data2={
-    index: ["9.0~9.5", "9.5~10.0", "10.0~10.5", "10.5~11.0", "11.0~11.5", "11.5~12.0", 
-        "12.0~12.5", "12.5~13.0", "13.0~13.5", "13.5~14.0", "14.0~14.5", "14.5~15.0", 
-        "15.0~15.5", "15.5~16.0", "16.0~16.5", "16.5~17.0", "17.0~17.5", "17.5~18.0", 
-        "18.0~18.5", "18.5~19.0", "19.0~19.5", "19.5~20.0", "20.0~20.5"],
-    March: [0.634, 1.308, 1.599, 2.72, 3.819, 5.56, 6.911, 8.51, 
-        8.841, 8.93, 8.761, 7.57, 6.13, 5.89, 4.916, 3.8, 
+        index: ["9.0~9.5", "9.5~10.0", "10.0~10.5", "10.5~11.0", "11.0~11.5", "11.5~12.0", "12.0~12.5", "12.5~13.0", "13.0~13.5", "13.5~14.0", "14.0~14.5", "14.5~15.0", 
+        "15.0~15.5", "15.5~16.0", "16.0~16.5", "16.5~17.0", "17.0~17.5", "17.5~18.0",  "18.0~18.5", "18.5~19.0", "19.0~19.5", "19.5~20.0", "20.0~20.5"],
+        March: [0.634, 1.308, 1.599, 2.72, 3.819, 5.56, 6.911, 8.51, 8.841, 8.93, 8.761, 7.57, 6.13, 5.89, 4.916, 3.8, 
         3.34, 2.867, 2.43, 1.889, 1.4140, 1.21, 0.845],
-    June: [0.532, 0.7170, 1.339, 2.168, 3.42, 5.079, 6.865, 7.952, 
-        8.94, 9.253, 8.80, 8.214, 6.9, 6.022, 5.014, 3.98, 
+        June: [0.532, 0.7170, 1.339, 2.168, 3.42, 5.079, 6.865, 7.952, 8.94, 9.253, 8.80, 8.214, 6.9, 6.022, 5.014, 3.98, 
         3.12, 2.3857, 1.685, 1.389, 1.047, 0.725, 0.56]
-    };
+};
 var myChart4 = echarts.init(document.getElementById('mile_f4'),theme);
 var option4={
             title:{ text: 'Lavida估算能耗',left: 'center'},
+            grid:{x:"5%",y:'15%',x2:"22%",y2:'15%'},
             tooltip: {trigger: 'axis',axisPointer: {type: 'cross',crossStyle: {color: '#999'}}},
             toolbox: { mark : {show: true},
                     dataView : {show: true, readOnly: false, title:'查看数据'},
                     restore : {show: true, title:'重置'},
                     saveAsImage : {show: true, title:'保存为图片图'}},
-            legend: {orient: 'vertical',right:"10%",top: '10%',data: ['March', 'June']},
+            legend: {orient: 'vertical',right:"10%",top: '10%',data: ['三月', '六月']},
             xAxis: { type: 'category',name:"电耗[kWh/100km]",nameLocation: 'middle',nameGap: 25,
                     axisTick:{show:true},data: data2.index},
-            yAxis: {type: 'value',min: 0,name:"占比",interval: 2,axisLabel: {formatter: '{value} %'},
+            yAxis: [
+                    {type: 'value',min: 0,name:"占比",interval: 2,axisLabel: {formatter: '{value} %'},
                     axisTick:{show:true},axisLine:{show:true},splitLine:{show:false}},
-            series: [{name:"March",type: 'bar',data:data2.March},
-                    {name:"June",type: 'bar',data:data2.June}
+                    {type: 'value',min: 0,name:"累计百分比",interval: 10,axisLabel: {formatter: '{value} %'},
+                    axisTick:{show:true},axisLine:{show:true},splitLine:{show:false}}
+                    ],
+            series: [{name:"三月",type: 'bar',data:data2.March},
+                    {name:"六月",type: 'bar',data:data2.June}
                     ]
             };
 myChart4.setOption(option4);
 
 var myChart5 = echarts.init(document.getElementById('mile_f5'),theme);
 var option5={
-            title:{ text: '不同车型每次充电之间的里程',left: 'center'},
+            title:{ text: '不同车型每次充电之间的里程',left: '20%'},
+            grid:{x:"5%",y:'15%',x2:"22%",y2:'15%'},
             tooltip: {trigger: 'axis',axisPointer: {type: 'cross',crossStyle: {color: '#999'}}},
             toolbox: { mark : {show: true},
                     dataView : {show: true, readOnly: false, title:'查看数据'},
                     restore : {show: true, title:'重置'},
                     saveAsImage : {show: true, title:'保存为图片图'}},
-            legend: {orient: 'vertical',right:"10%",top: '10%',data: ['March', 'June']},
-            xAxis: { type: 'category',name:"电耗[kWh/100km]",nameLocation: 'middle',nameGap: 25,
-                    axisTick:{show:true},data: data2.index},
+            legend: {orient: 'vertical',right:"10%",top: '10%',data: ['三月', '六月']},
+            xAxis: { type: 'category',name:"里程[km]",nameLocation: 'middle',nameGap: 25,
+                    axisTick:{show:true},data: data1.index},
             yAxis: {type: 'value',min: 0,name:"占比",interval: 2,axisLabel: {formatter: '{value} %'},
                     axisTick:{show:true},axisLine:{show:true},splitLine:{show:false}},
-            series: [{name:"March",type: 'bar',data:data2.March},
-                    {name:"June",type: 'bar',data:data2.June}
+            series: [{name:"Lavida",type: 'bar',data:data2.March},
+                    {name:"Tiguan",type: 'bar',data:data2.June},
+                    {name:"Passat",type: 'bar',data:data1.daily_mile_June.passat},
+                    {name:"Lavida（累积）",type: 'line',yAxisIndex: 1,data:data1.daily_mile_June.passat_acc},
+                    {name:"Tiguan（累积）",type: 'line',yAxisIndex: 1,data:data1.daily_mile_June.tiguan_acc},
+                    {name:"Passat（累积）",type: 'line',yAxisIndex: 1,data:data1.daily_mile_June.passat_acc}
                     ]
             };
 myChart5.setOption(option5);

@@ -3,6 +3,31 @@ import os
 import json
 #-*- coding:utf-8 -*-  
 path="D:/21python/rtm/data_visualization/f12/"
+df1=pd.read_excel(path+'data/mile.xlsx', sheet_name = 'drive_mode',index_col=0,header=0)
+j_all={}
+columns1 = df1.columns.tolist()
+index1 = df1.index.tolist()
+j_all['index']=df1.index.tolist()
+
+for column in columns1:
+    j_all[column] =[round(i*100,3) for i in df1[column].values.tolist() ] 
+
+dat1=json.dumps(j_all,ensure_ascii=False)
+print(dat1)
+
+df1=pd.read_excel(path+'data/mile.xlsx', sheet_name = 'velocity',index_col=0,header=0)
+j_all={}
+columns1 = df1.columns.tolist()
+index1 = df1.index.tolist()
+j_all['index']=df1.index.tolist()
+
+
+for column in columns1:
+    j_all[column] =[round(i*100,3) for i in df1[column].values.tolist() ] 
+
+dat1=json.dumps(j_all,ensure_ascii=False)
+print(dat1)
+
 df1=pd.read_excel(path+'data/mile.xlsx', sheet_name = 'Sheet3',index_col=0,header=0)
 j_all={}
 columns1 = df1.columns.tolist()
@@ -11,7 +36,7 @@ index1 = df1.index.tolist()
 
 
 for column in columns1:
-    j_all[column] =[i*100 for i in df1[column].values.tolist() ] 
+    j_all[column] =[round(i*100,3) for i in df1[column].values.tolist() ] 
 
 dat1=json.dumps(j_all,ensure_ascii=False)
 print(dat1)
