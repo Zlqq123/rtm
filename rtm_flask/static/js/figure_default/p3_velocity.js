@@ -150,14 +150,45 @@ myChart2.setOption(option2);
 
 var myChart3 = echarts.init(document.getElementById('velocity_f3'),theme);
 var option3 ={
+        title: [{text: '驾驶模式占比',subtext: 'EV：纯电模式 PHEV:油电混合驱动 FV：燃油消耗',left: '18%',textAlign: 'center'},
+                {text: '不同车速下驾驶模式占比',left: '65%',textAlign: 'center'}],
+        grid: {x:"40%",y:'15%',x2:"10%",y2:'15%'},
+        tooltip: {trigger: 'axis',axisPointer: {type: 'cross',crossStyle: {color: '#999'}}},
+        toolbox: { show: true,feature: {dataView: {show: true, readOnly: false, title:'查看数据'}, 
+                                        saveAsImage: {show:true, title:'保存为图片图'},
+                                        restore: {show: true, title:'重置'}
+                                    }},
+        legend: {orient: 'vertical',left:"90%",top: '12%',data: ['EV', 'PHEV','FV']},
+        tooltip: {trigger: 'axis',showContent: false},
+        xAxis: { type: 'category',name:"车速[km/h]",nameLocation: 'middle',nameGap: 25,
+                axisTick:{show:true,alignWithLabel:true,interval:0,rotate:40,},
+                data: data1.index
+                },
+        yAxis: {type: 'value',min: 0,name:"占比",max:100,
+                interval: 10,axisLabel: {formatter: '{value} %'},
+                axisTick:{show:true},axisLine:{show:true},splitLine:{show:false}
+                },
+        series: [
+            {name:"EV",type: 'bar',stack: 'mode',data:data1.drive_mode_v.passat.EV},
+            {name:"PHEV",type: 'bar',stack: 'mode',data:data1.drive_mode_v.passat.PHEV},
+            {name:"FV",type: 'bar',stack: 'mode',data:data1.drive_mode_v.passat.FV},
+            {type: 'pie',radius: [0, '40%'],center: ['18%', '50%'],data:data1.drive_mode.passat}
+            ]
+        };
+myChart3.setOption(option3);
+
+
+/*
+var myChart3 = echarts.init(document.getElementById('velocity_f3'),theme);
+var option3 ={
         legend: { 
-                type: 'scroll',orient: 'vertical',right: 10,top: 20,
+                type: 'scroll',orient: 'vertical',left:"85%",top: '12%',
                 data: ['EV', 'PHEV','FV']
                 },
         tooltip: {trigger: 'item'},
         series: [{name: 'project',
                 type: 'pie',
-                radius: '55%',
+                radius: '50%',
                 center: ['40%', '50%'],
                 data:data1.drive_mode.passat }]
         };
@@ -189,3 +220,4 @@ var option4 = {
             ]
         };
 myChart4.setOption(option4);
+*/

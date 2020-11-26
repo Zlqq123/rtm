@@ -2,7 +2,38 @@ import pandas as pd
 import os
 import json
 #-*- coding:utf-8 -*-  
-path="D:/21python/rtm/data_visualization/f12/"
+path="D:/21python/rtm/rtm_flask/"
+
+SOC = ["[0,5)", "[5,10)", "[10,15)", "[15,20)", "[20,25)", "[25,30)", "[30,35)", "[35,40)", "[40,45)", "[45,50)", \
+        "[50,55)", "[55,60)", "[60,65)", "[65,70)", "[70,75)", "[75,80)", "[80,85)", "[85,90)", "[90,95)", "[95,100)", "100"]
+temp= ["[-30,-25)", "[-25,-20)", "[-20,-15)", "[-15,-10)", "[-10,-5)", "[-5,0)", "[0,5)", "[5,10)", \
+        "[10,15)", "[15,20)", "[20,25)", "[25,30)", "[30,35)", "[35,40)", "[40,45)", "[45,50)", "[50,55)", "[55,60)"] 
+
+
+
+a=''
+for i in range(20):
+    a+='"['+str(i*5)+","+str(i*5+5)+')", '
+print(a)
+
+a=''
+for i in range(20):
+    a+='"['+str(i*5-30)+","+str(i*5-25)+')", '
+print(a)
+
+
+df1=pd.read_excel(path+'data/battery.xlsx', sheet_name = 'lavida_6_char',index_col=0,header=0)
+j_all={}
+columns1 = df1.columns.tolist()
+j_all['index']=df1.index.tolist()
+j_all['col']=df1.columns.tolist()
+for column in columns1:
+    j_all[column] =[round(i*100,3) for i in df1[column].values.tolist() ] 
+
+dat1=json.dumps(j_all,ensure_ascii=False)
+print(dat1)
+
+
 df1=pd.read_excel(path+'data/mile.xlsx', sheet_name = 'drive_mode',index_col=0,header=0)
 j_all={}
 columns1 = df1.columns.tolist()

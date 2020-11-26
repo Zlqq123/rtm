@@ -21,8 +21,8 @@ def over_view():
     """
     主界面
     """
-    df1 = pd.read_excel(path+'/f12/data/vehicle_distribution.xlsx', sheet_name = 0)
-    df2 = pd.read_excel(path+'/f12/data/vehicle_distribution.xlsx', sheet_name = 1)
+    df1 = pd.read_excel(path+'/rtm_flask/data/vehicle_distribution.xlsx', sheet_name = 0)
+    df2 = pd.read_excel(path+'/rtm_flask/data/vehicle_distribution.xlsx', sheet_name = 1)
     col1 = df1.columns
     df_project=df2.pivot_table(index='车型', values=['车辆数目'], aggfunc=sum)
 
@@ -34,8 +34,8 @@ def over_view1():
     主界面
     """
     print('overview')
-    df1 = pd.read_excel(path+'/f12/data/vehicle_distribution.xlsx', sheet_name = 0)
-    df2 = pd.read_excel(path+'/f12/data/vehicle_distribution.xlsx', sheet_name = 1)
+    df1 = pd.read_excel(path+'/rtm_flask/data/vehicle_distribution.xlsx', sheet_name = 0)
+    df2 = pd.read_excel(path+'/rtm_flask/data/vehicle_distribution.xlsx', sheet_name = 1)
     col1 = df1.columns
     df_project=df2.pivot_table(index='车型', values=['车辆数目'], aggfunc=sum)
 
@@ -55,6 +55,13 @@ def velocity():
     里程与能耗daily
     """
     return render_template('velocity.html')
+
+@app.route('/battery')
+def battery():
+    """
+    电池工作情况
+    """
+    return render_template('battery.html')
 
 '''
 @app.route('/mile')
@@ -92,12 +99,7 @@ def e_motor():
     return render_template('e_motor.html')
 
 
-@app.route('/battery')
-def battery():
-    """
-    电池工作情况
-    """
-    return render_template('battery.html')
+
 
 @app.route('/ir')
 def ir():

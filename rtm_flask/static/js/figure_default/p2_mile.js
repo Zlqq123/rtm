@@ -189,7 +189,7 @@ var data1={
 
 var myChart1 = echarts.init(document.getElementById('mile_f1'),theme);
 var option1={
-        title : {text: 'Lavida 每日行驶里程',left: '20%'},
+        title : {text: 'Lavida 每日行驶里程',left: '30%',textAlign: 'center'},
         grid:{x:"5%",y:'15%',x2:"22%",y2:'15%'},
         tooltip: {trigger: 'axis',axisPointer: {type: 'cross',crossStyle: {color: '#999'}}},
         legend: { orient: 'vertical',left:"85%",top: '12%',
@@ -219,10 +219,10 @@ myChart1.setOption(option1);
 
 var myChart2 = echarts.init(document.getElementById('mile_f2'),theme);
 var option2={
-        title : {text: 'PHEV 每日行驶里程',left: '20%'},
+        title : {text: 'PHEV 每日行驶里程',left: '30%'},
         grid:{x:"5%",y:'15%',x2:"22%",y2:'15%'},
         tooltip: {trigger: 'axis',axisPointer: {type: 'cross',crossStyle: {color: '#999'}}},
-        legend: { orient: 'vertical',right:"10%",top: '10%',
+        legend: { orient: 'vertical',left:"85%",top: '12%',
                 data: ['Tiguan', 'Passat','Tiguan（累积）', 'Passat（累积）']},
         toolbox: { show: true,feature: {dataView: {show: true, readOnly: false, title:'查看数据'}, 
                                         saveAsImage: {show:true, title:'保存为图片图'},
@@ -249,12 +249,12 @@ myChart2.setOption(option2);
 
 var myChart3 = echarts.init(document.getElementById('mile_f3'),theme);
 var option3={
-        title : {text: 'Lavida 估算全电里程',left: 'center'},
+        title : {text: 'Lavida 估算全电里程',left: '30%'},
         grid:{x:"5%",y:'15%',x2:"22%",y2:'15%'},
         tooltip: {trigger: 'axis',axisPointer: {type: 'cross',crossStyle: {color: '#999'}}},
-        legend: { orient: 'vertical',right:"10%",top: '10%',
+        legend: { orient: 'vertical',left:"85%",top: '12%',
                 data: ['三月', '六月']},
-        oolbox: { show: true,feature: {dataView: {show: true, readOnly: false, title:'查看数据'}, 
+        toolbox: { show: true,feature: {dataView: {show: true, readOnly: false, title:'查看数据'}, 
                                         saveAsImage: {show:true, title:'保存为图片图'},
                                         restore: {show: true, title:'重置'}
                                     }},
@@ -278,22 +278,19 @@ var data2={
 };
 var myChart4 = echarts.init(document.getElementById('mile_f4'),theme);
 var option4={
-            title:{ text: 'Lavida估算能耗',left: 'center'},
+            title:{ text: 'Lavida估算能耗',left: '30%'},
             grid:{x:"5%",y:'15%',x2:"22%",y2:'15%'},
             tooltip: {trigger: 'axis',axisPointer: {type: 'cross',crossStyle: {color: '#999'}}},
-            toolbox: { mark : {show: true},
-                    dataView : {show: true, readOnly: false, title:'查看数据'},
-                    restore : {show: true, title:'重置'},
-                    saveAsImage : {show: true, title:'保存为图片图'}},
-            legend: {orient: 'vertical',right:"10%",top: '10%',data: ['三月', '六月']},
+            toolbox: { show: true,feature: {dataView: {show: true, readOnly: false, title:'查看数据'}, 
+                                        saveAsImage: {show:true, title:'保存为图片图'},
+                                        restore: {show: true, title:'重置'}
+                                    }},
+            legend: {orient: 'vertical',left:"85%",top: '12%',data: ['三月', '六月']},
             xAxis: { type: 'category',name:"电耗[kWh/100km]",nameLocation: 'middle',nameGap: 25,
                     axisTick:{show:true},data: data2.index},
-            yAxis: [
-                    {type: 'value',min: 0,name:"占比",interval: 2,axisLabel: {formatter: '{value} %'},
+            yAxis: {type: 'value',min: 0,name:"占比",interval: 2,axisLabel: {formatter: '{value} %'},
                     axisTick:{show:true},axisLine:{show:true},splitLine:{show:false}},
-                    {type: 'value',min: 0,name:"累计百分比",interval: 10,axisLabel: {formatter: '{value} %'},
-                    axisTick:{show:true},axisLine:{show:true},splitLine:{show:false}}
-                    ],
+                    
             series: [{name:"三月",type: 'bar',data:data2.March},
                     {name:"六月",type: 'bar',data:data2.June}
                     ]
@@ -302,14 +299,14 @@ myChart4.setOption(option4);
 
 var myChart5 = echarts.init(document.getElementById('mile_f5'),theme);
 var option5={
-            title:{ text: '不同车型每次充电之间的里程',left: '20%'},
+            title:{ text: '不同车型每次充电之间的里程',left: '30%'},
             grid:{x:"5%",y:'15%',x2:"22%",y2:'15%'},
             tooltip: {trigger: 'axis',axisPointer: {type: 'cross',crossStyle: {color: '#999'}}},
-            toolbox: { mark : {show: true},
-                    dataView : {show: true, readOnly: false, title:'查看数据'},
-                    restore : {show: true, title:'重置'},
-                    saveAsImage : {show: true, title:'保存为图片图'}},
-            legend: {orient: 'vertical',right:"10%",top: '10%',
+            toolbox: { show: true,feature: {dataView: {show: true, readOnly: false, title:'查看数据'}, 
+                                        saveAsImage: {show:true, title:'保存为图片图'},
+                                        restore: {show: true, title:'重置'}
+                                    }},
+            legend: {orient: 'vertical',left:"85%",top: '12%',
                     data: ['Lavida', 'Tiguan','Passat','Lavida(累积)','Tiguan(累积)','Passat(累积)']},
             xAxis: { type: 'category',name:"里程[km]",nameLocation: 'middle',nameGap: 25,
                     axisTick:{show:true},data: data1.index},

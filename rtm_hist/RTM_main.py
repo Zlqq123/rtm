@@ -5,17 +5,22 @@ import time
 import csv
 import numpy as np
 #from range_test.range_test import Rangetest
-from rtm.RTM_ana import RtmAna
+#from RTM_ana import RtmAna
 from genarl_func import time_cost
 import hist_func_np
 from en_client import en_client
-
-
+from default_hist import RtmHist
+import os
 client=en_client()
-path='D:/03RTM/temp/'
-tb1_name="en.rtm_6_2th"
-tb2_name="en.vehicle_vin"
-sampling=1/6
+
+
+path=os.getcwd()
+print(path)
+
+l1=RtmHist(path,"ALL PHEV",'MidEast','ShangHai','Fleet',['2020-06-01','2020-06-13'],[100,3000])
+l1.daily_mileage()
+a=1
+
 
 
 def f1(proj,u):
