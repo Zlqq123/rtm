@@ -3,7 +3,7 @@ import xlsxwriter
 import time
 from datetime import datetime
 import numpy as np
-
+import pandas as pd
 import hist_func_np
 from genarl_func import time_cost,time_cost_all
 from en_client import en_client
@@ -224,7 +224,7 @@ class RtmAna():
         pass
     '''
 
-    @time_cost1()
+ 
     def daily_mileage(self,workbook):
         sql="SELECT max(accmiles)-min(accmiles) FROM " +self.tb1_name+ self.tb_join+ \
             " where "+ self.con+" group by deviceid,toDate(uploadtime) "
@@ -235,11 +235,12 @@ class RtmAna():
         
         hist_func_np.hist_con_show(workbook,["daily_mile",'mileage per day'],[np.array(mileage)],range(0,500,20),2)
 
-    @time_cost1()
     def percharge_mile(self,workbook):
         sql="SELECT deviceid,uploadtime,charg_s_c,soc,soc_c,accmiles " \
             "FROM " +self.tb1_name+ self.tb_join+ " WHERE " + self.con + " AND "+ self.tb1_name +".charg_s_c IN (1,-1) ORDER BY deviceid,uploadtime "
         aus=client.execute(sql)
+        #df=pd.DataFrame(aus)
+        #df.to_csv('old.csv')
         #aus=[0 vin  1 时间  2充电变化标志位  3 soc   4 d_soc  5 mileage ]
         all_drive=[]
         count_1=0#基数多少次行驶前数据丢失
@@ -294,8 +295,7 @@ class RtmAna():
             for a in all_drive:
                 Energy_consump.append(charging_energy*(a[3]-a[4])/(a[6]-a[5]))
             hist_func_np.hist_con_show(workbook,['Energy consumption','Energy consumption'],[np.array(Energy_consump)],np.arange(6,30,0.5),2)
-
-    @time_cost1()
+ 
     def v_mode(self,workbook,sampling=1/6):
         sql="SELECT vehiclespeed,operationmode FROM " + self.tb1_name + self.tb_join+  \
             " Where "+ self.con+ " AND "+ self.tb1_name +".vehiclespeed>0 and toSecond(uploadtime)<"+str(int(sampling*60))
@@ -308,7 +308,6 @@ class RtmAna():
         if self.pro_typ=="PHEV":
             hist_func_np.hist_cros_con_dis_show(workbook,["driving mode"],np.array(v),[0,10,20,30,40,50,60,70,80,90,100,110,120,200],np.array(mode),['EV','PHEV',"FV"])
     
-    @time_cost1()
     def get_drive(self,workbook):
         sql="SELECT deviceid,uploadtime,vehicle_s_c,accmiles,soc,soc_c FROM " +self.tb1_name+ self.tb_join+ \
             " WHERE " + self.con + " AND "+self.tb1_name+".vehicle_s_c in (1,-1) ORDER BY deviceid,uploadtime"
@@ -408,7 +407,6 @@ class RtmAna():
         hist_func_np.hist_con_show(workbook,name_list,[v_mean],[0,10,20,30,40,50,60,100,210],2)
         '''
 
-    @time_cost1()
     def E_motor(self,workbook,sampling=1/6):
         '''
         sampling自定义采样频率 取值范围[1/60,1]
@@ -442,7 +440,6 @@ class RtmAna():
         hist_func_np.hist_con_show(workbook,["LE-temp",'E_motor temperature','LE temperature'],[np.array(temp_motor),np.array(temp_LE)],range(-10,120,5),2)
         hist_func_np.hist_cros_2con_show(workbook,['LE_working_point'],np.array(speed),range(-4000,13000,500),np.array(torq),range(-300,400,50))
 
-    @time_cost1()
     def power_distribution(self,workbook,sampling=1/6):
         '''
         sampling自定义采样频率 取值范围[1/60,1]
@@ -462,7 +459,6 @@ class RtmAna():
         in_list=[np.array(BMS_pow),np.array(em_el_pow),np.array(other_pow)]
         hist_func_np.hist_con_show(workbook,name_list,in_list,range(50),2)
 
-    @time_cost1()
     def BMS(self,workbook,sampling=1/6):
         '''
         sampling自定义采样频率 取值范围[1/60,1]
@@ -600,6 +596,7 @@ class RtmAna():
             "FROM " +self.tb1_name + self.tb_join+" WHERE "+ self.con+ " AND "+ self.tb1_name +".charg_s==1 " \
             "ORDER BY deviceid,uploadtime"
         aus=client.execute(sql)
+
         #aus=[i][0vin 1time, 2 BMS_power 3temp 4soc 5charg_mode 6max_temp 7min_temp]
 
         ss,ee=[],[]#用于存放aus中每段充电开始的index 和每次充电结束的index
@@ -679,7 +676,6 @@ class RtmAna():
 
         return np.array(time_h_s),np.array(time_d),np.array(time_d_c),np.array(mode),charg_soc,charg_temp,charg_pow
 
-    @time_cost1()
     def charg_hist(self,workbook):
         [time_h_s,time_d,time_d_c,mode,charg_soc,charg_temp,charg_pow]=self.charge_ana()
 
@@ -705,7 +701,6 @@ class RtmAna():
         hist_func_np.hist_con_show(workbook,name_list,charg_pow,range(50),2)
         hist_func_np.hist_cros_con_dis_show(workbook,['charg_pow-mode'],charg_pow[1],range(50),np.array(mode),mode_interval)
 
-    @time_cost1()
     def Warming_hist(self,workbook):
         sql="SELECT sum(tdfwn),sum(celohwn),sum(vedtovwn),sum(vedtuvwn),sum(lsocwn),sum(celovwn),sum(celuvwn),sum(hsocwn),sum(jpsocwn), " \
             "sum(cesysumwn),sum(celpoorwn),sum(inswn),sum(dctpwn),sum(bksyswn),sum(dcstwn),sum(emctempwn),sum(hvlockwn),sum(emtempwn),sum(vesoc) " \

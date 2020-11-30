@@ -11,18 +11,35 @@ import hist_func_np
 from en_client import en_client
 from default_hist import RtmHist
 import os
+from RTM_ana import RtmAna
 client=en_client()
 
-
+sql="SELECT uniq( deviceid) FROM ods.rtm_reissue_history WHERE deviceid like 'LSVC%'"
+aus=client.execute(sql)
+print(aus[0][0])
 path=os.getcwd()
 print(path)
 
-l1=RtmHist(path,"ALL PHEV",'MidEast','ShangHai','Fleet',['2020-06-01','2020-06-13'],[100,3000])
-l1.daily_mileage()
+
+
+#l1=RtmHist(path,"ALL PHEV",'MidEast','ShangHai','Fleet',['2020-06-01','2020-06-03'],[100,3000])
+#l1.daily_mileage()
+l2=RtmHist(path,"lavida",date_range=['2020-06-01','2020-06-03'])
+l2.count_nr()
+l2.charge_soc()
+
+
+
+tb1_name = "en.rtm_6_2th"
+tb2_name = "en.vehicle_vin"
+l1=RtmAna(path,"lavida",tb1_name,tb2_name)
+l1.condition_printer()
+l1(start_date='2020-06-01',end_date='2020-06-03')
+
+l2.E_motor_workingPoint()
+l2.E_motor_temp()
+l2.percharge_mile()
 a=1
-
-
-
 def f1(proj,u):
     #path='D:/01zlq/temp/_'+u+'/'
     start=time.time()

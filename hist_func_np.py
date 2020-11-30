@@ -2,7 +2,6 @@ import sys
 import numpy as np
 import pandas as pd
 import xlsxwriter
-from genarl_func import time_cost_all, time_cost_all
 
 '''
 given input_input and steps,output hist.

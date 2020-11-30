@@ -6,7 +6,6 @@ import numpy as np
 import pandas as pd
 
 import hist_func_np
-from genarl_func import time_cost,time_cost_all
 from en_client import en_client
 client=en_client()
 '''
@@ -33,7 +32,7 @@ class RtmHist():
 
     '''
 
-    def __init__ (self,path,proj,region=0,province=0,user_type=0,date_range=[],mile_range=[]):
+    def __init__ (self,proj,region=0,province=0,user_type=0,date_range=[],mile_range=[]):
         '''
         project must be in {'Lavida','Passat','Tiguan','Passat C5','Passat C6','Tiguan C5','Tiguan C6','ALL BEV','ALL PHEV'}
         region must be in {'MidSouth', 'MidNorth', 'MidEast', 'SouthWest', 'Mid', 'NorthWest', 'NorthEast'}
@@ -43,7 +42,6 @@ class RtmHist():
         date_range=[start_date,end_date]:yyyy-mm-dd        eg: ['2020-06-01','2020-06-13']
         mile_range=[start_mileage,end_mileage]
         '''
-        self.path=path
         tb1='ods.rtm_reissue_history'
         tb2='en.vehicle_vin'
         self.tb1=tb1

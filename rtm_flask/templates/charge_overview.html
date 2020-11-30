@@ -9,11 +9,12 @@
         <div class="col-md-12">
             <div class=widget>
               <header class="widget-header">
-                <h4 class="widget-title">充电情况概览</h4>
+                <h4 class="widget-title">平均每月充电次数</h4>
               </header>
               <hr class="widget-separator">
               <div class="widget-body">
-
+                <div class="col-md-6"  style="height:400px;" id="char_overview_f1"></div>
+                <script src="../static/js/figure_default/p5_charge_overview.js"></script>
 
                 
             </div><!-- .widget-body -->
@@ -21,7 +22,22 @@
     </div><!-- END column -->
   </div><!-- END row -->
 
+  <div class="row">
+    <div class="col-md-12">
+        <div class=widget>
+          <header class="widget-header">
+            <h4 class="widget-title">充电模式</h4>
+          </header>
+          <hr class="widget-separator">
+          <div class="widget-body">
+            <div  style="height:400px;" id="char_overview_f2"></div>
+            <script src="../static/js/figure_default/p5_charge_overview.js"></script>
 
+            
+        </div><!-- .widget-body -->
+    </div><!-- .widget -->
+</div><!-- END column -->
+</div><!-- END row -->
 
 
 </div>

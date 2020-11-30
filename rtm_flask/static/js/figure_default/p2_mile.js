@@ -254,7 +254,8 @@ var option3={
         tooltip: {trigger: 'axis',axisPointer: {type: 'cross',crossStyle: {color: '#999'}}},
         legend: { orient: 'vertical',left:"85%",top: '12%',
                 data: ['三月', '六月']},
-        toolbox: { show: true,feature: {dataView: {show: true, readOnly: false, title:'查看数据'}, 
+        toolbox: { show: true,feature: {dataView: {show: true, readOnly: false, title:'查看数据'},
+                                        magicType: {type: ['bar', 'line'],title:{line:'折线图',bar:'柱状图'}},
                                         saveAsImage: {show:true, title:'保存为图片图'},
                                         restore: {show: true, title:'重置'}
                                     }},
@@ -263,8 +264,8 @@ var option3={
         yAxis: {type: 'value',min: 0,name:"占比",
             interval: 5,axisLabel: {formatter: '{value} %'},
             axisTick:{show:true},axisLine:{show:true},splitLine:{show:false}},
-        series: [{name:"三月",type: 'bar',data:data1.mile_convert.March},
-            {name:"六月",type: 'bar',data:data1.mile_convert.June}]
+        series: [{name:"三月",type: 'line',data:data1.mile_convert.March},
+            {name:"六月",type: 'line',data:data1.mile_convert.June}]
             };
 myChart3.setOption(option3);
 
@@ -282,6 +283,7 @@ var option4={
             grid:{x:"5%",y:'15%',x2:"22%",y2:'15%'},
             tooltip: {trigger: 'axis',axisPointer: {type: 'cross',crossStyle: {color: '#999'}}},
             toolbox: { show: true,feature: {dataView: {show: true, readOnly: false, title:'查看数据'}, 
+                                        magicType: {type: ['bar', 'line'],title:{line:'折线图',bar:'柱状图'}},
                                         saveAsImage: {show:true, title:'保存为图片图'},
                                         restore: {show: true, title:'重置'}
                                     }},
@@ -291,8 +293,8 @@ var option4={
             yAxis: {type: 'value',min: 0,name:"占比",interval: 2,axisLabel: {formatter: '{value} %'},
                     axisTick:{show:true},axisLine:{show:true},splitLine:{show:false}},
                     
-            series: [{name:"三月",type: 'bar',data:data2.March},
-                    {name:"六月",type: 'bar',data:data2.June}
+            series: [{name:"三月",type: 'line',data:data2.March},
+                    {name:"六月",type: 'line',data:data2.June}
                     ]
             };
 myChart4.setOption(option4);

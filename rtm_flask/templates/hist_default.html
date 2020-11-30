@@ -6,26 +6,99 @@
     <div class="wrap">
     <section class="app-content">
       <div class="row">
-        <div class="col-md-12">
+        <div class="col-md-8">
             <div class=widget>
               <header class="widget-header">
-                <h4 class="widget-title">充电功率</h4>
+                <h4 class="widget-title">自定义查询</h4>
               </header>
               <hr class="widget-separator">
               <div class="widget-body">
                 <form action='/hist_default' method="POST"> 
                     车型：
                     <select name='brand'>
-                        <option value="朗逸">朗逸</option>
-                        <option value="途观">途观</option>
-                        <option value="帕萨特">帕萨特</option>
+                        <option value="Lavida" >Lavida BEV 53Ah</option>
+                        <option value="Tiguan">Tiguan L PHEV</option>
+                        <option value="Tiguan C5">Tiguan L PHEV C5</option>
+                        <option value="Tiguan C6">Tiguan L PHEV C6</option>
+                        <option value="Passat">Passat PHEV</option>
+                        <option value="Passat C5">Passat PHEV C5</option>
+                        <option value="Passat C6">Passat PHEV C6</option>
+                        <option value="ALL BEV">All BEV</option>
+                        <option value="ALL PHEV">ALL PHEV</option>
                     </select>
+                    <br>
+                    <br>
                     开始时间：
-                    <input type='date' name='start_date' value="2019-01-01"/>
+                    <input type='date' name='start_date' value="2020-01-01"/>
                     结束时间：
                     <input type='date' name='end_date' value="2020-11-20"/>
-                    <button type='submit'>查询</button>
+                    <br>
+                    <br>
+                    用户类型：
+                    <select name='user_type'>
+                      <option value='all'>ALL</option>
+                      <option value="Private">Private</option>
+                      <option value="Fleet">Fleet</option>
+                      <option value="Taxi">Taxi</option>
+                    </select>
+                    &emsp;&emsp;&emsp;&emsp;
+                    地理位置：
+                    <select name='region'>
+                      <option value='all'>全国</option>
+                      <option value="MidEast">华东</option>
+                      <option value="MidNorth">华北</option>
+                      <option value="Mid">华中</option>
+                      <option value="Taxi">华南</option>
+                      <option value="NorthEast">东北</option>
+                      <option value="NorthWest">西北</option>
+                      <option value="SouthWest">西南</option>                      
+                    </select>
+                    <br>
+                    <br>
+                    车辆里程范围：<input type="text" name="start_mile" style="width:60px;"> km ~ <input type="text" name="end_mile" style="width:60px;"> km
+                    <br>
+                    <br>
+                    统计特性：
+                    <select name='fc_name'>
+                      <option value="fc11">每日行驶里程</option>
+                      <option value="fc12">每次充电间隔行驶里程</option>
+                      <option value="fc13">折算里程</option>
+                      <option value="fc14">折算能耗</option>
+                      <option value="fc2">车速分布</option>
+                      <option value="fc31">电机温度分布</option>
+                      <option value="fc32">LE温度分布</option>
+                      <option value="fc33">电机工作点</option>
+                      <option value="fc34">电机效率</option>
+                      <option value="fc41">充电开始时间分布</option>
+                      <option value="fc42">充电开始SOC以及结束SOC分布</option>
+                      <option value="fc43">充电时间</option>
+                    </select>
+                    &emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;
+                    <button type='submit'> 查询 </button>
+                    <br>
+                    <br>
                 </form>
+
+                <div class="table-responsive">
+                  <table class="table table-striped" cellspacing="0" width="50%">
+                    <thead>
+                        </tr>
+                          {% for col in col1: %}
+                            <th>{{col}}</th>
+                          {%endfor%}
+                        </tr>
+                    </thead>
+                    <tbody>
+                      {% for indexs in df1.index: %}
+                        <tr>
+                          {% for i in x: %}
+                          <td>{{df1.loc[indexs].values[i]}}</td>
+                          {%endfor%}
+                        </tr>
+                      {%endfor%}
+                    </tbody>
+                  </table>
+                </div>
             </div><!-- .widget-body -->
         </div><!-- .widget -->
     </div><!-- END column -->

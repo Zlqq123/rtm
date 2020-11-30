@@ -1,6 +1,7 @@
 import os
 from flask import Flask, render_template, jsonify, request, redirect, url_for
 from flask_script import Manager
+from de_hist import f1
 
 import pandas as pd
 
@@ -41,6 +42,35 @@ def over_view1():
 
     return render_template('overview.html',col1=col1,df1=df1,df_project=df_project)
 
+@app.route('/hist_default', methods=['GET', 'POST'])
+def hist_default():
+    """
+    充电
+    """
+    df=pd.DataFrame(["",'',''])
+    col=['A','B','C']
+    x=range(len(col))
+    
+    if request.method == "POST":
+        data = request.values
+        pro = data['brand']
+        date_range =[data['start_date'], data['end_date']]
+        region = data['region']
+        userType = data['user_type']
+        mile_range = [data['start_mile'],data['end_mile']]
+        fuc_name = data['fc_name']
+        
+        df = f1(pro, date_range, region, userType, mile_range,fuc_name)
+
+
+        #df = pd.DataFrame([[12,13,14,15,16,17],[1,2,3,4,5,6]])
+        #df.columns=['A','B','C','D','E','F']
+        col=df.columns.tolist()
+        x=range(len(col))
+
+    return render_template('hist_default.html',col1=col,df1=df,x=x)
+
+
 @app.route('/mile')
 def daily_mile():
     """
@@ -62,6 +92,20 @@ def battery():
     电池工作情况
     """
     return render_template('battery.html')
+
+@app.route('/E_motor')
+def e_motor():
+    """
+    电机工作点
+    """
+    return render_template('e_motor.html')
+
+@app.route('/charge_overview')
+def charge_overview():
+    """
+    充电
+    """
+    return render_template('charge_overview.html')
 
 '''
 @app.route('/mile')
@@ -91,13 +135,6 @@ def daily_mile():
 '''
 
 
-@app.route('/E_motor')
-def e_motor():
-    """
-    里程与能耗daily
-    """
-    return render_template('e_motor.html')
-
 
 
 
@@ -108,12 +145,6 @@ def ir():
     """
     return render_template('ir.html')
 
-@app.route('/charge')
-def charge_overview():
-    """
-    充电
-    """
-    return render_template('charge_overview.html')
 
 @app.route('/charge_soc')
 def charge_soc():
@@ -154,16 +185,7 @@ def warm_hist():
     """
     return render_template('warm_hist.html')
 
-@app.route('/hist_default', methods=['GET', 'POST'])
-def hist_default():
-    """
-    充电
-    """
-    if request.method == "POST":
-        data = request.values
-        print('brand {}, start {}, end {}'.format(data['brand'], data['start_date'], data['end_date']))
-        test='print'
-    return render_template('hist_default.html',test=test)
+
 
 @app.route('/warming_pre')
 def warming_pre():
