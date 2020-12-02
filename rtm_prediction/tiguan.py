@@ -3,7 +3,7 @@ import matplotlib.pyplot as plt
 import seaborn as sns
 
 from en_client import en_client
-from genarl_func import time_cost,mail_sender
+#from genarl_func import time_cost,mail_sender
 
 '''
 original table
@@ -175,7 +175,7 @@ def tiguan_sample():
 
 
 # 获取样本特征值，获得完整训练数据
-@time_cost
+#@time_cost
 def feature_ex(filename,t_name):
     from rtm.RTM_ana import feature_extract
     import datetime
@@ -303,9 +303,9 @@ def pre1():
     X1.to_csv(filepath+'训练样本_x.csv',encoding="gbk")
     y.to_csv(filepath+'训练样本_y.csv',encoding="gbk")
 
+#pre1()
 
-
-@time_cost
+#@time_cost
 def xgb_search_param():
     '''
     网格搜索获得最优参数：
@@ -357,14 +357,15 @@ def xgb_search_param():
 
 
 def trian_coment():
+    
+    filename=filepath+"训练样本_y.csv"
+    y = pd.read_csv(filename, encoding="gbk", index_col=0, header=0)
     filename=filepath+"训练样本_x.csv"
-    X = pd.read_csv(filename, encoding="gbk", index_col=0, header=0)
+    X = pd.read_csv(filename,encoding="gbk", index_col=0, header=0)
     #index_col=0声明文件第一列为索引，header=0第一行为列名（默认就是，不必重新申明）
     print(X.columns)
     # 导入特征和label
-    filename=filepath+"训练样本_y.csv"
-    y = pd.read_csv(filename, encoding="gbk", index_col=0, header=0)
-
+  
 
     from sklearn.model_selection import train_test_split
     X_train, X_test_s, y_train, y_test_s = train_test_split(X, y, test_size=0.2, random_state=1)
@@ -391,7 +392,7 @@ def trian_coment():
     #print('XGBoost 预测结果', y_pred1)
     print('XGBoost 准确率:', metrics.accuracy_score(y_test_s,y_pred1))
 
-    '''
+    
     from sklearn.metrics import roc_curve,auc
     fpr, tpr, thresholds = roc_curve(y_test_s, y_pred, pos_label=1)
     roc_auc = auc(fpr, tpr)  ###计算auc的值
@@ -417,6 +418,8 @@ def trian_coment():
     xgb.plot_importance(model,max_num_features=20,importance_type='weight')
     plt.savefig(filepath+"importance_weight.jpg")
     plt.show()
+
+        '''
 
 
 trian_coment()

@@ -1,12 +1,13 @@
 var theme='essos';
 
-var data1={
+var data={
     index: [
         "温度差异报警", "电池高温报警", "车载储能装置类型过压报警", "车载储能装置类型欠压报警", 
         "SOC低报警", "单体电池过压报警", "单体电池欠压报警", "SOC过高报警", "SOC跳变报警", 
         "可充电储能系统不匹配报警", "电池单体一致性差报警", "绝缘报警", "dc-dc温度报警", 
         "制动系统报警", "DC-DC状态报警", "驱动电机控制器温度报警", "高压互锁状态报警", 
         "驱动电机温度报警", "车载储能装置类型过充", "total"], 
+    index1:['01','02','03','04','05','06','07','08','09','10','11','12','13','14','15','16','17','18','19','合计'],
     col: ["Lavida BEV", "Tiguan L PHEV", "Passat PHEV"], 
     warming_num:{
         lavida: [0, 1706, 0, 0, 0, 0, 0, 0, 73, 0, 0, 17085, 0, 716, 26, 8, 734, 0, 0, 19878], 
@@ -23,10 +24,10 @@ var data1={
         passat: [0, 8, 0, 0, 4, 0, 0, 0, 51, 0, 1, 2, 1, 203, 9, 2, 57, 0, 0, 297]
     }
 };
-    
+
 var myChart1 = echarts.init(document.getElementById('warm_f1'),theme);
 var option1={
-        title : {text: 'RTM报警发生次数统计（2020年6月）',left: '20%'},
+        title: {text: 'RTM报警发生次数统计（2020年6月）',left: '20%'},
         grid:{x:"5%",y:'15%',x2:"22%",y2:'15%'},
         tooltip: {trigger: 'axis',axisPointer: {type: 'cross',crossStyle: {color: '#999'}}},
         legend: { orient: 'vertical',left:"85%",top: '12%',
@@ -37,14 +38,13 @@ var option1={
                                     }},
         xAxis: { type: 'category',
                 axisTick:{show:true ,interval:0, rotate:40},
-                data: data.index
+                data: data.index1
             },
         yAxis: {
             type: 'value',min: 0,name:"发生次数",
-            interval: 200,
+            interval: 5000,
             axisTick:{show:true},axisLine:{show:true},splitLine:{show:false}
         },
-            
         series: [
             {name:"Lavida BEV",type: 'bar',data:data.warming_num.lavida},
             {name:"Tiguan L PHEV",type: 'bar',data:data.warming_num.tiguan},
@@ -52,3 +52,5 @@ var option1={
             ]
             };
 myChart1.setOption(option1);
+
+

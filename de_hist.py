@@ -27,12 +27,18 @@ def f1(pro, date_range, region, userType, mile_range,fuc_name):
     if n>0 :
         if fuc_name=='fc11':
             [re1, _]= l2.daily_mileage()
+            #col_name = re1.columns.tolist()
+            #col_name.insert(0,'每日行驶里程范围[km]')
             re1['每日行驶里程范围[km]']=re1.index.tolist()
+            #re1.reindex(columns=col_name)            
             return re1
         if fuc_name=='fc12':
             x = l2.percharge_mile()
             re1 = x[0]
+            #col_name = re1.columns.tolist()
+            #col_name.insert(0,'每次充电之间行驶里程范围[km]')
             re1['每次充电之间行驶里程范围[km]'] = re1.index.tolist()
+            #re1.reindex(columns=col_name)
             return re1
 
 

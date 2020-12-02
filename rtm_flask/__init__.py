@@ -66,7 +66,8 @@ def hist_default():
         #df = pd.DataFrame([[12,13,14,15,16,17],[1,2,3,4,5,6]])
         #df.columns=['A','B','C','D','E','F']
         col=df.columns.tolist()
-        x=range(len(col))
+        x = list(range(len(col)))
+        #x.reverse()
 
     return render_template('hist_default.html',col1=col,df1=df,x=x)
 
