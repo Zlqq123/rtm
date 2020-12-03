@@ -1,7 +1,7 @@
 import os
 from flask import Flask, render_template, jsonify, request, redirect, url_for
 from flask_script import Manager
-from de_hist import f1
+from rtm_hist.de_hist import f1
 
 import pandas as pd
 
