@@ -3,13 +3,20 @@ import os
 import json
 #-*- coding:utf-8 -*-  
 path="D:/21python/rtm/rtm_flask/"
-df1 = pd.read_excel (path + 'data/mile.xlsx', sheet_name = 'warming',index_col=0,header=0)
+df1 = pd.read_excel (path + 'data/mile.xlsx', sheet_name = 'mile_usertype',index_col=0,header=0)
 j_all={}
 columns1 = df1.columns.tolist()
 j_all['index']=df1.index.tolist()
 j_all['col']=df1.columns.tolist()
 for column in columns1:
-    j_all[column] =df1[column].values.tolist()
+    s=sum(df1[column].values.tolist())
+    #j_all[column] =[round(i*100/s,3) for i in df1[column].values.tolist() ] 
+    j_all[column] = []
+    s1=0
+    for i in df1[column].values.tolist():
+        s1+=i
+        j_all[column].append(round(s1/s*100,2))
+    
 
 dat1=json.dumps(j_all,ensure_ascii=False)
 print(dat1)

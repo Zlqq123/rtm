@@ -1,7 +1,7 @@
 import os
 from flask import Flask, render_template, jsonify, request, redirect, url_for
 from flask_script import Manager
-from rtm_hist.de_hist import f1
+from rtm_hist.default_hist import f1
 
 import pandas as pd
 
@@ -53,6 +53,7 @@ def hist_default():
     
     if request.method == "POST":
         data = request.values
+        print(data)
         pro = data['brand']
         date_range =[data['start_date'], data['end_date']]
         region = data['region']
@@ -133,6 +134,10 @@ def daily_mile():
         result1.append(temp)
     #print(result)
     return render_template('mile.html', data=result1, columns=columns1, index=index1, data_max=data_max1)
+
+@app.route('/get_data')
+def get_data():
+    return 'hhhhh'
 '''
 
 
@@ -175,9 +180,7 @@ def charge_power():
     """
     return render_template('charge_power.html')
 
-@app.route('/get_data')
-def get_data():
-    return 'hhhhh'
+
 
 @app.route('/rtm_warm')
 def warm_hist():

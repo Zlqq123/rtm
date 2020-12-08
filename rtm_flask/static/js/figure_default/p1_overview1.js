@@ -1,4 +1,6 @@
+
 var theme='essos';
+
 var myChart= echarts.init(document.getElementById('r2'),theme);
 var option ={
         title:[
@@ -47,74 +49,6 @@ var option ={
                 ]
         };
 myChart.setOption(option);
-
-
-/*
-var myChart2 = echarts.init(document.getElementById('p1_f2'),theme);
-var option2 ={
-        grid:{ height:'50%'},
-        legend: { type: 'scroll',orient: 'vertical',right: 5,top: 20,
-                data: ['Private', 'Taxi','Fleet']
-                },
-        title:{text: 'Lavida BEV 53Ah',x:'center', y: 'top' },
-        toolbox: { show: true,
-                feature: {magicType: { saveAsImage: {show:true, title:'保存为图片图'}}}
-                },                          
-        tooltip: {trigger: 'item'},
-        series: [{  name: 'project',
-                type: 'pie',
-                radius: '55%',
-                center: ['40%', '50%'],
-                data: [
-                        {value: 2438, name: 'Private'},
-                        {value: 291, name: 'Taxi'},
-                        {value: 4053, name: 'Fleet'},
-                        ]  }]
-        };
-myChart2.setOption(option2);
- 
-var myChart3 = echarts.init(document.getElementById('p1_f3'),theme);
-var option3 ={
-                legend: { type: 'scroll',orient: 'vertical',right: 5,top: 20,
-                        data: ['Private', 'Taxi','Fleet']
-                        },
-                title:{text: 'Passat PHEV',x:'center', y: 'top' },
-                toolbox: { show: true,
-                        feature: {magicType: { saveAsImage: {show:true, title:'保存为图片图'}}}
-                        },                          
-                tooltip: {trigger: 'item'},
-                series: [{  name: 'project',
-                        type: 'pie',
-                        radius: '55%',
-                        center: ['40%', '50%'],
-                        data: [
-                        {value: 18856, name: 'Private'},
-                        {value: 3519, name: 'Fleet'},
-                        ]  }]
-                };
-myChart3.setOption(option3);
-
-
-var myChart4 = echarts.init(document.getElementById('p1_f4'),theme);
-var option4 ={
-        legend: { type: 'scroll',orient: 'vertical',right: 5,top: 20,
-                data: ['Private', 'Taxi','Fleet']
-                },
-        title:{text: 'Tiguan L PHEV',x:'center', y: 'top' },
-        toolbox: { show: true,
-                feature: {magicType: { saveAsImage: {show:true, title:'保存为图片图'}}}
-                },                          
-        tooltip: {trigger: 'item'},
-        series: [{  name: 'project',
-                type: 'pie',
-                radius: '55%',
-                center: ['40%', '50%'],
-                data: [
-                {value: 13760, name: 'Private'},
-                ]  }]
-        };
-myChart4.setOption(option4);
-*/
 
 
 var myChart6 = echarts.init(document.getElementById('p1_f6'),theme);

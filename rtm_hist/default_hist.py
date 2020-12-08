@@ -1,13 +1,14 @@
 import sys
+sys.path.append("..")#sys.path.append("..")的意思是增加搜索的路径，..代表上一个目录层级
+
 import xlsxwriter
 import time
 from datetime import datetime
 import numpy as np
 import pandas as pd
 
-import hist_func_np
-from genarl_func import time_cost,time_cost_all
-from en_client import en_client
+from rtm_hist import hist_func_np
+from rtm_hist.en_client import en_client
 client=en_client()
 '''
 original table
@@ -33,7 +34,7 @@ class RtmHist():
 
     '''
 
-    def __init__ (self,path,proj,region=0,province=0,user_type=0,date_range=[],mile_range=[]):
+    def __init__ (self,proj,region=0,province=0,user_type=0,date_range=[],mile_range=[]):
         '''
         project must be in {'Lavida','Passat','Tiguan','Passat C5','Passat C6','Tiguan C5','Tiguan C6','ALL BEV','ALL PHEV'}
         region must be in {'MidSouth', 'MidNorth', 'MidEast', 'SouthWest', 'Mid', 'NorthWest', 'NorthEast'}
@@ -43,7 +44,6 @@ class RtmHist():
         date_range=[start_date,end_date]:yyyy-mm-dd        eg: ['2020-06-01','2020-06-13']
         mile_range=[start_mileage,end_mileage]
         '''
-        self.path=path
         tb1='ods.rtm_reissue_history'
         tb2='en.vehicle_vin'
         self.tb1=tb1
@@ -576,10 +576,54 @@ class RtmHist():
         return re1, re2, re3, re4, re5, re6
 
 
+def f1(pro, date_range, region, userType, mile_range,fuc_name):
+
+    if userType=='all':
+        userType=0
+
+    if region=='all':
+        region=0
+
+    if mile_range == ['','']:
+        l2=RtmHist(pro, date_range=date_range, region=region, user_type=userType )
+    else:
+        m=[int(mile_range[0]),int(mile_range[0])]
+        l2=RtmHist(pro, date_range=date_range, region=region, user_type=userType, mile_range=m)
+    n = l2.count_nr()
+    if n>0 :
+        if fuc_name=='fc11':
+            [re1, _]= l2.daily_mileage()
+            re1['每日行驶里程范围[km]']=re1.index.tolist()
+            col_name = re1.columns
+            a=re1.reindex(columns=col_name[::-1])            
+            return a
+        if fuc_name=='fc12':
+            x = l2.percharge_mile()
+            re1 = x[0]
+            re1['每次充电之间行驶里程范围[km]'] = re1.index.tolist()
+            col_name = re1.columns
+            a=re1.reindex(columns=col_name[::-1])            
+            return a
+        if fuc_name=='fc13':
+            x = l2.percharge_mile()
+            re1 = x[2]
+            re1['折算里程范围[km]'] = re1.index.tolist()
+            col_name = re1.columns
+            a=re1.reindex(columns=col_name[::-1])            
+            return a
+        if fuc_name=='fc14':
+            x = l2.percharge_mile()
+            re1 = x[4]
+            re1['折算电耗范围[kWh/100km]'] = re1.index.tolist()
+            col_name = re1.columns
+            a=re1.reindex(columns=col_name[::-1])            
+            return a
 
 
 
 
 
+
+#if __name__=="__main__":
 
 

@@ -7,14 +7,14 @@ var data={
         "可充电储能系统不匹配报警", "电池单体一致性差报警", "绝缘报警", "dc-dc温度报警", 
         "制动系统报警", "DC-DC状态报警", "驱动电机控制器温度报警", "高压互锁状态报警", 
         "驱动电机温度报警", "车载储能装置类型过充", "total"], 
-    index1:['01','02','03','04','05','06','07','08','09','10','11','12','13','14','15','16','17','18','19','合计'],
+    index1:['W01','W02','W03','W04','W05','W06','W07','W08','W09','W10','W11','W12','W13','W14','W15','W16','W17','W18','W19','合计'],
     col: ["Lavida BEV", "Tiguan L PHEV", "Passat PHEV"], 
     warming_num:{
         lavida: [0, 1706, 0, 0, 0, 0, 0, 0, 73, 0, 0, 17085, 0, 716, 26, 8, 734, 0, 0, 19878], 
         tiguan: [
             3024, 55, 0, 0, 54, 0, 0, 0, 2052, 0, 8107, 7649, 13, 3647, 30, 84, 
             8291, 0, 0, 32766],
-        Passat: [
+        passat: [
             0, 1156, 0, 0, 610, 0, 0, 0, 2442, 0, 3759, 3622, 755, 6734, 
             382, 1526, 3718, 0, 0, 22219], 
     },
@@ -54,3 +54,30 @@ var option1={
 myChart1.setOption(option1);
 
 
+var myChart1 = echarts.init(document.getElementById('warm_f2'),theme);
+var option1={
+        title: {text: '发生RTM报警车辆数统计（2020年6月）',left: '20%'},
+        grid:{x:"5%",y:'15%',x2:"22%",y2:'15%'},
+        tooltip: {trigger: 'axis',axisPointer: {type: 'cross',crossStyle: {color: '#999'}}},
+        legend: { orient: 'vertical',left:"85%",top: '12%',
+                data: ["Lavida BEV", "Tiguan L PHEV", "Passat PHEV"]},
+        toolbox: { show: true,feature: {dataView: {show: true, readOnly: false, title:'查看数据'}, 
+                                        saveAsImage: {show:true, title:'保存为图片图'},
+                                        restore: {show: true, title:'重置'}
+                                    }},
+        xAxis: { type: 'category',
+                axisTick:{show:true ,interval:0, rotate:40},
+                data: data.index1
+            },
+        yAxis: {
+            type: 'value',min: 0,name:"辆",
+            interval: 100,
+            axisTick:{show:true},axisLine:{show:true},splitLine:{show:false}
+        },
+        series: [
+            {name:"Lavida BEV",type: 'bar',data:data.vehicle_involve.lavida},
+            {name:"Tiguan L PHEV",type: 'bar',data:data.vehicle_involve.tiguan},
+            {name:"Passat PHEV",type: 'bar',data:data.vehicle_involve.passat},
+            ]
+            };
+myChart1.setOption(option1);

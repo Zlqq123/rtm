@@ -13,6 +13,18 @@ from default_hist import RtmHist
 import os
 from RTM_ana import RtmAna
 client=en_client()
+from rtm_hist.default_hist import f1
+
+
+pro="Tiguan C6"
+date_range=["2020-01-01","2020-11-20"]
+region='all'
+userType="Private"
+fuc_name="fc11"
+mile_range=['','']
+df = f1(pro, date_range, region, userType, mile_range,fuc_name)
+print(df)
+
 
 sql="SELECT uniq( deviceid) FROM ods.rtm_reissue_history WHERE deviceid like 'LSVC%'"
 aus=client.execute(sql)

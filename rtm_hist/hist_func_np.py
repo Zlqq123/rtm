@@ -1,8 +1,11 @@
 import sys
+#sys.path.append("./.")#sys.path.append("..")的意思是增加搜索的路径，..代表上一个目录层级
+sys.path.append(".")#sys.path.append("..")的意思是增加搜索的路径，..代表上一个目录层级
+
 import numpy as np
 import pandas as pd
 import xlsxwriter
-from genarl_func import time_cost_all, time_cost_all
+from rtm_hist.genarl_func import time_cost_all, time_cost_all
 
 '''
 given input_input and steps,output hist.

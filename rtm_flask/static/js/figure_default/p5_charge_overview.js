@@ -26,18 +26,16 @@ var data={
 
 var myChart1 = echarts.init(document.getElementById('char_overview_f1'),theme);
 var option1 = {
-        title : {},
-        grid:{x:"5%",y:'15%',x2:"22%",y2:'15%'},
+        title: {text:'平均每月每辆车充电次数', left: '50%', textAlign: 'center'},
+        grid:{x:"5%",y:'15%',x2:"5%",y2:'5%',containLabel: true},
         tooltip: {trigger: 'axis',axisPointer: {type: 'cross',crossStyle: {color: '#999'}}},
         toolbox: { show: true,feature: {dataView: {show: true, readOnly: false, title:'查看数据'}, 
                                         saveAsImage: {show:true, title:'保存为图片图'},
                                         restore: {show: true, title:'重置'}
                                     }},
-        xAxis: { type: 'category',axisTick:{show:true,},data: ['Lavida BEV 53Ah', "Tiguan L PHEV","Passat L PHEV"]},
-        yAxis: {type: 'value',min: 0,name:"平均每月充电次数",
-            interval: 2,
-            axisTick:{show:true},axisLine:{show:true},splitLine:{show:false}},
-        series:{type: 'bar',data:[20,10,9.5]}
+        xAxis: {type: 'value',min: 0, interval: 2,},
+        yAxis: { type: 'category', data: ['Lavida BEV 53Ah', "Tiguan L PHEV","Passat L PHEV"]},
+        series:{type: 'bar', barWidth : 20, data:[20,10,9.5]}
 };
 myChart1.setOption(option1);
 
@@ -45,18 +43,18 @@ var myChart2 = echarts.init(document.getElementById('char_overview_f2'),theme);
 var option2 ={
     title:[
          {text: 'Lavida BEV',left: '16.67%',textAlign: 'center'},
-         {text: 'Passat PHEV',left: '50%',textAlign: 'center'},
-         {text: 'Tiguan L PHEV',left: '83.33%',textAlign: 'center' },
+         {text: 'Tiguan L PHEV',left: '50%',textAlign: 'center'},
+         {text: 'Passat PHEV',left: '83.33%',textAlign: 'center' },
             ],
-    legend: { type: 'scroll',orient: 'vertical',right: 5,top: 20,
-            data: ["模式二", "模式三(3.6kW)","模式三(7.2kW)","直流充电"]  },
+  //  legend: { type: 'scroll',orient: 'vertical',right: 5,top: 20,
+  //          data: ["模式二", "模式三(3.6kW)","模式三(7.2kW)","直流充电"]  },
     tooltip: {trigger: 'item'},
     toolbox: {show: true,orient : 'vertical',left: '95%',top: '75%',
             feature : { mark : {show: true},
                     restore : {show: true, title:'重置'},
                     saveAsImage : {show: true, title:'保存为图片图'}}
                     },
-    series:[{type:'pie',radius: '60%',center: ['16.67%', '50%'],
+    series:[{type:'pie',radius: '50%',center: ['16.67%', '50%'],
             data:data.charge_mode.lavida,
             animation: false,
             label: {position: 'outer',alignTo: 'none',bleedMargin: 5},
@@ -65,7 +63,7 @@ var option2 ={
             top: 0,
             bottom: 0
             },
-            {type:'pie',radius: '60%',center: ['50%', '50%'],
+            {type:'pie',radius: '50%',center: ['50%', '50%'],
             data:data.charge_mode.tiguan,
             animation: false,
             label: {position: 'outer',alignTo: 'none',bleedMargin: 5},
@@ -74,7 +72,7 @@ var option2 ={
             top: 0,
             bottom: 0
             },
-            {type:'pie',radius: '60%',center: ['80%', '50%'],
+            {type:'pie',radius: '50%',center: ['80%', '50%'],
             data:data.charge_mode.passat,
             animation: false,
             label: {position: 'outer',alignTo: 'none',bleedMargin: 5},
