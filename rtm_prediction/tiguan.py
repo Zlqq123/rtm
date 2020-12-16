@@ -23,7 +23,7 @@ All data with warmingsignal Tiguan -------ods.rtm_reissue_history>>------en.rtm_
 
 '''
 client=en_client()
-filepath="D:/21python/rtm/prediction_data/new/"
+filepath="D:/21python/rtm/rtm_prediction/new/"
 
 
 def tiguan_warming_detective():
@@ -177,7 +177,7 @@ def tiguan_sample():
 # 获取样本特征值，获得完整训练数据
 #@time_cost
 def feature_ex(filename,t_name):
-    from rtm.RTM_ana import feature_extract
+    from rtm_hist.RTM_ana import feature_extract
     import datetime
     tb1_name="en.rtm_tiguan"
     fe=pd.DataFrame()
@@ -386,10 +386,13 @@ def trian_coment():
                 }
     train_data = xgb.DMatrix(X_train, label=y_train)
     test_data = xgb.DMatrix(X_test_s, label=y_test_s)
-    model = xgb.train(param, train_data, evals=[(train_data, 'train'), (test_data, 'valid')], num_boost_round = 5000, early_stopping_rounds=50, verbose_eval=25)
+    model = xgb.train(param, train_data, evals=[(train_data, 'train'), (test_data, 'valid')], num_boost_round = 5000, early_stopping_rounds=50, verbose_eval=50)
     y_pred = model.predict(test_data)
+    #y_pred =[x for x in y_pred]
     y_pred1 = [1 if x>=0.5 else 0 for x in y_pred]
-    #print('XGBoost 预测结果', y_pred1)
+    #x = pd.DataFrame([y_test_s["Label"].tolist(),y_pred,y_pred1])
+    #x.to_csv(filepath+"result.csv",encoding="gbk")
+    #print('XGBoost 准确率:', metrics.accuracy_score(y_test_s,y_pred))
     print('XGBoost 准确率:', metrics.accuracy_score(y_test_s,y_pred1))
 
     
