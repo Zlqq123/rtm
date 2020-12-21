@@ -104,3 +104,43 @@ fe.to_csv(t_name,encoding="gbk",index=False)
 >> df.min()：返回每一列的最小值
 >> df.median()：返回每一列的中位数
 >> df.std()：返回每一列的标准差
+
+
+
+### numpy 
+>> t_aay = np.array([[1,2,3,4,1], [3,2,4,1,2]])
+>> np.sort(t_aay)
+>> np.argsort(t_aay)
+t_aay.shape=2,5
+t_aay.transpose()转置
+
+拉平：
+a.flatten()#对于原始数组不改变
+
+数组连接：
+c=np.concatenate((a,b),axis=0)
+c=np.concatenate((a,b),axis=1)
+np.vstack((a,b))
+np.hstack((a,b))
+
+构造数组
+np.zeros((3,2))
+np.ones((3,5))
+np.ones((3,5))*8
+a=np.zeros_like(c) 创建预c矩阵一样大小的零矩阵
+np.identity(5) 构造5*5的单位矩阵
+>> x=np.empty((3,2)) 慎用
+
+np.random.rand(3,2)随机构造0~1的 float
+nprandom.randint(n,size=(5,4)) 随机构造 [0,n) 的整数数组
+
+
+mu,sigma=0,2
+np.random.normal(mu,sigma,10)构造长度为10的数组，满足均值为0 ，方差为2的正太分布
+
+洗牌
+np.random.shuffle(a) 打乱数组a 的顺序
+随机种子
+np.random.seed(x)
+
+

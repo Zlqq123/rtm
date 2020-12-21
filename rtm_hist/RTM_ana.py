@@ -31,6 +31,8 @@ class RtmAna():
         自定义处理数据时间选择;    添加call函数;    添加绝缘阻值统计
         v5.3
         client delete
+        v5.4
+        抛出异常raise
     '''
 
     def __init__ (self,path,proj,tb1_name,tb2_name):
