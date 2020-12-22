@@ -124,7 +124,7 @@ np.vstack((a,b))
 np.hstack((a,b))
 
 构造数组
-np.zeros((3,2))
+>>np.zeros((3,2))
 np.ones((3,5))
 np.ones((3,5))*8
 a=np.zeros_like(c) 创建预c矩阵一样大小的零矩阵
