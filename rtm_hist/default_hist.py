@@ -176,7 +176,7 @@ class RtmHist():
         aus=client.execute(sql)
         #aus=[0 vin  1 时间  2充电变化标志位  3 soc   4 d_soc  5 mileage ]
         df=pd.DataFrame(aus)
-        df.to_csv('new.csv')
+        #df.to_csv('new.csv')
         all_drive=[]
         count_1=0#基数多少次行驶前数据丢失
         count_2=0#计数行驶后数据丢失
@@ -226,16 +226,8 @@ class RtmHist():
         re1=pd.DataFrame(freq[1])
         re1.index=freq[0]
         re1.columns=['频数']
-        re2=pd.DataFrame([np.min(mile_r)])
-        re2.index = ['min']
-        re2.columns=['per charging mileage']
-        re2.loc['1%percentile']=np.percentile(mile_r,1)
-        re2.loc['25%percentile']=np.percentile(mile_r,25)
-        re2.loc['50%percentile']=np.percentile(mile_r,50)
-        re2.loc['75%percentile']=np.percentile(mile_r,75)
-        re2.loc['99%percentile']=np.percentile(mile_r,99)
-        re2.loc['max']=np.max(mile_r)
-        re2.loc['mean']=np.mean(mile_r)
+        re2 =  hist_func_np.box_hist(mile_r,'每次充电间隔里程[km]')
+        
 
         if self.pro_typ=='BEV':
             charging_energy=37 #lavida BEV 实际SOC96~8% 冲入电量37kWh,来源NEDC充电测试平均值
@@ -249,29 +241,17 @@ class RtmHist():
             Energy_consump = np.array(Energy_consump)
 
             freq = hist_func_np.hist_con(mile_r_c,step)
-            re3=pd.DataFrame(freq[1])
-            re3.index=freq[0]
-            re3.columns=['频数']
-            re4=pd.DataFrame([np.min(mile_r_c),np.percentile(mile_r_c,1),np.percentile(mile_r_c,25), \
-                np.percentile(mile_r_c,50),np.percentile(mile_r_c,75),np.percentile(mile_r_c,99), \
-                np.max(mile_r_c),np.mean(mile_r_c)])
-            re4.index = ['min','1%percentile','25%percentile','50%percentile','75%percentile','99%percentile','max','mean']
-            re4.columns=['mileage convert']
+            re3 = pd.DataFrame(freq[1])
+            re3.index = freq[0]
+            re3.columns = ['频数']
+            re4 = hist_func_np.box_hist(mile_r_c,'折算纯电续驶里程[km]')
+            
             
             freq = hist_func_np.hist_con(Energy_consump,np.arange(6,30,0.5))
             re5=pd.DataFrame(freq[1])
             re5.index=freq[0]
             re5.columns=['频数']
-            re6=pd.DataFrame([np.min(Energy_consump)])
-            re6.index = ['min']
-            re6.columns=['per charging mileage']
-            re6.loc['1%percentile']=np.percentile(Energy_consump,1)
-            re6.loc['25%percentile']=np.percentile(Energy_consump,25)
-            re6.loc['50%percentile']=np.percentile(Energy_consump,50)
-            re6.loc['75%percentile']=np.percentile(Energy_consump,75)
-            re6.loc['99%percentile']=np.percentile(Energy_consump,99)
-            re6.loc['max']=np.max(Energy_consump)
-            re6.loc['mean']=np.mean(Energy_consump)
+            re6 = hist_func_np.box_hist(Energy_consump,'折算电耗[kWh/100km]')
 
             return re1,re2, re3, re4,re5,re6
         else:
@@ -289,21 +269,14 @@ class RtmHist():
         re3=pd.DataFrame(freq[1])
         re3.index=freq[0]
         re3.columns=['频数']
-        re4=pd.DataFrame([np.min(temp_motor),np.percentile(temp_motor,1),np.percentile(temp_motor,25), \
-            np.percentile(temp_motor,50),np.percentile(temp_motor,75),np.percentile(temp_motor,99), \
-            np.max(temp_motor),np.mean(temp_motor)])
-        re4.index = ['min','1%percentile','25%percentile','50%percentile','75%percentile','99%percentile','max','mean']
-        re4.columns=['电机温度']
+        re4 = hist_func_np.box_hist(temp_motor,'电机温度[℃]')
+        
 
         freq = hist_func_np.hist_con(temp_LE,step)
         re1=pd.DataFrame(freq[1])
         re1.index=freq[0]
         re1.columns=['频数']
-        re2=pd.DataFrame([np.min(temp_LE),np.percentile(temp_LE,1),np.percentile(temp_LE,25), \
-            np.percentile(temp_LE,50),np.percentile(temp_LE,75),np.percentile(temp_LE,99), \
-            np.max(temp_LE),np.mean(temp_LE)])
-        re2.index = ['min','1%percentile','25%percentile','50%percentile','75%percentile','99%percentile','max','mean']
-        re2.columns=['LE温度']
+        re2 = hist_func_np.box_hist(temp_LE,'LE温度[℃]')
 
         return re1,re2,re3,re4
 
@@ -575,7 +548,11 @@ class RtmHist():
 
         return re1, re2, re3, re4, re5, re6
 
-
+"""
+    调用clickhouse进行查询
+    输入：各种查询条件
+    返回：查询到的结果，如果没有结果返回0
+"""
 def f1(pro, date_range, region, userType, mile_range,fuc_name):
 
     if userType=='all':
@@ -590,36 +567,53 @@ def f1(pro, date_range, region, userType, mile_range,fuc_name):
         m=[int(mile_range[0]),int(mile_range[0])]
         l2=RtmHist(pro, date_range=date_range, region=region, user_type=userType, mile_range=m)
     n = l2.count_nr()
+    a = pd.DataFrame([])
     if n>0 :
         if fuc_name=='fc11':
             [re1, _]= l2.daily_mileage()
             re1['每日行驶里程范围[km]']=re1.index.tolist()
             col_name = re1.columns
             a=re1.reindex(columns=col_name[::-1])            
-            return a
+            
         if fuc_name=='fc12':
             x = l2.percharge_mile()
             re1 = x[0]
             re1['每次充电之间行驶里程范围[km]'] = re1.index.tolist()
             col_name = re1.columns
             a=re1.reindex(columns=col_name[::-1])            
-            return a
+            
         if fuc_name=='fc13':
             x = l2.percharge_mile()
             re1 = x[2]
             re1['折算里程范围[km]'] = re1.index.tolist()
             col_name = re1.columns
             a=re1.reindex(columns=col_name[::-1])            
-            return a
+            
         if fuc_name=='fc14':
             x = l2.percharge_mile()
             re1 = x[4]
             re1['折算电耗范围[kWh/100km]'] = re1.index.tolist()
             col_name = re1.columns
             a=re1.reindex(columns=col_name[::-1])            
-            return a
+            
+        '''
+        if fuc_name=='fc21':
+            x = l2.percharge_mile()
+            re1 = x[4]
+            re1['折算电耗范围[kWh/100km]'] = re1.index.tolist()
+            col_name = re1.columns
+            a=re1.reindex(columns=col_name[::-1])            
+            
+        if fuc_name=='fc22':
+            x = l2.percharge_mile()
+            re1 = x[4]
+            re1['折算电耗范围[kWh/100km]'] = re1.index.tolist()
+            col_name = re1.columns
+            a=re1.reindex(columns=col_name[::-1])            
+            
+        '''
 
-
+    return n,a
 
 
 

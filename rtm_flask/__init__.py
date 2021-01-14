@@ -1,5 +1,5 @@
 import os
-from flask import Flask, render_template, jsonify, request, redirect, url_for
+from flask import Flask, render_template, jsonify, request, redirect, url_for, json
 from flask_script import Manager
 from rtm_hist.default_hist import f1
 
@@ -47,31 +47,66 @@ def hist_default():
     """
     充电
     """
-    df=pd.DataFrame(["",'',''])
-    col=['A','B','C']
-    x=range(len(col))
+    hist_result=pd.DataFrame([])
+    #data_submitted = {}
+    data_input={}
+    project_list = {'Lavida': 'Lavida BEV 53Ah', \
+                    'Tiguan': 'Tiguan L PHEV', \
+                    'Tiguan C5': 'Tiguan L PHEV C5', \
+                    'Tiguan C6': 'Tiguan L PHEV C6', \
+                    'Passat': 'Passat PHEV', \
+                    'Passat C5': 'Passat PHEV C5', \
+                    'Passat C6': 'Passat PHEV C6', \
+                    'ALL BEV': 'All BEV', \
+                    'ALL PHEV': 'ALL PHEV'}
+    user_type_list={'all': "ALL", "Private": "Private", "Fleet": "Fleet", "Taxi": "Taxi"}
+    
     
     if request.method == "POST":
-        data = request.values
-        print(data)
-        pro = data['brand']
-        date_range =[data['start_date'], data['end_date']]
-        region = data['region']
-        userType = data['user_type']
-        mile_range = [data['start_mile'],data['end_mile']]
-        fuc_name = data['fc_name']
-        
-        df = f1(pro, date_range, region, userType, mile_range,fuc_name)
+        data_input = request.values.to_dict()
+        print(type(data_input))
+        pro = data_input['project']
+        date_range =[data_input['start_date'], data_input['end_date']]
+        region = data_input['region']
+        userType = data_input['user_type']
+        mile_range = [data_input['start_mile'],data_input['end_mile']]
+        fuc_name = data_input['fc_name']
 
+        [n,hist_result] = f1(pro, date_range, region, userType, mile_range,fuc_name)
 
+        if n != 0:
+            data_input['is_null'] = False
+        else:
+            data_input['is_null'] = True
+        print(data_input)
+
+    col=hist_result.columns.tolist()
+    x = list(range(len(hist_result)))
+    print(x)
+    return render_template('hist_default.html',n=n, x=x,col=col,hist_result=hist_result, data_input=data_input, project_list = project_list, user_type_list=user_type_list)
+
+    
+    '''
+        if len(hist_result) != 0:
+            data2['is_null'] = False
+            print(data2['pro'])
+            print(data2['is_null'])
+        else:
+            data2['is_null'] = True
+        #data_submitted['project'] = pro
+        #data_submitted['date_range'] = date_range
+        #data_submitted['region'] = region
+        #data_submitted['userType'] = userType
+        #data_submitted['mile_range'] = mile_range
+        #data_submitted['func_name'] = fuc_name
+
+        #print(df)
+        #print(len(df))
         #df = pd.DataFrame([[12,13,14,15,16,17],[1,2,3,4,5,6]])
         #df.columns=['A','B','C','D','E','F']
-        col=df.columns.tolist()
-        x = list(range(len(col)))
-        #x.reverse()
+    '''
 
-    return render_template('hist_default.html',col1=col,df1=df,x=x)
-
+    
 
 @app.route('/mile')
 def daily_mile():
