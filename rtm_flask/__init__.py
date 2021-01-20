@@ -61,7 +61,7 @@ def hist_default():
                     'ALL PHEV': 'ALL PHEV'}
     user_type_list={'all': "ALL", "Private": "Private", "Fleet": "Fleet", "Taxi": "Taxi"}
     
-    
+    n = 0
     if request.method == "POST":
         data_input = request.values.to_dict()
         print(type(data_input))
@@ -80,33 +80,14 @@ def hist_default():
             data_input['is_null'] = True
         print(data_input)
 
+
     col=hist_result.columns.tolist()
     x = list(range(len(hist_result)))
+    
     print(x)
-    return render_template('hist_default.html',n=n, x=x,col=col,hist_result=hist_result, data_input=data_input, project_list = project_list, user_type_list=user_type_list)
+    return render_template('hist_default.html', n=n, x=x, col=col, hist_result=hist_result, data_input=data_input, project_list = project_list, user_type_list=user_type_list)
 
-    
-    '''
-        if len(hist_result) != 0:
-            data2['is_null'] = False
-            print(data2['pro'])
-            print(data2['is_null'])
-        else:
-            data2['is_null'] = True
-        #data_submitted['project'] = pro
-        #data_submitted['date_range'] = date_range
-        #data_submitted['region'] = region
-        #data_submitted['userType'] = userType
-        #data_submitted['mile_range'] = mile_range
-        #data_submitted['func_name'] = fuc_name
 
-        #print(df)
-        #print(len(df))
-        #df = pd.DataFrame([[12,13,14,15,16,17],[1,2,3,4,5,6]])
-        #df.columns=['A','B','C','D','E','F']
-    '''
-
-    
 
 @app.route('/mile')
 def daily_mile():

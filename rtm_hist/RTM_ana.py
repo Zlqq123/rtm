@@ -10,7 +10,7 @@ from en_client import en_client
 client=en_client()
 
 
-class RtmAna():
+class RtmAna(): 
     '''
     用于统计车辆行驶特性，包括里程，速度，驾驶模式，能耗估算，充电行为，电机工作点，电池工作点等。
 

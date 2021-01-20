@@ -26,7 +26,7 @@ df = f1(pro, date_range, region, userType, mile_range,fuc_name)
 print(df)
 
 
-sql="SELECT uniq( deviceid) FROM ods.rtm_reissue_history WHERE deviceid like 'LSVC%'"
+sql="SELECT uniq(deviceid) FROM ods.rtm_reissue_history WHERE deviceid like 'LSVC%'"
 aus=client.execute(sql)
 print(aus[0][0])
 path=os.getcwd()

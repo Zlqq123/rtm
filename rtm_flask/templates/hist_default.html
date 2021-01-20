@@ -107,7 +107,7 @@
                         </tr>
                           {% for c in col: %}
                             <th>{{c}}</th>
-                          {%endfor%}
+                          {% endfor %}
                         </tr>
                     </thead>
                     <tbody>
@@ -115,9 +115,9 @@
                         <tr>
                           {% for i in x: %}
                           <td>{{hist_result.loc[indexs].values[i]}}</td>
-                          {%endfor%}
+                          {% endfor %}
                         </tr>
-                      {%endfor%}
+                      {% endfor %}
                     </tbody>
                   </table>
                 </div>
@@ -140,7 +140,7 @@ var num = "{{n|safe}}";
 if (isnum == "True"){
   alert('没有找到车辆');
 }
-else
+if (isnum == "False")
 {
   alert('查询到'+num.toString()+ "辆车");
 }
