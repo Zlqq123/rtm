@@ -40,6 +40,12 @@ primary key (col) #指定主键
 
 create tabele tb_name like tb_name1 #同结构的表复制，只复制结构，不复制数据
 
+SELECT a.id FROM Weather as a INNER JOIN Wheather as b
+Where DATEDIFF(a.recordDaye, b.recordDate)=1 AND a.temperatue > b.temperature
+查询温度比前一天温度高的所有日期ID
+ 
+order by rand() 按照随机顺序
+
 
 DROP TABLE IF EXISTS t_company;
 CREATE TABLE IF NOT EXISTS t_company (

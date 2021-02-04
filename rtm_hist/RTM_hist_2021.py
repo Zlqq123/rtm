@@ -23,8 +23,8 @@ VIN Usertype Project region province mileage---------------- en.vehicle_vin(to b
 
 更新日志：
 
-V7.3   2021/1/20
-    判断开始充电算法更新：    charging_stoppped与no_charging之间反复跳变视为没有开始充电
+V7.3   2021/1/27
+    判断开始充电算法更新： charging_stoppped与no_charging之间反复跳变视为没有开始充电
     充电时间算法更新：    充电过程中数据丢失，帧信号时间间隔>1800s，不计算充电时间
     充电模式算法更新：    充电过程中，平均电流<19A && （电芯中最高温度）平均值<50℃ ->AC充电   else：DC充电
 v7.2
@@ -116,7 +116,6 @@ class RtmHist():
                 print("input error:project must be in {'Lavida','Passat','Tiguan','Passat C5', 'Passat C6','Tiguan C5','Tiguan C6','ALL BEV','ALL PHEV'}")
                 sys.exit(-1)
 
-
     def location_select(self,region='ALL',province='ALL'):
         '''
         region must be in {'MidSouth', 'MidNorth', 'MidEast', 'SouthWest', 'Mid', 'NorthWest', 'NorthEast'}
@@ -164,8 +163,6 @@ class RtmHist():
             else:
                 print("input error:start data must be small than end date  eg: 2020-06-01,2020-06-13")
                 sys.exit(-1)
-
-        
     
     def mileage_select(self,start_mileage,end_mileage):
         '''
@@ -188,8 +185,6 @@ class RtmHist():
         else:
             print("input error:user_type must be in {'Private', 'Fleet', 'Taxi'}")
             sys.exit(-1)
-
-
 
     def vin_select(self,vin):
         '''

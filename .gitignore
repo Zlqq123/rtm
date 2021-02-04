@@ -2,7 +2,7 @@
 /en_client.py
 /personal_info.py
 /temp.py
-/data_visualization/en_client.py
+*en_client.py
 /data_visualization/vin.py
 /data_visualization/personal_info.py
 /prediction_data/*

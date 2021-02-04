@@ -4,6 +4,7 @@ import xlsxwriter
 import time
 import csv
 import numpy as np
+import pandas as pd
 #from range_test.range_test import Rangetest
 #from RTM_ana import RtmAna
 from genarl_func import time_cost
@@ -14,6 +15,13 @@ import os
 from RTM_ana import RtmAna
 client=en_client()
 from rtm_hist.default_hist import f1
+
+
+sql="SELECT deviceid,uploadtime, cast(vehiclespeed,'Float32'), cast(accmiles,'Float32'),chargingstatus, vehiclestatus FROM ods.rtm_reissue_history WHERE deviceid == 'LSVUB6E45L2011107' "
+aus=client.execute(sql)
+df = pd.DataFrame(aus)
+
+df.to_csv('LSVUB6E45L2011107.csv')
 
 
 pro="Tiguan C6"
