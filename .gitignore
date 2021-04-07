@@ -9,3 +9,5 @@
 /.ipynb_checkpoints/*
 *.pyc
 __pycache__/
+/rtm_flask/data/*
+/rtm_platform/*
