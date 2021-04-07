@@ -1,0 +1,54 @@
+{% extends "layout.html" %}
+
+{% block main %}
+
+<main id="app-main" class="app-main">
+    <div class="wrap">
+    <section class="app-content">
+      <div class="row">
+        <div class="col-md-12">
+            <div class=widget>
+              <header class="widget-header">
+                <h4 class="widget-title">用户工况车速分布与标准工况对比</h4>
+              </header>
+              <hr class="widget-separator">
+              <div class="widget-body">
+                <div  style="height:400px;" id="velocity_f1"></div>
+                <script src="../static/js/figure_default/p3_velocity.js"></script>
+                
+                <div  style="height:400px;" id="velocity_f2"></div>
+                <script src="../static/js/figure_default/p3_velocity.js"></script>
+
+
+                
+            </div><!-- .widget-body -->
+        </div><!-- .widget -->
+    </div><!-- END column -->
+  </div><!-- END row -->
+
+  <div class="row">
+    <div class="col-md-12">
+        <div class=widget>
+          <header class="widget-header">
+            <h4 class="widget-title">PHEV 驾驶模式与车速的关系</h4>
+          </header>
+          <hr class="widget-separator">
+          <div class="widget-body">
+            <div style="height:400px;" id="velocity_f3"></div>
+            <script src="../static/js/figure_default/p3_velocity.js"></script>
+<!--
+            <div class="col-md-8" style="height:400px;" id="velocity_f4"></div>
+            <script src="../static/js/figure_default/p3_velocity.js"></script>
+-->
+          </div><!-- .widget-body -->
+        </div><!-- .widget -->
+    </div><!-- END column -->
+  </div><!-- END row -->
+
+
+
+</div>
+
+</main>
+
+{% endblock %}

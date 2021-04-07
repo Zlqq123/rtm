@@ -1,0 +1,35 @@
+{% extends "layout.html" %}
+
+{% block main %}
+
+<main id="app-main" class="app-main">
+    <div class="wrap">
+    <section class="app-content">
+      <div class="row">
+        <div class="col-md-12">
+            <div class=widget>
+              <header class="widget-header">
+                <h4 class="widget-title">充电soc</h4>
+              </header>
+              <hr class="widget-separator">
+              <div class="widget-body">
+                <div  style="height:400px;" id="charge_soc_f1"></div>
+                <script src="../static/js/figure_default/p6_charge_soc.js" ></script>
+
+                <div  style="height:400px;" id="charge_soc_f2"></div>
+                <script src="../static/js/figure_default/p6_charge_soc.js" ></script>
+
+                
+            </div><!-- .widget-body -->
+        </div><!-- .widget -->
+    </div><!-- END column -->
+  </div><!-- END row -->
+
+
+
+
+</div>
+
+</main>
+
+{% endblock %}

@@ -74,7 +74,7 @@ sql="WITH cast(splitByChar(',',cocesprotemp1),'Array(Int8)') AS temp_list, " \
     "WHERE deviceid like 'LSVAX60%' and charg_s==1 and vehiclestatus!='ERROR' and chargingstatus!='INVALID' and chargingstatus!='ERROR' and cocesprotemp1!='NULL'" \
     "ORDER BY deviceid, uploadtime " 
 aus=client.execute(sql) 
-#aus=[i][0vin, 1time, 2 BMS_power 3soc 4charg_mode 5max_temp  8current, 9 v , 10longitude, 11 latitude]
+#aus=[i][0vin, 1time, 2 BMS_power 3soc 4charg_mode 5max_temp  6current,7 v , 8longitude, 9 latitude]
 
 
 
@@ -92,8 +92,8 @@ mode2 =[] #根据电流级温度判断充电模式
 
 for j in range(all_charge.shape[0]):#根据all_charge中每次充电开始时间，找到aus中每次充电开始-结束时间
     vin = all_charge.iloc[j,0]
-    start_time = all_charge.iloc[j,1]
-    end_time = all_charge.iloc[j,2]
+    start_time = datetime.strptime(all_charge.iloc[j,1], "%Y-%m-%d %H:%M:%S")
+    end_time = datetime.strptime(all_charge.iloc[j,2], "%Y-%m-%d %H:%M:%S")
     if ee == []: 
         i = 0
     else:
@@ -115,14 +115,51 @@ for j in range(all_charge.shape[0]):#根据all_charge中每次充电开始时间
                     i+=1
             if ff==1:
                 ss.pop()
+                print(i,"x")
             else:
                 break
         else:
             i+=1
-    if ff==2:
-        print(j,i)
+
 
 print(len(ss))
 print(len(ee))
+i=0
+while i < len(ss):
+    start_p = aus[ss[i]]
+    end_p = aus[ee[i]]
+    charge_time = (end_p[1]-start_p[1]).seconds/60
+    if charge_time < 5 or charge_time/60 > 24 or ee[i]-ss[i]<5:
+        ss.pop(i)
+        ee.pop(i)
+        #print(i)
+    else:
+        i+=1
+print(len(ss))
+print(len(ee))
+##充电模式
+aus = pd.DataFrame(aus)
+vin=[]
+start_time =[]
+end_time =[]
+longitude, latitude=[],[]
+for i in range(len(ss)):
+    a=aus.iloc[ss[i]:ee[i]]
+    I_mean=a.iloc[:,6].mean()
+    temp=a.iloc[:,5].mean()
+    mode1.append(a.iloc[3,4])
+    if I_mean<19 and temp<50:
+        mode2.append("AC")
+    else:
+        mode2.append("DC")
+    vin.append(a.iloc[0,0])
+    start_time.append(a.iloc[0,1])
+    end_time.append(aus.iloc[ee[i],1])
+    longitude.append(a.iloc[0,8])
+    latitude.append(a.iloc[0,9])
 
+x1=np.array([vin,start_time,end_time,mode2,mode1,longitude, latitude])
+x=pd.DataFrame(x1.T)
+x.columns=['vin','start','end','charge_mode','charge_mode_p','longitude','latitude']
+x.to_csv('re.csv')
 z=1

@@ -356,7 +356,7 @@ def xgb_search_param():
     print('最佳模型得分', gs.best_score_)
 
 
-def trian_coment():
+def trian_xgboost():
     
     filename=filepath+"训练样本_y.csv"
     y = pd.read_csv(filename, encoding="gbk", index_col=0, header=0)
@@ -382,7 +382,7 @@ def trian_coment():
             'subsample_freq': 1,  
             'alpha': 0,      #正则化系数，越大越不容易过拟合
             'lambda': 1,  # 控制模型复杂度的权重值的L2 正则化项参数，参数越大，模型越不容易过拟合
-            'scale_pos_weight':5#原始数据集中，负样本（label=0)数量比上正样本（label=1)数量
+            'scale_pos_weight': 5 #原始数据集中，负样本（label=0)数量比上正样本（label=1)数量
                 }
     train_data = xgb.DMatrix(X_train, label=y_train)
     test_data = xgb.DMatrix(X_test_s, label=y_test_s)
@@ -396,6 +396,7 @@ def trian_coment():
     print('XGBoost 准确率:', metrics.accuracy_score(y_test_s,y_pred1))
 
     
+    ##计算AUC值
     from sklearn.metrics import roc_curve,auc
     fpr, tpr, thresholds = roc_curve(y_test_s, y_pred, pos_label=1)
     roc_auc = auc(fpr, tpr)  ###计算auc的值
@@ -413,7 +414,49 @@ def trian_coment():
     plt.legend(loc="lower right")
     plt.savefig(filepath+"roc.jpg")
     plt.show()
+    
+
+    
+    #model.save_model('xgb_tiguan.model')
+
+    ##计算feature importance
+
+    importance = model.get_score(importance_type='gain', fmap='')
+    #gain：（某特征在整个树群作为分裂节点的信息增益之和再除以某特征出现的频次）
+    #print(importance)
+    tuples = [(k, importance[k]) for k in importance]
+    tuples = sorted(tuples, key=lambda x: x[1])
+    labels, values = zip(*tuples)
+    df_imp = pd.DataFrame([labels, values])
+    df_imp2 = pd.DataFrame(df_imp.values.T)
+    df_imp2.to_csv('imp_gain.csv')
+
+    importance = model.get_score(importance_type='weight', fmap='')
+    #weight：权重（某特征在整个树群节点中出现的次数，出现越多，价值就越高）
+    tuples = [(k, importance[k]) for k in importance]
+    tuples = sorted(tuples, key=lambda x: x[1])
+    labels, values = zip(*tuples)
+    df_imp = pd.DataFrame([labels, values])
+    df_imp2 = pd.DataFrame(df_imp.values.T)
+    df_imp2.to_csv('imp_weight.csv')
+
+    importance = model.get_score(importance_type='cover', fmap='')
+    #cover比较复杂，python文档未做解释，其实是指某特征节点样本的二阶导数和再除以某特征出现的 我在xgboost R API文档中找到了部分解释： https://github.com/dmlc/xgboost
+    tuples = [(k, importance[k]) for k in importance]
+    tuples = sorted(tuples, key=lambda x: x[1])
+    labels, values = zip(*tuples)
+    df_imp = pd.DataFrame([labels, values])
+    df_imp2 = pd.DataFrame(df_imp.values.T)
+    df_imp2.to_csv('imp_cover.csv')
     '''
+
+    imp_dict=model.get_fscore()
+    imp_gain=pd.Series(imp_dict).sort_values(ascending=False)
+    imp_gain/imp_gain.sum()
+    print(imp_gain)
+    #print(model.feature_importances_) 无法运行
+    '''
+
     xgb.plot_importance(model,max_num_features=20,importance_type='gain')
     plt.savefig(filepath+"importance_gain.jpg")
     plt.show()
@@ -422,10 +465,91 @@ def trian_coment():
     plt.savefig(filepath+"importance_weight.jpg")
     plt.show()
 
-        '''
 
 
-trian_coment()
+def train_LGBM():
+    
+    filename=filepath+"训练样本_y.csv"
+    y = pd.read_csv(filename, encoding="gbk", index_col=0, header=0)
+    filename=filepath+"训练样本_x.csv"
+    X = pd.read_csv(filename,encoding="gbk", index_col=0, header=0)
+    #index_col=0声明文件第一列为索引，header=0第一行为列名（默认就是，不必重新申明）
+    print(X.columns)
+    # 导入特征和label
+  
+    from sklearn.model_selection import train_test_split
+    X_train, X_test_s, y_train, y_test_s = train_test_split(X, y, test_size=0.2, random_state=1)
+
+    import lightgbm as lgb
+    from sklearn import metrics
+    param = {'boosting_type':'gbdt',
+                         'objective' : 'binary', #任务类型
+                         'metric' : 'auc', #评估指标
+                         'learning_rate' : 0.002, #学习率
+                         'max_depth' : 10, #树的最大深度
+                         'feature_fraction':0.8, #设置在每次迭代中使用特征的比例
+                         'bagging_fraction': 0.9, #样本采样比例
+                         'bagging_freq': 8, #bagging的次数
+                         'lambda_l1': 0.6, #L1正则
+                         'lambda_l2': 0, #L2正则
+        }
+
+    train_data = lgb.Dataset(X_train, label=y_train)
+    valid_data = lgb.Dataset(X_test_s, label=y_test_s)
+
+    model = lgb.train(param,train_data,valid_sets=[train_data,valid_data],num_boost_round = 5000 ,early_stopping_rounds=200,verbose_eval=25)
+    y_pred = model.predict(X_test_s)
+    y_pred1 = [1 if x>=0.5 else 0 for x in y_pred]
+    print('Light GBM 准确率:', metrics.accuracy_score(y_test_s,y_pred1))
+    #test[['Attrition']].to_csv('submit_lgb.csv')
+
+    ##计算AUC值
+    from sklearn.metrics import roc_curve,auc
+    fpr, tpr, thresholds = roc_curve(y_test_s, y_pred, pos_label=1)
+    roc_auc = auc(fpr, tpr)  ###计算auc的值
+    lw = 2
+    plt.figure(figsize=(8, 5))
+    plt.plot(fpr, tpr, color='darkorange',
+            lw=lw, label='ROC curve (area = %0.2f)' % roc_auc)  ###假正率为横坐标，真正率为纵坐标做曲线
+    plt.plot([0, 1], [0, 1], color='navy', lw=lw, linestyle='--')
+    plt.grid()
+    plt.xlim([0.0, 1.0])
+    plt.ylim([0.0, 1.0])
+    plt.xlabel('False Positive Rate')
+    plt.ylabel('True Positive Rate')
+    plt.title('Receiver operating characteristic example')
+    plt.legend(loc="lower right")
+    plt.savefig(filepath+"roc_LGBM.jpg")
+    plt.show()
+
+
+
+def train_SVM():
+
+    filename=filepath+"训练样本_y.csv"
+    y = pd.read_csv(filename, encoding="gbk", index_col=0, header=0)
+    filename=filepath+"训练样本_x.csv"
+    X = pd.read_csv(filename,encoding="gbk", index_col=0, header=0)
+    #index_col=0声明文件第一列为索引，header=0第一行为列名（默认就是，不必重新申明）
+    print(X.columns)
+    # 导入特征和label
+    from sklearn.model_selection import train_test_split
+    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=1)
+
+    from sklearn.svm import SVC
+    from sklearn import metrics
+
+    svc=SVC() # 使用默认参数
+    svc.fit(X_train,y_train)
+    y_pred=svc.predict(X_test)
+    print('SVM 预测结果：', y_pred)
+    print('SVM 准确率:', metrics.accuracy_score(y_test,y_pred))
+
+train_LGBM()
+
+
+
+trian_xgboost()
 
 tiguan_sample()
 filename = filepath + "train_sample_warning.csv"
@@ -435,14 +559,6 @@ filename = filepath + "train_sample_no_warning.csv"
 t_name = filepath + 'train_feature_no_warming.csv'
 feature_ex(filename,t_name)
 
-'''
-filename = filepath + "test_sample_no_warning.csv"
-t_name = filepath + 'test_feature_no_warming.csv'
-feature_ex(filename,t_name)
-filename = filepath + "test_sample_warning.csv"
-t_name = filepath + 'test_feature_warming.csv'
-feature_ex(filename,t_name)
-'''
 pre1()
 
 xgb_search_param()

@@ -88,7 +88,6 @@ def hist_default():
     return render_template('hist_default.html', n=n, x=x, col=col, hist_result=hist_result, data_input=data_input, project_list = project_list, user_type_list=user_type_list)
 
 
-
 @app.route('/mile')
 def daily_mile():
     """

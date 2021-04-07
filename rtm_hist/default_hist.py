@@ -8,12 +8,13 @@ import numpy as np
 import pandas as pd
 
 from rtm_hist import hist_func_np
-from rtm_hist.en_client import en_client
+from en_client import en_client
 client=en_client()
 '''
 original table
 All data(without warmingsignal)----------------------------- ods.rtm_details  
 All data with warmingsignal------------------------ods.rtm_reissue_history
+All data with warmingsignal [after 2020-9-25] ------- ods.rtm_details_v2
 
 2020/03 Data(without warmingsignal)------------------------- en.rtm_vds
 2020/06 Data(with warmingsignal)---------------------------- en.rtm_data_june
@@ -253,7 +254,7 @@ class RtmHist():
             re5.columns=['频数']
             re6 = hist_func_np.box_hist(Energy_consump,'折算电耗[kWh/100km]')
 
-            return re1,re2, re3, re4,re5,re6
+            return re1, re2, re3, re4, re5, re6
         else:
             return re1,re2
 
@@ -406,7 +407,7 @@ class RtmHist():
             "SELECT deviceid,uploadtime, -P, arrayReduce('avg',temp_list), if(soc<0,0,soc), " \
             "multiIf(P<-7.5,'DC',P>=-7.5 and P<-4,'mode3_1',P>=-4 and P<-2,'mode3_2',P>=-2 and P<0,'mode2','discharging') as charg_mode, " \
             "arrayReduce('max',temp_list), arrayReduce('min',temp_list) " \
-            "FROM " + self.tb1 + self.con+ " and charg_s==1 ORDER BY deviceid, uploadtime " \
+            "FROM " + self.tb1 + self.con+ " and charg_s==1 ORDER BY deviceid, uploadtime " 
 
         aus=client.execute(sql)
         #aus=[i][0vin 1time, 2 BMS_power 3temp 4soc 5charg_mode 6max_temp 7min_temp]
