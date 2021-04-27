@@ -448,14 +448,6 @@ def trian_xgboost():
     df_imp = pd.DataFrame([labels, values])
     df_imp2 = pd.DataFrame(df_imp.values.T)
     df_imp2.to_csv('imp_cover.csv')
-    '''
-
-    imp_dict=model.get_fscore()
-    imp_gain=pd.Series(imp_dict).sort_values(ascending=False)
-    imp_gain/imp_gain.sum()
-    print(imp_gain)
-    #print(model.feature_importances_) 无法运行
-    '''
 
     xgb.plot_importance(model,max_num_features=20,importance_type='gain')
     plt.savefig(filepath+"importance_gain.jpg")
@@ -608,7 +600,9 @@ def train_LGBM1():
     print('Light GBM 准确率:', metrics.accuracy_score(y_test_s,y_pred1))
     #test[['Attrition']].to_csv('submit_lgb.csv')
 
+
     ##计算AUC值
+    '''
     from sklearn.metrics import roc_curve,auc
     fpr, tpr, thresholds = roc_curve(y_test_s, y_pred, pos_label=1)
     roc_auc = auc(fpr, tpr)  ###计算auc的值
@@ -626,6 +620,16 @@ def train_LGBM1():
     plt.legend(loc="lower right")
     plt.savefig(filepath+"roc_LGBM1.jpg")
     plt.show()
+    '''
+    
+   
+    importance_split = model.feature_importance(importance_type='split')
+    importance_gain = model.feature_importance(importance_type='gain')
+    feature_name = model.feature_name()
+    feature_importance = pd.DataFrame({'feature_name':feature_name,
+                                    'importance_split':importance_split,'importance_gain':importance_gain} )
+    feature_importance.to_csv(filepath+'feature_importance_LGBM.csv',index=False)
+
 
 
 
@@ -651,7 +655,22 @@ def train_SVM():
     print('SVM 准确率:', metrics.accuracy_score(y_test,y_pred))
 
 
+def train_Credit():
 
+    # 采用等频的方式进行分箱
+    df_train['bin_RevolvingUtilizationOfUnsecuredLines'] = pd.qcut(df_train['RevolvingUtilizationOfUnsecuredLines'], q=5)
+    df_train['bin_DebtRatio'] = pd.qcut(df_train['DebtRatio'], q=5)
+    df_train['bin_MonthlyIncome'] = pd.qcut(df_train['MonthlyIncome'], q=5, duplicates='drop')
+    df_train['bin_NumberOfOpenCreditLinesAndLoans'] = pd.qcut(df_train['NumberOfOpenCreditLinesAndLoans'], q=5)
+    df_train['bin_NumberRealEstateLoansOrLines'] = pd.qcut(df_train['NumberRealEstateLoansOrLines'], q=5, duplicates='drop')
+    # 等频5段 0-20%分位数， 20%-40%分位数
+    # 如果遇到相同的数据，横跨2个箱子，那么就去掉一个
+    import math
+    #对于age字段，分成6段 [-math.inf, 25, 40, 50, 60, 70, math.inf]
+    ages_bins = [-math.inf, 25, 40, 50, 60, 70, math.inf] # 左开右闭
+    df_train['bin_age'] = pd.cut(df_train['age'], bins=ages_bins)
+    #df_train['age'].value_counts()
+    df_train[['age', 'bin_age']]
 
 train_LGBM1()
 train_LGBM()
