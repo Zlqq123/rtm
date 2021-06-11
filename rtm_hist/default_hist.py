@@ -55,8 +55,8 @@ class RtmHist():
         self.proj=proj
 
         if proj=="LAVIDA" or proj=='All BEV':
-            con2 = "project=='Lavida BEV 53Ah' "
             typ_v='BEV'
+            con2 = "project=='Lavida BEV 53Ah' "
         else:
             typ_v='PHEV'
             if proj=="TIGUAN":
@@ -596,6 +596,10 @@ def f1(pro, date_range, region, userType, mile_range,fuc_name):
             re1['折算电耗范围[kWh/100km]'] = re1.index.tolist()
             col_name = re1.columns
             a=re1.reindex(columns=col_name[::-1])            
+            
+        if fuc_name=='fc33':
+            x = l2.E_motor_workingPoint()
+            a = x[2]
             
         '''
         if fuc_name=='fc21':

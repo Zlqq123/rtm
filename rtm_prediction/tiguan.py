@@ -218,466 +218,10 @@ def feature_ex(filename,t_name):
 
 
 
-# 训练数据预处理及感知
-def pre1():
 
-    filename=filepath+'train_feature_no_warming.csv'
-    s1=pd.read_csv(filename,encoding="gbk")    #s1=pd.read_csv(filename,encoding="gbk",index_col=0,header=0)
-    filename=filepath+'train_feature_warming.csv'
-    s2=pd.read_csv(filename,encoding="gbk")
-    print(s1.shape)
-    print(s2.shape)
-    s1 = s1.drop(s1[s1.Integrity == 1].index)
-    print(s1.shape)
-    s1 = s1.drop(s1[s1.Label == 1].index)
-    print(s1.shape)
-    s2 = s2.drop(s2[s2.Integrity == 1].index)
-    print(s2.shape)
-    s2 = s2.drop(s2[s2.Label == 0].index)
-    print(s2.shape)
-    
-    des=s1.describe()
-    des.to_csv(filepath+"no_warming_f_describe.csv",encoding="gbk")
-    des=s2.describe()
-    des.to_csv(filepath+"warming_f_describe.csv",encoding="gbk")
 
-    a=[2]
-    a.extend(range(6,64))
 
-    for i in a:
-        plt.rcParams['font.sans-serif']=['Microsoft YaHei']
-        plt.rcParams['axes.unicode_minus']=False
-        plt.style.use('ggplot')
 
-        plt.figure(figsize=(10,5))#设置画布的尺寸
-        plt.title(s1.columns[i],fontsize=14)#标题，并设定字号大小
-        plt.boxplot([s1.iloc[:,i],s2.iloc[:,i]],showmeans=True, labels = ['No_warming','Warming'],sym = '*')
-        #plt.show()
-        plt.savefig(filepath+"pic/"+str(i)+"_"+s1.columns[i]+'.jpg')
-
-    
-    ss=s1.append(s2)
-    print(ss.shape)
-    del s1,s2
-    #数据预处理
-    from sklearn.preprocessing import LabelEncoder
-    label_name = ['VIN','region','province']
-    for a in label_name:
-        le = LabelEncoder()
-        le.fit(ss[a])
-        ss[a]=le.transform(ss[a])
-
-    print(ss.isnull().sum())
-    print("样本个数: {}".format(ss.shape[0]))
-    print("报警个数: {}".format(ss[ss.Label == 1].shape[0]))
-    print("未报警个数: {}".format(ss[ss.Label == 0].shape[0]))
-    
-    # 分割特征和Target
-    X=ss.drop(labels=['Label',"user_type",'Integrity'],axis=1)
-    y=pd.DataFrame(ss['Label'])
-    del ss
-    print("特征个数: {}".format(X.shape[1]))
-
-    # corr相关系数函数
-    c=X.corr()
-    c.to_csv(filepath+'特征值之间的相关系数.csv',encoding="gbk")
-    print(c)
-    sns.heatmap(c)
-    #plt.show()
-    plt.savefig(filepath+"corr.jpg")
-
-    #归一化
-    # 最大最小值归一化 将数值映射到 [-1, 1]之间
-    from sklearn.preprocessing import MinMaxScaler
-    scaler=MinMaxScaler()
-    scaler.fit(X)
-    X1 = pd.DataFrame(scaler.transform(X))
-    X1.columns = X.columns
-    y.columns = ['Label']
-    # 标准归一化
-    #from sklearn.preprocessing import StandardScaler
-    #scaler = StandardScaler()
-    #scaler.fit(X)
-
-
-    X1.to_csv(filepath+'训练样本_x.csv',encoding="gbk")
-    y.to_csv(filepath+'训练样本_y.csv',encoding="gbk")
-
-#pre1()
-
-#@time_cost
-def xgb_search_param():
-    '''
-    网格搜索获得最优参数：
-    结果：
-    模型最优参数 {'learning_rate': 0.005, 'max_depth': 6}
-    最佳模型得分 0.6203925515304519
-    '''
-
-    filename=filepath+"训练样本_x.csv"
-    X = pd.read_csv(filename, encoding="gbk", index_col=0, header=0)
-    #index_col=0声明文件第一列为索引，header=0第一行为列名（默认就是，不必重新申明）
-    print(X.columns)
-    # 导入特征和label
-    filename=filepath+"训练样本_y.csv"
-    y = pd.read_csv(filename, encoding="gbk", index_col=0, header=0)
-
-
-    from sklearn.model_selection import train_test_split
-    X_train, X_test_s, y_train, y_test_s = train_test_split(X, y, test_size=0.2, random_state=1)
-
-
-    import xgboost as xgb
-    from sklearn import metrics
-    from sklearn.model_selection import GridSearchCV
-    cv_params= {'max_depth': [3,4,5,6,7,8,9,10], 
-                'learning_rate': [0.001, 0.002, 0.005, 0.01, 0.02, 0.05, 0.1]
-                }
-    model = xgb.XGBClassifier(#learning_rate=0.1,
-                            n_estimators=1000,         # 树的个数--1000棵树建立xgboost
-                            #max_depth=6,               # 树的深度
-                            min_child_weight = 1,      # 叶子节点最小权重
-                            gamma=0.,                  # 惩罚项中叶子结点个数前的参数
-                            subsample=0.8,             # 随机选择80%样本建立决策树
-                            #colsample_btree=0.8,       # 随机选择80%特征建立决策树
-                            objective='binary:logistic ', # 指定目标函数    reg:linear (默认)回归任务  reg:logistic
-                            # binary:logistic    二分类任务返回概率值  binary：logitraw   二分类任务返回类别
-                            # multi：softmax  num_class=n   多分类任务返回类别   multi：softprob   num_class=n   多分类任务返回概率
-                            scale_pos_weight=5,        # 解决样本个数不平衡的问题
-                            random_state=27,            # 随机数
-                            eval_metric = 'auc'         # 回归任务  rmse:均方根误差(默认)   mae--平均绝对误差
-                            # 分类任务  error--错误率（二分类）(默认)    auc--roc曲线下面积  logloss--负对数似然函数（二分类）merror--错误率（多分类）mlogloss--负对数似然函数（多分类）
-                            )
-    gs = GridSearchCV(model, cv_params, scoring='roc_auc', refit=True, verbose=2, cv=5, n_jobs=1)
-    gs.fit(X_train,y_train)
-
-    # 模型最优参数
-    print('模型最优参数', gs.best_params_)
-    print('最佳模型得分', gs.best_score_)
-
-
-def trian_xgboost():
-    
-    filename=filepath+"训练样本_y.csv"
-    y = pd.read_csv(filename, encoding="gbk", index_col=0, header=0)
-    filename=filepath+"训练样本_x.csv"
-    X = pd.read_csv(filename,encoding="gbk", index_col=0, header=0)
-    #index_col=0声明文件第一列为索引，header=0第一行为列名（默认就是，不必重新申明）
-    print(X.columns)
-    # 导入特征和label
-  
-
-    from sklearn.model_selection import train_test_split
-    X_train, X_test_s, y_train, y_test_s = train_test_split(X, y, test_size=0.2, random_state=1)
-
-    import xgboost as xgb
-    from sklearn import metrics
-    param = {'boosting_type':'gbdt',
-            'objective' : 'binary:logistic', #任务类型'logistic'逻辑   'regression'回归
-            'eval_metric' : 'auc',
-            'eta' : 0.005,                # 如同学习率   0.001~0.01
-            'max_depth' : 6,             # 构建树的深度，越大越容易过拟合
-            'colsample_bytree':1,#  列采样， 这个参数默认为1
-            'subsample': 0.8,    # 随机采样训练样本行采样
-            'subsample_freq': 1,  
-            'alpha': 0,      #正则化系数，越大越不容易过拟合
-            'lambda': 1,  # 控制模型复杂度的权重值的L2 正则化项参数，参数越大，模型越不容易过拟合
-            'scale_pos_weight': 5 #原始数据集中，负样本（label=0)数量比上正样本（label=1)数量
-                }
-    train_data = xgb.DMatrix(X_train, label=y_train)
-    test_data = xgb.DMatrix(X_test_s, label=y_test_s)
-    model = xgb.train(param, train_data, evals=[(train_data, 'train'), (test_data, 'valid')], num_boost_round = 5000, early_stopping_rounds=50, verbose_eval=50)
-    y_pred = model.predict(test_data)
-    #y_pred =[x for x in y_pred]
-    y_pred1 = [1 if x>=0.5 else 0 for x in y_pred]
-    #x = pd.DataFrame([y_test_s["Label"].tolist(),y_pred,y_pred1])
-    #x.to_csv(filepath+"result.csv",encoding="gbk")
-    #print('XGBoost 准确率:', metrics.accuracy_score(y_test_s,y_pred))
-    print('XGBoost 准确率:', metrics.accuracy_score(y_test_s,y_pred1))
-
-    
-    ##计算AUC值
-    from sklearn.metrics import roc_curve,auc
-    fpr, tpr, thresholds = roc_curve(y_test_s, y_pred, pos_label=1)
-    roc_auc = auc(fpr, tpr)  ###计算auc的值
-    lw = 2
-    plt.figure(figsize=(8, 5))
-    plt.plot(fpr, tpr, color='darkorange',
-            lw=lw, label='ROC curve (area = %0.2f)' % roc_auc)  ###假正率为横坐标，真正率为纵坐标做曲线
-    plt.plot([0, 1], [0, 1], color='navy', lw=lw, linestyle='--')
-    plt.grid()
-    plt.xlim([0.0, 1.0])
-    plt.ylim([0.0, 1.0])
-    plt.xlabel('False Positive Rate')
-    plt.ylabel('True Positive Rate')
-    plt.title('Receiver operating characteristic example')
-    plt.legend(loc="lower right")
-    plt.savefig(filepath+"roc.jpg")
-    plt.show()
-    
-
-    
-    #model.save_model('xgb_tiguan.model')
-
-    ##计算feature importance
-
-    importance = model.get_score(importance_type='gain', fmap='')
-    #gain：（某特征在整个树群作为分裂节点的信息增益之和再除以某特征出现的频次）
-    #print(importance)
-    tuples = [(k, importance[k]) for k in importance]
-    tuples = sorted(tuples, key=lambda x: x[1])
-    labels, values = zip(*tuples)
-    df_imp = pd.DataFrame([labels, values])
-    df_imp2 = pd.DataFrame(df_imp.values.T)
-    df_imp2.to_csv('imp_gain.csv')
-
-    importance = model.get_score(importance_type='weight', fmap='')
-    #weight：权重（某特征在整个树群节点中出现的次数，出现越多，价值就越高）
-    tuples = [(k, importance[k]) for k in importance]
-    tuples = sorted(tuples, key=lambda x: x[1])
-    labels, values = zip(*tuples)
-    df_imp = pd.DataFrame([labels, values])
-    df_imp2 = pd.DataFrame(df_imp.values.T)
-    df_imp2.to_csv('imp_weight.csv')
-
-    importance = model.get_score(importance_type='cover', fmap='')
-    #cover比较复杂，python文档未做解释，其实是指某特征节点样本的二阶导数和再除以某特征出现的 我在xgboost R API文档中找到了部分解释： https://github.com/dmlc/xgboost
-    tuples = [(k, importance[k]) for k in importance]
-    tuples = sorted(tuples, key=lambda x: x[1])
-    labels, values = zip(*tuples)
-    df_imp = pd.DataFrame([labels, values])
-    df_imp2 = pd.DataFrame(df_imp.values.T)
-    df_imp2.to_csv('imp_cover.csv')
-
-    xgb.plot_importance(model,max_num_features=20,importance_type='gain')
-    plt.savefig(filepath+"importance_gain.jpg")
-    plt.show()
-
-    xgb.plot_importance(model,max_num_features=20,importance_type='weight')
-    plt.savefig(filepath+"importance_weight.jpg")
-    plt.show()
-
-
-
-def train_LGBM():
-    
-    filename=filepath+"训练样本_y.csv"
-    y = pd.read_csv(filename, encoding="gbk", index_col=0, header=0)
-    filename=filepath+"训练样本_x.csv"
-    X = pd.read_csv(filename,encoding="gbk", index_col=0, header=0)
-    #index_col=0声明文件第一列为索引，header=0第一行为列名（默认就是，不必重新申明）
-    print(X.columns)
-    # 导入特征和label
-  
-    from sklearn.model_selection import train_test_split
-    X_train, X_test_s, y_train, y_test_s = train_test_split(X, y, test_size=0.2, random_state=1)
-
-    import lightgbm as lgb
-    from sklearn import metrics
-    param = {'boosting_type':'gbdt',
-                         'objective' : 'binary', #任务类型
-                         'metric' : 'auc', #评估指标
-                         'learning_rate' : 0.002, #学习率
-                         'max_depth' : 10, #树的最大深度
-                         'feature_fraction':0.8, #设置在每次迭代中使用特征的比例
-                         'bagging_fraction': 0.9, #样本采样比例
-                         'bagging_freq': 8, #bagging的次数
-                         'lambda_l1': 0.6, #L1正则
-                         'lambda_l2': 0, #L2正则
-        }
-
-    train_data = lgb.Dataset(X_train, label=y_train)
-    valid_data = lgb.Dataset(X_test_s, label=y_test_s)
-
-    model = lgb.train(param,train_data,valid_sets=[train_data,valid_data],num_boost_round = 5000 ,early_stopping_rounds=200,verbose_eval=25)
-    y_pred = model.predict(X_test_s)
-    y_pred1 = [1 if x>=0.5 else 0 for x in y_pred]
-    print('Light GBM 准确率:', metrics.accuracy_score(y_test_s,y_pred1))
-    #test[['Attrition']].to_csv('submit_lgb.csv')
-
-    ##计算AUC值
-    from sklearn.metrics import roc_curve,auc
-    fpr, tpr, thresholds = roc_curve(y_test_s, y_pred, pos_label=1)
-    roc_auc = auc(fpr, tpr)  ###计算auc的值
-    lw = 2
-    plt.figure(figsize=(8, 5))
-    plt.plot(fpr, tpr, color='darkorange',
-            lw=lw, label='ROC curve (area = %0.2f)' % roc_auc)  ###假正率为横坐标，真正率为纵坐标做曲线
-    plt.plot([0, 1], [0, 1], color='navy', lw=lw, linestyle='--')
-    plt.grid()
-    plt.xlim([0.0, 1.0])
-    plt.ylim([0.0, 1.0])
-    plt.xlabel('False Positive Rate')
-    plt.ylabel('True Positive Rate')
-    plt.title('Receiver operating characteristic example')
-    plt.legend(loc="lower right")
-    plt.savefig(filepath+"roc_LGBM.jpg")
-    plt.show()
-
-
-
-def LGBM_pre():
-    filename=filepath+'train_feature_no_warming.csv'
-    s1=pd.read_csv(filename,encoding="gbk")    #s1=pd.read_csv(filename,encoding="gbk",index_col=0,header=0)
-    filename=filepath+'train_feature_warming.csv'
-    s2=pd.read_csv(filename,encoding="gbk")
-    #数据预处理
-    print("原始非报警样本个数: {}".format(s1.shape))
-    print("原始报警样本个数: {}".format(s2.shape))
-    s1 = s1.drop(s1[s1.Integrity == 1].index)
-    s1 = s1.drop(s1[s1.Label == 1].index)
-    s2 = s2.drop(s2[s2.Integrity == 1].index)
-    s2 = s2.drop(s2[s2.Label == 0].index)
-    ss=s1.append(s2)#合并
-    ss.index=range(ss.shape[0])#index重置
-
-    print(ss.isnull().sum())#检查是否有空值
-    print('处理后：')
-    print("样本总数: {}".format(ss.shape[0]))
-    print("报警个数: {}".format(ss[ss.Label == 1].shape[0]))
-    print("未报警个数: {}".format(ss[ss.Label == 0].shape[0]))
-    
-    # 分割特征和Target
-    x2=ss[['VIN','region','province']]#label特征
-    x1=ss.drop(labels=['Label',"user_type",'Integrity','VIN','region','province'],axis=1)
-    y=pd.DataFrame(ss['Label'])
-    del ss
-
-    #归一化
-    # 最大最小值归一化 将数值映射到 [-1, 1]之间
-    from sklearn.preprocessing import MinMaxScaler
-    scaler=MinMaxScaler()
-    scaler.fit(x1)
-    X1 = pd.DataFrame(scaler.transform(x1))
-    X1.columns = x1.columns
-    y.columns = ['Label']
-    X=pd.concat([X1, x2], axis=1)
-
-
-    X.to_csv(filepath+'训练样本_x_LGBM.csv',encoding="gbk")
-    y.to_csv(filepath+'训练样本_y_LGBM.csv',encoding="gbk")
-
-def train_LGBM1():
-    filename=filepath+"训练样本_y_LGBM.csv"
-    y = pd.read_csv(filename, encoding="gbk", index_col=0, header=0)
-    filename=filepath+"训练样本_x_LGBM.csv"
-    X = pd.read_csv(filename,encoding="gbk", index_col=0, header=0)
-    #index_col=0声明文件第一列为索引，header=0第一行为列名（默认就是，不必重新申明）
-    print(X.columns)
-    # 导入特征和label
-    cat_cols=['VIN','region','province']
-    X[cat_cols] = X[cat_cols].astype('category')
-  
-    from sklearn.model_selection import train_test_split
-    X_train, X_test_s, y_train, y_test_s = train_test_split(X, y, test_size=0.2, random_state=1)
-
-    import lightgbm as lgb
-    from sklearn import metrics
-    param = {'boosting_type':'gbdt',
-                         'objective' : 'binary', #任务类型
-                         'metric' : 'auc', #评估指标
-                         'learning_rate' : 0.002, #学习率
-                         'max_depth' : 10, #树的最大深度
-                         'feature_fraction':0.8, #设置在每次迭代中使用特征的比例
-                         'bagging_fraction': 0.9, #样本采样比例
-                         'bagging_freq': 8, #bagging的次数
-                         'lambda_l1': 0.6, #L1正则
-                         'lambda_l2': 0, #L2正则
-        }
-
-    train_data = lgb.Dataset(X_train, label=y_train)
-    valid_data = lgb.Dataset(X_test_s, label=y_test_s)
-
-    model = lgb.train(param,
-                    train_data,
-                    valid_sets=[train_data,valid_data],
-                    num_boost_round = 5000 ,
-                    early_stopping_rounds=200,
-                    verbose_eval=25, 
-                    categorical_feature=[59,60,61])
-    y_pred = model.predict(X_test_s)
-    y_pred1 = [1 if x>=0.5 else 0 for x in y_pred]
-    print('Light GBM 准确率:', metrics.accuracy_score(y_test_s,y_pred1))
-    #test[['Attrition']].to_csv('submit_lgb.csv')
-
-
-    ##计算AUC值
-    '''
-    from sklearn.metrics import roc_curve,auc
-    fpr, tpr, thresholds = roc_curve(y_test_s, y_pred, pos_label=1)
-    roc_auc = auc(fpr, tpr)  ###计算auc的值
-    lw = 2
-    plt.figure(figsize=(8, 5))
-    plt.plot(fpr, tpr, color='darkorange',
-            lw=lw, label='ROC curve (area = %0.2f)' % roc_auc)  ###假正率为横坐标，真正率为纵坐标做曲线
-    plt.plot([0, 1], [0, 1], color='navy', lw=lw, linestyle='--')
-    plt.grid()
-    plt.xlim([0.0, 1.0])
-    plt.ylim([0.0, 1.0])
-    plt.xlabel('False Positive Rate')
-    plt.ylabel('True Positive Rate')
-    plt.title('Receiver operating characteristic example')
-    plt.legend(loc="lower right")
-    plt.savefig(filepath+"roc_LGBM1.jpg")
-    plt.show()
-    '''
-    
-   
-    importance_split = model.feature_importance(importance_type='split')
-    importance_gain = model.feature_importance(importance_type='gain')
-    feature_name = model.feature_name()
-    feature_importance = pd.DataFrame({'feature_name':feature_name,
-                                    'importance_split':importance_split,'importance_gain':importance_gain} )
-    feature_importance.to_csv(filepath+'feature_importance_LGBM.csv',index=False)
-
-
-
-
-def train_SVM():
-
-    filename=filepath+"训练样本_y.csv"
-    y = pd.read_csv(filename, encoding="gbk", index_col=0, header=0)
-    filename=filepath+"训练样本_x.csv"
-    X = pd.read_csv(filename,encoding="gbk", index_col=0, header=0)
-    #index_col=0声明文件第一列为索引，header=0第一行为列名（默认就是，不必重新申明）
-    print(X.columns)
-    # 导入特征和label
-    from sklearn.model_selection import train_test_split
-    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=1)
-
-    from sklearn.svm import SVC
-    from sklearn import metrics
-
-    svc=SVC() # 使用默认参数
-    svc.fit(X_train,y_train)
-    y_pred=svc.predict(X_test)
-    print('SVM 预测结果：', y_pred)
-    print('SVM 准确率:', metrics.accuracy_score(y_test,y_pred))
-
-
-def train_Credit():
-
-    # 采用等频的方式进行分箱
-    df_train['bin_RevolvingUtilizationOfUnsecuredLines'] = pd.qcut(df_train['RevolvingUtilizationOfUnsecuredLines'], q=5)
-    df_train['bin_DebtRatio'] = pd.qcut(df_train['DebtRatio'], q=5)
-    df_train['bin_MonthlyIncome'] = pd.qcut(df_train['MonthlyIncome'], q=5, duplicates='drop')
-    df_train['bin_NumberOfOpenCreditLinesAndLoans'] = pd.qcut(df_train['NumberOfOpenCreditLinesAndLoans'], q=5)
-    df_train['bin_NumberRealEstateLoansOrLines'] = pd.qcut(df_train['NumberRealEstateLoansOrLines'], q=5, duplicates='drop')
-    # 等频5段 0-20%分位数， 20%-40%分位数
-    # 如果遇到相同的数据，横跨2个箱子，那么就去掉一个
-    import math
-    #对于age字段，分成6段 [-math.inf, 25, 40, 50, 60, 70, math.inf]
-    ages_bins = [-math.inf, 25, 40, 50, 60, 70, math.inf] # 左开右闭
-    df_train['bin_age'] = pd.cut(df_train['age'], bins=ages_bins)
-    #df_train['age'].value_counts()
-    df_train[['age', 'bin_age']]
-
-train_LGBM1()
-train_LGBM()
-
-
-
-trian_xgboost()
 
 tiguan_sample()
 filename = filepath + "train_sample_warning.csv"
@@ -687,8 +231,64 @@ filename = filepath + "train_sample_no_warning.csv"
 t_name = filepath + 'train_feature_no_warming.csv'
 feature_ex(filename,t_name)
 
-pre1()
 
-xgb_search_param()
-mail_sender()
+
+# clickhouse中tiguan表预处理
+# ods.rtm_reissue_history>>------en.rtm_tiguan  [2019-06-01 2020-5-31]
+def pre_ana_tiguan1():
+    sql="CREATE TABLE IF NOT EXISTS en.rtm_tiguan " \
+            "(deviceid String, uploadtime DateTime,d_time Int, vehicle_s UInt8, vehicle_s_c Int8, charg_s UInt8, charg_s_c Int8, " \
+            " vehiclespeed Float32, accmiles Float32, soc UInt8, soc_c Int8, operationmode String, " \
+            " totalvolt Float64, totalcurrent Float64, BMS_pow Float32, charg_mode String, " \
+            " ir UInt32, accpedtrav UInt8, brakepedstat UInt8," \
+            " emstat String, emctltemp Int32, emtemp Int32, emspeed Float32, emtq Float32, em_me_pow Float32, " \
+            " emvolt Float32, emctlcut Float32, em_el_pow Float32, em_eff Float32, cocesprotemp1 Array(Int8), " \
+            " tdfwn UInt8, celohwn UInt8, vedtovwn UInt8, vedtuvwn UInt8, lsocwn UInt8, celovwn UInt8, celuvwn UInt8, " \
+            " hsocwn UInt8, jpsocwn UInt8, cesysumwn UInt8, celpoorwn UInt8, inswn UInt8, dctpwn UInt8, bksyswn UInt8, " \
+            " dcstwn UInt8, emctempwn UInt8, hvlockwn UInt8, emtempwn UInt8, vesoc UInt8, mxal UInt8, count_wn UInt8 " \
+            ") ENGINE = MergeTree() ORDER BY (deviceid, uploadtime )"
+    aus=client.execute(sql)
+    sql="desc en.rtm_tiguan"
+    aus=client.execute(sql)
+    print(aus)
+    print(len(aus))
+
+    sql="INSERT INTO en.rtm_tiguan " \
+        "SELECT deviceid, uploadtime,cast(runningDifference(uploadtime),'Int'), vehicle_s, runningDifference(vehicle_s), charg_s, runningDifference(charg_s), " \
+        "cast(vehiclespeed,'Float32'), cast(accmiles,'Float32'), socp, runningDifference(socp), operationmode, " \
+        "totalvolt, totalcurrent, totalcurrent*totalvolt/1000 AS P, multiIf(P<-2,'mode3_2',P>=-2 and P<0,'mode2','discharging'), " \
+        "cast(ir,'UInt32'), if(accped<0,0,accped), if(brakeped<0,0,brakeped), " \
+        "emstat, cast(emctltemp,'Int32'),cast(emtemp,'Int32'), sp, tq, sp*tq/9550 as me_pow, em_v, em_i, em_v*em_i/1000 as el_pow, " \
+        "multiIf(emstat=='CLOSED' or el_pow*me_pow==0,0,emstat=='CONSUMING_POWER',me_pow/el_pow,emstat=='GENERATING_POWER',el_pow/me_pow,100), temp_list, " \
+        "wn01, wn02, wn03, wn04, wn05, wn06, wn07, wn08, wn09, wn10, wn11, wn12, wn13, wn14, wn15, wn16, wn17, wn18, wn19, if(wn_r<0,0,wn_r), " \
+        "(wn01 + wn02 + wn03 + wn04 + wn05 + wn06 + wn07 + wn08 + wn09 + wn10 + wn11 + wn12 + wn13 + wn14 + wn15 + wn16 + wn17 + wn18 + wn19) " \
+        "FROM ( SELECT deviceid, uploadtime, if(vehiclestatus=='STARTED',1,0) AS vehicle_s, if(chargingstatus=='NO_CHARGING',0,1) AS charg_s, " \
+        "vehiclespeed, accmiles, if(soc<0,0,soc) AS socp, operationmode, totalvolt, totalcurrent, " \
+        "ir, cast(accpedtrav,'Int32') AS accped, CAST(brakepedstat,'Int32') AS brakeped, " \
+        "emstat, emctltemp, emtemp, cast(emspeed,'Float32') AS sp, cast(emtq,'Float32') AS tq, " \
+        "cast(emvolt,'Float32') AS em_v, cast(emctlcut,'Float32') AS em_i, " \
+        "cast(splitByChar(',',cocesprotemp1),'Array(Int8)') AS temp_list, " \
+        "if(tdfwn=='true',1,0) as wn01, if(celohwn=='true',1,0) as wn02, if(vedtovwn=='true',1,0) as wn03, if(vedtuvwn=='true',1,0) as wn04, if(lsocwn=='true',1,0) as wn05, " \
+        "if(celovwn=='true',1,0) as wn06, if(celuvwn=='true',1,0) as wn07, if(hsocwn=='true',1,0) as wn08, if(jpsocwn=='true',1,0) as wn09, if(cesysumwn=='true',1,0) as wn10, " \
+        "if(celpoorwn=='true',1,0) as wn11, if(inswn=='true',1,0) as wn12, if(dctpwn=='true',1,0) as wn13, if(bksyswn=='true',1,0) as wn14, if(dcstwn=='true',1,0) as wn15, " \
+        "if(emctempwn=='true',1,0) as wn16, if(hvlockwn=='true',1,0) as wn17, if(emtempwn=='true',1,0) as wn18, if(vesoc=='true',1,0)as wn19, cast(mxal,'Int8') as wn_r  " \
+        "FROM ods.rtm_reissue_history " \
+        "WHERE vehiclestatus!='ERROR' and chargingstatus!='INVALID' and chargingstatus!='ERROR' and cocesprotemp1!='NULL' " \
+        "AND uploadtime BETWEEN '2018-01-01 00:00:00' AND '2020-12-31 23:59:59' AND deviceid IN (SELECT deviceid FROM en.vehicle_vin WHERE project like 'Tiguan%') " \
+        "ORDER BY deviceid,uploadtime ) "
+    print(sql)
+    aus=client.execute(sql)
+    sql="SELECT COUNT(deviceid) from en.rtm_tiguan"
+    aus=client.execute(sql)
+    print(aus)
+    sql="SELECT COUNT(DISTINCT deviceid) from en.rtm_tiguan"
+    aus=client.execute(sql)
+    print(aus)
+    sql="SELECT * from en.rtm_tiguan limit 10"
+    aus=client.execute(sql)
+    df = pd.DataFrame(aus)
+    sql="desc en.rtm_tiguan"
+    title=pd.DataFrame(client.execute(sql))
+    df.columns=title[0]
+    df.to_csv('rtm_tiguan.csv')
 

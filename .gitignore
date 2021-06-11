@@ -11,3 +11,7 @@
 __pycache__/
 /rtm_flask/data/*
 /rtm_platform/*
+/temp/*
+rtm_prediction/new/cridet/cridet_WOE.csv
+rtm_prediction/new/smote/训练样本_x.csv
+rtm_prediction/new/smote/smote_resample.csv

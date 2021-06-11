@@ -1,0 +1,62 @@
+,col_name,IV,
+8,bin_driving time,0.020492304,1
+28,bin_cell discharge temp diff mean,0.014339164,2
+57,bin_charge end SOC mean,0.011980533,3
+27,bin_cell discharge temp diff max,0.011574054,4
+0,bin_week_num,0.011276929,5
+6,bin_mile,0.010975759,6
+29,bin_E-motor speed max,0.010367014,7
+7,bin_daily mile (mean),0.010320822,8
+23,bin_BMS discharge power max,0.009206099,9
+52,bin_charge times,0.008501849,10
+15,bin_acc pedal(99%),0.007456183,11
+46,bin_BMS charge power max,0.006976956,12
+58,bin_charge end SOC 50%,0.006664952,13
+59,bin_mean(¦¤SOC),0.005820694,14
+60,bin_sum(¦¤SOC),0.005561914,15
+34,bin_E-motor torque- mean,0.005312023,16
+33,bin_E-motor torque- max,0.005267899,17
+10,bin_v 99%,0.005237103,18
+37,bin_E-motor temp 99%,0.004738615,19
+12,bin_EV %,0.004425675,20
+31,bin_E-motor torque+ max,0.004298687,21
+13,bin_FV %,0.004106185,22
+25,bin_cell discharge temp max,0.004015055,23
+20,bin_BMS discharge temp max,0.003997616,24
+38,bin_E-motor temp 50%,0.003777641,25
+36,bin_E-motor temp mean,0.003479293,26
+18,bin_dec pedal(99%),0.003114253,27
+35,bin_E-motor torque- percentage,0.003065994,28
+30,bin_E-motor speed mean,0.00256642,29
+14,bin_acc pedal(mean),0.00253717,30
+9,bin_v (mean),0.002421504,31
+4,bin_acc_mileage,0.002154978,32
+43,bin_LE temp 1%,0.002139613,33
+47,bin_BMS charge power mean,0.001866961,34
+49,bin_cell charge temp min,0.001842704,35
+17,bin_dec pedal(mean),0.001813134,36
+3,bin_province,0.001771876,37
+26,bin_cell discharge temp min,0.001749736,38
+21,bin_BMS discharge temp min,0.001727585,39
+11,bin_v 50%,0.001673473,40
+24,bin_BMS discharge power mean,0.001430748,41
+39,bin_E-motor temp 1%,0.001227738,42
+32,bin_E-motor torque+ mean,0.001136909,43
+16,bin_acc pedal(50%),0.001109111,44
+5,bin_ir,0.00110259,45
+54,bin_mode3 percentage,0.001069025,46
+41,bin_LE temp 99%,0.000969266,47
+42,bin_LE temp 50%,0.000901621,48
+51,bin_cell charge temp diff mean,0.000866495,49
+19,bin_dec pedal(50%),0.000805858,50
+22,bin_BMS discharge temp mean,0.00079756,51
+40,bin_LE temp mean,0.000764528,52
+2,bin_VIN,0.000572919,53
+45,bin_BMS charge temp mean,0.000460329,54
+50,bin_cell charge temp diff max,0.000376016,55
+56,bin_charge start SOC 50%,0.000370361,56
+55,bin_charge start SOC mean,0.000368721,57
+53,bin_mode2 percentage,9.43E-05,58
+48,bin_cell charge temp max,7.42E-05,59
+44,bin_BMS charge temp max,5.89E-05,60
+1,bin_region,4.23E-05,61

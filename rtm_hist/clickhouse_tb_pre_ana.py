@@ -104,7 +104,6 @@ def f2():
 
 
 
-
 def delet_tb(tb_name):
     sql="DROP TABLE "+tb_name
     aus=client.execute(sql)

@@ -226,7 +226,7 @@ def pre1():
 
 
 
-from rtm.RTM_ana import feature_extract
+from rtm_hist.RTM_ana import feature_extract
 @time_cost
 def feature_ex(filename,t_name):
     fe=pd.DataFrame()

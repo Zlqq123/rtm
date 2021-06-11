@@ -17,6 +17,63 @@ client=en_client()
 from rtm_hist.default_hist import f1
 
 
+'''
+deviceid like 'LSVUB%'  ID4x 82kWh
+deviceid like 'LSVUA%'  ID4x 55kWh
+
+Lavida BEV 53Ah	LSVAX40E××2××××××
+	            LSVAX60E××2××××××
+Tharu BEV 61Ah	LSVUZ6B2××N××××××
+Lavida BEV 61Ah	LSVAV40E××2××××××
+	            LSVAV60E××2××××××
+Tiguan L PHEV C5	LSVUZ60T××2××××××
+Tiguan L PHEV C6	LSVUY60T××2××××××
+Passat PHEV C5	LSVCZ2C4××N××××××
+	            LSVCZ6C4××N××××××
+Passat PHEV C6	LSVCY2C4××N××××××
+	            LSVCY6C4××N××××××
+
+'''
+
+sql="SELECT * from ods.rtm_details_v2 " \
+    " where deviceid=='LSVUB6E43L2011932' order by uploadtime"
+aus=client.execute(sql)
+df = pd.DataFrame(aus)
+df.to_csv('temp/LSVUB6E43L2011932.csv')
+
+a=1
+sql="WITH cast(emnum,'Float32') as m_num, cast(cel1num1,'Float32') as cell_num" \
+    " SELECT deviceid, max(m_num), topK(2)(cell_num) FROM ods.rtm_details_v2 " \
+    " WHERE (deviceid like 'LSVUB%' or deviceid like 'LSVUA%') AND emnum!='NULL' and cel1num1!= 'NULL' " \
+    " GROUP BY deviceid"
+aus=client.execute(sql)
+df = pd.DataFrame(aus)
+df.to_csv('MEB_VIN_0428-1.csv')
+
+
+sql=" SELECT topK(10)(cel1num1) from ods.rtm_details_v2 " \
+    " WHERE deviceid like 'LSVUB%' "
+aus=client.execute(sql)
+print(aus)
+
+
+
+
+
+
+'''
+sql="desc ods.rtm_details_v2"
+aus=client.execute(sql)
+df = pd.DataFrame(aus)
+df.to_csv('rtm_details_v2.csv')
+'''
+
+
+
+
+
+
+
 sql="SELECT deviceid,uploadtime, cast(vehiclespeed,'Float32'), cast(accmiles,'Float32'),chargingstatus, vehiclestatus FROM ods.rtm_reissue_history WHERE deviceid == 'LSVUB6E45L2011107' "
 aus=client.execute(sql)
 df = pd.DataFrame(aus)

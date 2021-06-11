@@ -106,6 +106,7 @@
                     <thead>
                         </tr>
                           {% for c in col: %}
+                            <th>{{''}}</th>
                             <th>{{c}}</th>
                           {% endfor %}
                         </tr>
@@ -113,6 +114,7 @@
                     <tbody>
                       {% for indexs in hist_result.index: %}
                         <tr>
+                          <td>{{indexs}}</td>
                           {% for i in x: %}
                           <td>{{hist_result.loc[indexs].values[i]}}</td>
                           {% endfor %}

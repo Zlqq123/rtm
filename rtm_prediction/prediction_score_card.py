@@ -3,8 +3,9 @@ import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
 
-#filepath="D:/21python/rtm/rtm_prediction/new/"
-filepath="C:/Users/ZhaoYinglong/Documents/vscode/rtm/rtm_prediction/new/"
+filepath="D:/21python/rtm/rtm_prediction/new/"
+#评分卡模型
+# https://www.jianshu.com/p/c3fa53c54cca
 
 filename=filepath+'train_feature_no_warming.csv'
 s1=pd.read_csv(filename,encoding="gbk")    #s1=pd.read_csv(filename,encoding="gbk",index_col=0,header=0)
@@ -144,6 +145,8 @@ bin_cols = ['bin_driving time','bin_cell discharge temp diff mean','bin_charge e
     'bin_daily mile (mean)','bin_BMS discharge power max','bin_charge times']
 
 
+#通过IV值对特征变量进行筛选
+# https://blog.csdn.net/sscc_learning/article/details/78591210?utm_medium=distribute.pc_relevant.none-task-blog-2%7Edefault%7EBlogCommendFromMachineLearnPai2%7Edefault-2.vipsorttest&depth_1-utm_source=distribute.pc_relevant.none-task-blog-2%7Edefault%7EBlogCommendFromMachineLearnPai2%7Edefault-2.vipsorttest
 df_woe = cal_WOE(x, bin_cols, 'Label')
 
 df_woe.describe()
@@ -151,12 +154,8 @@ df_woe.describe()
 woe_cols = [c for c in list(df_woe.columns.values) if 'woe' in c]
 df_woe[woe_cols]
 df_woe.to_csv(filepath+'cridet_WOE.csv',encoding="gbk")
-
-df_woe[woe_cols].describe()
-
 print(bin_cols)
 feature_cols = [x[4:] for x in bin_cols]
-
 
 
 # 得到WOE规则
@@ -172,10 +171,13 @@ for f in feature_cols:
     # 按照行的方式进行拼接
     df_bin_to_woe = pd.concat([df_bin_to_woe, df])
 print(df_bin_to_woe)
+
 print(df_woe[woe_cols])
 
 df=df_woe[woe_cols]
 df.to_csv(filepath+'cridet_WOE1.csv',encoding="gbk")
+
+
 
 # 数据集切分
 from sklearn.model_selection import train_test_split
@@ -193,27 +195,5 @@ print(accuracy_score(y_pred, y_test))
 print(roc_auc_score(y_pred, y_test))
 
 
-from sklearn.model_selection import cross_val_score
-model = LogisticRegression(random_state=33, class_weight='balanced')
-print('auc score ', cross_val_score(model, x_train, y_train, cv=5, scoring='roc_auc').mean())
-print('accuracy ', cross_val_score(model, x_train, y_train, cv=5, scoring='accuracy').mean())
-
-
-def lr_cv(max_iter, C):
-    result = cross_val_score(LogisticRegression(C=C, max_iter=max_iter), x_train, y_train, scoring='f1', cv=5).mean()
-    return result
-
-
-# 使用贝叶斯超参数优化
-from bayes_opt import BayesianOptimization
-lr_op = BayesianOptimization(
-        f = lr_cv,
-        pbounds = {'C': (0.01, 10),
-                   'max_iter': (50, 500)
-                  }
-    )
-#lr_op.maximize(init_points=1,n_iter=2)
-lr_op.maximize()
-print(lr_op.max)
 
 a=1

@@ -772,6 +772,7 @@ class feature_extract():
     '''
     用于提取特征
         20200904 v1.0
+    用于预处理后的表
     '''
     def __init__(self,vin,start_date,end_date,target_date,tb_name):
         '''
