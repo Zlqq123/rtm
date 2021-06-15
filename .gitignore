@@ -5,7 +5,7 @@
 *en_client.py
 /data_visualization/vin.py
 /data_visualization/personal_info.py
-/prediction_data/*
+/rtm_prediction/data/*
 /.ipynb_checkpoints/*
 *.pyc
 __pycache__/
