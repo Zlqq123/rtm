@@ -6,8 +6,8 @@ import seaborn as sns
 from en_client import en_client
 
 client=en_client()
-filepath="D:/21python/rtm/rtm_prediction/new/"
-
+#filepath="D:/01 RTM/rtm/rtm_prediction/data/new/"
+filepath = "D:/01 RTM/rtm/rtm_prediction/data/feature_reconstruction/"
 
 
 
@@ -149,8 +149,8 @@ def xgb_search_param():
     print('最佳模型得分', gs.best_score_)
 
 
-def trian_xgboost():
-    
+def train_xgboost():
+    filepath = "D:/01 RTM/rtm/rtm_prediction/data/feature_reconstruction/"
     filename=filepath+"训练样本_y.csv"
     y = pd.read_csv(filename, encoding="gbk", index_col=0, header=0)
     filename=filepath+"训练样本_x.csv"
@@ -193,6 +193,9 @@ def trian_xgboost():
     from sklearn.metrics import roc_curve,auc
     fpr, tpr, thresholds = roc_curve(y_test_s, y_pred, pos_label=1)
     roc_auc = auc(fpr, tpr)  ###计算auc的值
+    print(fpr)
+    print(tpr)
+    print(thresholds)
     lw = 2
     plt.figure(figsize=(8, 5))
     plt.plot(fpr, tpr, color='darkorange',
@@ -209,7 +212,34 @@ def trian_xgboost():
     plt.show()
     
 
-    
+    #验证集样本验证
+    filepath= 'D:/01 RTM/rtm/rtm_prediction/data/new/'
+    filename=filepath+"valid_data/验证样本_y.csv"
+    y_valid = pd.read_csv(filename, encoding="gbk", index_col=0, header=0)
+    filename=filepath+"valid_data/验证样本_x.csv"
+    x_valid = pd.read_csv(filename,encoding="gbk", index_col=0, header=0)
+    valid_data = xgb.DMatrix(x_valid, label=y_valid)
+    y_pred_v = model.predict(valid_data)
+    y_pred_v1 = [1 if x>=0.5 else 0 for x in y_pred_v]
+    print('XGBoost[验证集] 准确率:', metrics.accuracy_score(y_valid,y_pred_v1))
+    fpr, tpr, thresholds = roc_curve(y_valid, y_pred_v, pos_label=1)
+    roc_auc = auc(fpr, tpr)  ###计算auc的值
+    lw = 2
+    plt.figure(figsize=(8, 5))
+    plt.plot(fpr, tpr, color='darkorange',
+            lw=lw, label='ROC curve (area = %0.2f)' % roc_auc)  ###假正率为横坐标，真正率为纵坐标做曲线
+    plt.plot([0, 1], [0, 1], color='navy', lw=lw, linestyle='--')
+    plt.grid()
+    plt.xlim([0.0, 1.0])
+    plt.ylim([0.0, 1.0])
+    plt.xlabel('False Positive Rate')
+    plt.ylabel('True Positive Rate')
+    plt.title('Receiver operating characteristic example')
+    plt.legend(loc="lower right")
+    plt.savefig(filepath+"roc(vaid).jpg")
+    plt.show()
+
+
     #model.save_model('xgb_tiguan.model')
 
     ##计算feature importance
@@ -355,6 +385,7 @@ RandomizedSearchCV的使用方法其实是和GridSearchCV一致的，但它以�
 '''
 
 def train_xgboost2():
+    #采用 smote后的样本进行训练
     filename=filepath+"smote/训练样本_y.csv"
     y = pd.read_csv(filename, encoding="gbk", index_col=0, header=0)
     filename=filepath+"smote/训练样本_x.csv"
@@ -413,7 +444,34 @@ def train_xgboost2():
     plt.show()
     
 
-    
+    #验证集样本验证
+    filename=filepath+"valid_data/验证样本_y.csv"
+    y_valid = pd.read_csv(filename, encoding="gbk", index_col=0, header=0)
+    filename=filepath+"valid_data/验证样本_x.csv"
+    x_valid = pd.read_csv(filename,encoding="gbk", index_col=0, header=0)
+    valid_data = xgb.DMatrix(x_valid, label=y_valid)
+    y_pred_v = model.predict(valid_data)
+    y_pred_v1 = [1 if x>=0.5 else 0 for x in y_pred_v]
+    print('XGBoost[验证集] 准确率:', metrics.accuracy_score(y_valid,y_pred_v1))
+    fpr, tpr, thresholds = roc_curve(y_valid, y_pred_v, pos_label=1)
+    roc_auc = auc(fpr, tpr)  ###计算auc的值
+    lw = 2
+    plt.figure(figsize=(8, 5))
+    plt.plot(fpr, tpr, color='darkorange',
+            lw=lw, label='ROC curve (area = %0.2f)' % roc_auc)  ###假正率为横坐标，真正率为纵坐标做曲线
+    plt.plot([0, 1], [0, 1], color='navy', lw=lw, linestyle='--')
+    plt.grid()
+    plt.xlim([0.0, 1.0])
+    plt.ylim([0.0, 1.0])
+    plt.xlabel('False Positive Rate')
+    plt.ylabel('True Positive Rate')
+    plt.title('Receiver operating characteristic example')
+    plt.legend(loc="lower right")
+    plt.savefig(filepath+"smote/roc(vaid).jpg")
+    plt.show()
+
+
+
     #model.save_model('xgb_tiguan.model')
 
     ##计算feature importance
@@ -455,9 +513,162 @@ def train_xgboost2():
     plt.show()
 
 
+def valid_pre():
+    '''
+    验证集数据预处理
+    '''
+    filepath=''
+    filename=filepath+'tiguan2021_valid_no_warning_feature.csv'
+    s1=pd.read_csv(filename,encoding="gbk")    #s1=pd.read_csv(filename,encoding="gbk",index_col=0,header=0)
+    filename=filepath+'tiguan2021_valid_warning_feature.csv'
+    s2=pd.read_csv(filename,encoding="gbk")
+    print(s1.shape)
+    print(s2.shape)
+    s1 = s1.drop(s1[s1.Integrity == 1].index)
+    print(s1.shape)
+    s1 = s1.drop(s1[s1.Label == 1].index)
+    print(s1.shape)
+    s2 = s2.drop(s2[s2.Integrity == 1].index)
+    print(s2.shape)
+    s2 = s2.drop(s2[s2.Label == 0].index)
+    print(s2.shape)
+    
+    des=s1.describe()
+    print(des)
+    #des.to_csv(filepath+"no_warming_f_describe.csv",encoding="gbk")
+    des=s2.describe()
+    #des.to_csv(filepath+"warming_f_describe.csv",encoding="gbk")
+    print(des)
+
+    
+    ss=s1.append(s2)
+    print(ss.shape)
+    del s1,s2
+    #数据预处理
+    from sklearn.preprocessing import LabelEncoder
+    label_name = ['VIN','region','province']
+    for a in label_name:
+        le = LabelEncoder()
+        le.fit(ss[a])
+        ss[a]=le.transform(ss[a])
+
+    print(ss.isnull().sum())
+    print("样本个数: {}".format(ss.shape[0]))
+    print("报警个数: {}".format(ss[ss.Label == 1].shape[0]))
+    print("未报警个数: {}".format(ss[ss.Label == 0].shape[0]))
+    
+    # 分割特征和Target
+    X=ss.drop(labels=['Label',"user_type",'Integrity'],axis=1)
+    y=pd.DataFrame(ss['Label'])
+    del ss
+    print("特征个数: {}".format(X.shape[1]))
 
 
+    #归一化
+    # 最大最小值归一化 将数值映射到 [-1, 1]之间
+    from sklearn.preprocessing import MinMaxScaler
+    scaler=MinMaxScaler()
+    scaler.fit(X)
+    X1 = pd.DataFrame(scaler.transform(X))
+    X1.columns = X.columns
+    y.columns = ['Label']
+
+
+    X1.to_csv(filepath+'验证样本_x.csv',encoding="gbk")
+    y.to_csv(filepath+'验证样本_y.csv',encoding="gbk")
+
+filepath = "D:/01 RTM/rtm/rtm_prediction/data/feature_reconstruction/"
+def pre3():
+    #第一次特征重构，只保留11个特征，保留不充电样本
+    filename=filepath+'1/train_feature_no_warming.csv'
+    s1=pd.read_csv(filename,encoding="gbk")    #s1=pd.read_csv(filename,encoding="gbk",index_col=0,header=0)
+    filename=filepath+'1/train_feature_warming.csv'
+    s2=pd.read_csv(filename,encoding="gbk")
+    col_list=['acc pedal(99%)','acc_mileage','BMS charge power mean','BMS charge temp max','BMS charge temp mean',
+        'BMS discharge power max','BMS discharge power mean', 'BMS discharge temp max', 'BMS discharge temp min', 'cell charge temp diff max', 
+        'cell charge temp max', 'cell discharge temp diff mean','cell discharge temp min', 'charge end SOC 50%', 'charge end SOC mean', 
+        'charge times', 'daily mile (mean)', 'dec pedal(50%)','dec pedal(99%)', 'dec pedal(mean)', 'driving time', 'E-motor speed max', 
+        'E-motor temp 1%', 'E-motor torque- mean','E-motor torque+ max', 'ir', 'mean(ΔSOC)', 'region', 'sum(ΔSOC)', 'v 99%','VIN', 
+        'week_num', 'province','Label']
+
+    s1 = s1[col_list]
+    s2 = s2[col_list]
+    #print(s1.columns)
+    #print(s1.info())
+    #print(s2.info())
+    print(s1.isnull().sum())
+    print('~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~')
+    print(s2.isnull().sum())
+    s1=s1.dropna(subset=['acc pedal(99%)','v 99%','dec pedal(50%)','E-motor torque- mean','E-motor torque+ max','E-motor temp 1%'])
+    s2=s2.dropna(subset=['acc pedal(99%)','v 99%','dec pedal(50%)','E-motor torque- mean','E-motor torque+ max','E-motor temp 1%'])
+    print(s1.isnull().sum())
+    print('~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~')
+    print(s1.isnull().sum())
+    a = ['charge end SOC 50%','charge end SOC mean','mean(ΔSOC)','sum(ΔSOC)']
+    for i in a:
+        s1[i]=s1[i].fillna(0)
+        s2[i]=s2[i].fillna(0)
+    a=['BMS charge power mean','BMS charge temp max','BMS charge temp mean','cell charge temp diff max','cell charge temp max']
+    for i in a:
+        s1[i]=s1[i].fillna(s1[i].mean())
+        s2[i]=s2[i].fillna(s2[i].mean())
+    print('~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~')
+    print(s1.isnull().sum())
+    print('~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~')
+    print(s1.isnull().sum())
+
+    ss=s1.append(s2)
+    print(ss.shape)
+    del s1,s2
+    #数据预处理
+    from sklearn.preprocessing import LabelEncoder
+    label_name = ['VIN','region','province']
+    for a in label_name:
+        le = LabelEncoder()
+        le.fit(ss[a])
+        ss[a]=le.transform(ss[a])
+
+    print(ss.isnull().sum())
+    print("样本个数: {}".format(ss.shape[0]))
+    print("报警个数: {}".format(ss[ss.Label == 1].shape[0]))
+    print("未报警个数: {}".format(ss[ss.Label == 0].shape[0]))
+    
+    # 分割特征和Target
+    X=ss.drop(labels=['Label'],axis=1)
+    y=pd.DataFrame(ss['Label'])
+    del ss
+    print("特征个数: {}".format(X.shape[1]))
+
+    # corr相关系数函数
+    c=X.corr()
+    c.to_csv(filepath+'特征值之间的相关系数.csv',encoding="gbk")
+    print(c)
+    sns.heatmap(c)
+    #plt.show()
+    plt.savefig(filepath+"corr.jpg")
+
+    #归一化
+    # 最大最小值归一化 将数值映射到 [-1, 1]之间
+    from sklearn.preprocessing import MinMaxScaler
+    scaler=MinMaxScaler()
+    scaler.fit(X)
+    X1 = pd.DataFrame(scaler.transform(X))
+    X1.columns = X.columns
+    y.columns = ['Label']
+    # 标准归一化
+    #from sklearn.preprocessing import StandardScaler
+    #scaler = StandardScaler()
+    #scaler.fit(X)
+
+
+    X1.to_csv(filepath+'训练样本_x.csv',encoding="gbk")
+    y.to_csv(filepath+'训练样本_y.csv',encoding="gbk")
+    
+
+#pre3()
+#valid_pre()
 #pre2_smote()
 #xgb_search_param2()
-train_xgboost2()
+#train_xgboost2()
+train_xgboost()
 a=1

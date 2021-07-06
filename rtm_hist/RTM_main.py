@@ -7,15 +7,19 @@ import numpy as np
 import pandas as pd
 #from range_test.range_test import Rangetest
 #from RTM_ana import RtmAna
-from genarl_func import time_cost
-import hist_func_np
+#from genarl_func import time_cost
+#import hist_func_np
 from en_client import en_client
-from default_hist import RtmHist
+#from default_hist import RtmHist
 import os
-from RTM_ana import RtmAna
+#from RTM_ana import RtmAna
 client=en_client()
 from rtm_hist.default_hist import f1
 
+
+sql="SELECT distinct deviceid from ods.rtm_details_v2 where deviceid like 'LSVAX40E__2______'"
+df = pd.DataFrame(client.execute(sql))
+print(df)
 
 '''
 deviceid like 'LSVUB%'  ID4x 82kWh

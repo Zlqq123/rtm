@@ -119,17 +119,46 @@ print('<<<<<<<<<<<<<<<四月>>>>>>>>>>>>>>>>>')
 x3=Meb_mileage(['2021-04-01','2021-04-30'])
 print(x3)
 '''
+
+#月行驶里程
+sql="SELECT deviceid, mo, mi FROM " \
+    "(WITH cast(accmiles,'Float32') AS mile " \
+    "SELECT deviceid, toMonth(uploadtime) as mo, max(mile)-min(mile) as mi FROM ods.rtm_details_v2 " \
+    "WHERE uploadtime BETWEEN '2021-02-01 00:00:00' AND '2021-05-31 23:59:59' " \
+    "AND deviceid in ( " \
+    "SELECT deviceid FROM en.vehicle_vin " \
+    "WHERE project=='Lavida BEV 53Ah' AND user_typ == 'Private' ) " \
+    "GROUP BY deviceid, toMonth(uploadtime) ) " \
+    "WHERE mi<6000"
+aus=pd.DataFrame(client.execute(sql))
+aus.to_csv('mile_month.csv')
+
+m=np.array(aus[1])
+mile=np.array(aus[2])
+step=range(0,7250,50)
+[a,b,c] = hist_func_np.hist_con_dis(mile,step,m,[2,3,4,5],show_hist=1)
+re1=pd.DataFrame(np.array(b).T)
+re1.index=a
+re1.columns=['Fer','Apr',"Mar",'May']
+re2=pd.DataFrame(np.array(c).T)
+re2.index=['min','1%percentile','25%percentile','50%percentile','75%percentile','99%percentile','max','mean']
+re2.columns=['Fer','Apr',"Mar",'May']
+re1.to_csv('mile_month1.csv')
+re2.to_csv('mile_month2.csv')
+
+
 #工作日几休息日行驶里程
 sql="WITH cast(accmiles,'Float32') AS mile " \
-    "SELECT deviceid, toDate(uploadtime), toDayOfWeek(toDate(uploadtime)), " \
+    "SELECT deviceid, toDate(uploadtime), toDayOfWeek(toDate(uploadtime)) , " \
     "if(toDayOfWeek(toDate(uploadtime))<6, 'weekday', 'weekend' ), max(mile)-min(mile) FROM ods.rtm_details_v2 " \
     "WHERE uploadtime BETWEEN '2021-02-01 00:00:00' AND '2021-06-31 23:59:59' " \
     "AND deviceid in ( " \
     "SELECT deviceid FROM en.vehicle_vin " \
-    "WHERE project in ('Passat PHEV C6', 'Passat PHEV C5') AND user_typ == 'Private' ) " \
+    "WHERE project=='Lavida BEV 53Ah' AND user_typ == 'Private' ) " \
     "GROUP BY deviceid, toDate(uploadtime) "
+
 aus=pd.DataFrame(client.execute(sql))
-aus.to_csv('mile_week_passat.csv')
+aus.to_csv('mile_week.csv')
 
 w1=np.array(aus[2])
 w=np.array(aus[3])
@@ -211,66 +240,7 @@ re1.to_csv('v_week3.csv')
 re2.to_csv('v_week4.csv')
 
 
-#月行驶里程
-sql="WITH cast(accmiles,'Float32') AS mile " \
-    "SELECT deviceid, toMonth(uploadtime), max(mile)-min(mile) FROM ods.rtm_details_v2 " \
-    "WHERE uploadtime BETWEEN '2021-02-01 00:00:00' AND '2021-05-31 23:59:59' " \
-    "AND deviceid in ( " \
-    "SELECT deviceid FROM en.vehicle_vin " \
-    "WHERE project=='Lavida BEV 53Ah' AND user_typ == 'Private' ) " \
-    "GROUP BY deviceid, toMonth(uploadtime) "
-aus=pd.DataFrame(client.execute(sql))
-aus.to_csv('mile_month.csv')
 
-m=np.array(aus[1])
-mile=np.array(aus[2])
-step=range(0,7000,50)
-[a,b,c] = hist_func_np.hist_con_dis(mile,step,m,[2,3,4,5],show_hist=1)
-re1=pd.DataFrame(np.array(b).T)
-re1.index=a
-re1.columns=['Fer','Apr',"Mar",'May']
-re2=pd.DataFrame(np.array(c).T)
-re2.index=['min','1%percentile','25%percentile','50%percentile','75%percentile','99%percentile','max','mean']
-re2.columns=['Fer','Apr',"Mar",'May']
-re1.to_csv('mile_month1.csv')
-re2.to_csv('mile_month2.csv')
-
-
-#工作日几休息日行驶里程
-sql="WITH cast(accmiles,'Float32') AS mile " \
-    "SELECT deviceid, toDate(uploadtime), toDayOfWeek(toDate(uploadtime)), " \
-    "if(toDayOfWeek(toDate(uploadtime))<6, 'weekday', 'weekend' ), max(mile)-min(mile) FROM ods.rtm_details_v2 " \
-    "WHERE uploadtime BETWEEN '2021-02-01 00:00:00' AND '2021-06-31 23:59:59' " \
-    "AND deviceid in ( " \
-    "SELECT deviceid FROM en.vehicle_vin " \
-    "WHERE project=='Lavida BEV 53Ah' AND user_typ == 'Private' ) " \
-    "GROUP BY deviceid, toDate(uploadtime) "
-aus=pd.DataFrame(client.execute(sql))
-aus.to_csv('mile_week.csv')
-
-w1=np.array(aus[2])
-w=np.array(aus[3])
-mile=np.array(aus[4])
-step=range(0,500,10)
-[a,b,c] = hist_func_np.hist_con_dis(mile,step,w,['weekday', 'weekend'],show_hist=1)
-re1=pd.DataFrame(np.array(b).T)
-re1.index=a
-re1.columns=['weekday', 'weekend']
-re2=pd.DataFrame(np.array(c).T)
-re2.index=['min','1%percentile','25%percentile','50%percentile','75%percentile','99%percentile','max','mean']
-re2.columns=['weekday', 'weekend']
-re1.to_csv('mile_week1.csv')
-re2.to_csv('mile_week2.csv')
-
-[a,b,c] = hist_func_np.hist_con_dis(mile,step,w1,[1, 2, 3, 4, 5, 6, 7],show_hist=1)
-re1=pd.DataFrame(np.array(b).T)
-re1.index=a
-re1.columns=['Mon', 'Tue','Wed','Thu','Fri','Sat','Sun']
-re2=pd.DataFrame(np.array(c).T)
-re2.index=['min','1%percentile','25%percentile','50%percentile','75%percentile','99%percentile','max','mean']
-re2.columns=['Mon', 'Tue','Wed','Thu','Fri','Sat','Sun']
-re1.to_csv('mile_week3.csv')
-re2.to_csv('mile_week4.csv')
 
 
 # toDayOfWeek

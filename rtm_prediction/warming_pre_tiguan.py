@@ -74,7 +74,7 @@ def tb_pre_ana(original_tb_name,new_tb_name,start_time,end_time):
     print(len(aus))
 
     sql="INSERT INTO "+ new_tb_name + \
-        "SELECT deviceid, uploadtime,cast(runningDifference(uploadtime),'Int'), vehicle_s, runningDifference(vehicle_s), charg_s, runningDifference(charg_s), " \
+        " SELECT deviceid, uploadtime,cast(runningDifference(uploadtime),'Int'), vehicle_s, runningDifference(vehicle_s), charg_s, runningDifference(charg_s), " \
         "cast(vehiclespeed,'Float32'), cast(accmiles,'Float32'), socp, runningDifference(socp), operationmode, " \
         "totalvolt, totalcurrent, totalcurrent*totalvolt/1000 AS P, multiIf(P<-2,'mode3_2',P>=-2 and P<0,'mode2','discharging'), " \
         "cast(ir,'UInt32'), if(accped<0,0,accped), if(brakeped<0,0,brakeped), " \
@@ -93,7 +93,7 @@ def tb_pre_ana(original_tb_name,new_tb_name,start_time,end_time):
         "if(celpoorwn=='true',1,0) as wn11, if(inswn=='true',1,0) as wn12, if(dctpwn=='true',1,0) as wn13, if(bksyswn=='true',1,0) as wn14, if(dcstwn=='true',1,0) as wn15, " \
         "if(emctempwn=='true',1,0) as wn16, if(hvlockwn=='true',1,0) as wn17, if(emtempwn=='true',1,0) as wn18, if(vesoc=='true',1,0)as wn19, cast(mxal,'Int8') as wn_r  " \
         "FROM " + original_tb_name + \
-        "WHERE vehiclestatus!='ERROR' and chargingstatus!='INVALID' and chargingstatus!='ERROR' and cocesprotemp1!='NULL' " \
+        " WHERE vehiclestatus!='ERROR' and chargingstatus!='INVALID' and chargingstatus!='ERROR' and cocesprotemp1!='NULL' " \
         "AND uploadtime BETWEEN '" + start_time + "' AND '" + end_time + "' " \
         "AND deviceid IN (SELECT deviceid FROM en.vehicle_vin WHERE project like 'Tiguan%') " \
         "ORDER BY deviceid,uploadtime ) "
@@ -113,20 +113,21 @@ def tb_pre_ana(original_tb_name,new_tb_name,start_time,end_time):
     df.columns=title[0]
     df.to_csv(new_tb_name+'.csv')
 
-def sample_extraction(tb_name,start_time,end_time,sample_file_name):
-    
-    
-    #提取训练集
+def sample_extraction(tb_name,start_time,end_time,sample_file_name,n=60000):
+    '''
+    tb_name clickhouse中的表名（预处理后的表）
+    n=60000非报警样本抽样提取，抽样个数默认60000
+    '''
     #提取所有的非报警样本， 
     sql="SELECT c0, c1, c2, c3 FROM " \
     "(SELECT deviceid as c0, toDate(uploadtime) as c1, sum(bksyswn) as c2, max(accmiles) as c3 " \
-    "FROM en.rtm_tiguan WHERE uploadtime BETWEEN '"+ start_time +"' AND '"+ end_time +"' " \
+    "FROM " + tb_name + " WHERE uploadtime BETWEEN '"+ start_time +"' AND '"+ end_time +"' " \
     "GROUP BY deviceid,toDate(uploadtime) ORDER BY deviceid, toDate(uploadtime)) " \
     " WHERE c3>200 AND c2==0 "# 删除里程小于200km
     aus=client.execute(sql)
     print(len(aus))
     df = pd.DataFrame(aus)
-    df = df.sample(n=60000)  #随机采样
+    df = df.sample(n)  #随机采样
     print(df.shape)
     df.columns=['VIN','target date','bksyswn','mileage']
     df['start']=df['target date']-datetime.timedelta(days=31)
@@ -136,7 +137,7 @@ def sample_extraction(tb_name,start_time,end_time,sample_file_name):
     #提取所有的报警样本
     sql="SELECT c0, c1,c2,c3 FROM " \
     "(SELECT deviceid as c0, toDate(uploadtime) as c1, sum(bksyswn) as c2, max(accmiles) as c3 " \
-    "FROM en.rtm_tiguan WHERE bksyswn>0 AND uploadtime BETWEEN '"+ start_time +"' AND '"+ end_time +"' " \
+    "FROM " + tb_name + " WHERE bksyswn>0 AND uploadtime BETWEEN '"+ start_time +"' AND '"+ end_time +"' " \
     "GROUP BY deviceid,toDate(uploadtime) ORDER BY deviceid, toDate(uploadtime)) " \
     " WHERE c3>200 "# 删除里程小于200km
     aus=client.execute(sql)
@@ -185,6 +186,9 @@ def feature_extraction(tb_name,sample_file_name,feature_file_name):
     feature_all.to_csv(feature_file_name,encoding="gbk",index=False)
 
 
-tb_pre_ana('ods.rtm_details_v2','en.tiguan2021','2021-02-01 00:00:00','2021-06-01 00:00:00')
+#tb_pre_ana('ods.rtm_details_v2','en.tiguan2021','2021-02-01 00:00:00','2021-06-01 00:00:00')
+#sample_extraction('en.tiguan2021','2021-03-01 00:00:00','2021-06-01 00:00:00','tiguan2021_valid_',12439)
+#feature_extraction('en.tiguan2021','tiguan2021_valid_warning.csv','tiguan2021_valid_warning_feature.csv')
+#feature_extraction('en.tiguan2021','tiguan2021_valid_no_warning.csv','tiguan2021_valid_no_warning_feature.csv')
 
 a=1

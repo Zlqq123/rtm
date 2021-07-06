@@ -1,11 +1,14 @@
 import sys
+sys.path.append(".")
+sys.path.append("..")#sys.path.append("..")的意思是增加搜索的路径，..代表上一个目录层级
+
 import xlsxwriter
 import time
 from datetime import datetime
 import numpy as np
 import pandas as pd
-import hist_func_np
-from genarl_func import time_cost,time_cost_all
+from rtm_hist import hist_func_np
+#from genarl_func import time_cost,time_cost_all
 from en_client import en_client
 client=en_client()
 

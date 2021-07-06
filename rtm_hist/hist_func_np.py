@@ -81,7 +81,7 @@ def hist_con_dis(input_data1,interval1,input_data2,interval2,show_interval=1,sho
             re2[i,2]=np.percentile(in1,25)
             re2[i,3]=np.percentile(in1,50)
             re2[i,4]=np.percentile(in1,75)
-            re2[i,5]=np.percentile(in1,99)
+            re2[i,5]=np.percentile(in1,95)
             re2[i,6]=np.max(in1)
             re2[i,7]=np.mean(in1)
 

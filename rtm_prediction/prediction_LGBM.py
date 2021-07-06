@@ -5,7 +5,8 @@ import seaborn as sns
 from en_client import en_client
 
 client=en_client()
-filepath="D:/21python/rtm/rtm_prediction/new/"
+filepath="D:/01 RTM/rtm/rtm_prediction/data/new/"
+
 
 def train_LGBM():
     
@@ -62,6 +63,32 @@ def train_LGBM():
     plt.savefig(filepath+"roc_LGBM.jpg")
     plt.show()
 
+    #验证集样本验证
+    filename=filepath+"valid_data/验证样本_y.csv"
+    y_valid = pd.read_csv(filename, encoding="gbk", index_col=0, header=0)
+    filename=filepath+"valid_data/验证样本_x.csv"
+    x_valid = pd.read_csv(filename,encoding="gbk", index_col=0, header=0)
+    valid_data = lgb.Dataset(x_valid, label=y_valid)
+    y_pred_v = model.predict(x_valid)
+    y_pred_v1 = [1 if x>=0.5 else 0 for x in y_pred_v]
+    print('LGBM_smote[验证集] 准确率:', metrics.accuracy_score(y_valid,y_pred_v1))
+    fpr, tpr, thresholds = roc_curve(y_valid, y_pred_v, pos_label=1)
+    roc_auc = auc(fpr, tpr)  ###计算auc的值
+    lw = 2
+    plt.figure(figsize=(8, 5))
+    plt.plot(fpr, tpr, color='darkorange',
+            lw=lw, label='ROC curve (area = %0.2f)' % roc_auc)  ###假正率为横坐标，真正率为纵坐标做曲线
+    plt.plot([0, 1], [0, 1], color='navy', lw=lw, linestyle='--')
+    plt.grid()
+    plt.xlim([0.0, 1.0])
+    plt.ylim([0.0, 1.0])
+    plt.xlabel('False Positive Rate')
+    plt.ylabel('True Positive Rate')
+    plt.title('Receiver operating characteristic example')
+    plt.legend(loc="lower right")
+    plt.savefig(filepath+"roc_LGBM(vaid).jpg")
+    plt.show()
+
 
 
 def LGBM_pre():
@@ -106,6 +133,7 @@ def LGBM_pre():
     y.to_csv(filepath+'训练样本_y_LGBM.csv',encoding="gbk")
 
 def train_LGBM1():
+    #'VIN','region','province'采用category特诊，不进行onehot编码
     filename=filepath+"训练样本_y_LGBM.csv"
     y = pd.read_csv(filename, encoding="gbk", index_col=0, header=0)
     filename=filepath+"训练样本_x_LGBM.csv"
@@ -178,3 +206,86 @@ def train_LGBM1():
                                     'importance_split':importance_split,'importance_gain':importance_gain} )
     feature_importance.to_csv(filepath+'feature_importance_LGBM.csv',index=False)
 
+def train_LGBM_smote():
+    #采用 smote后的样本进行训练
+    filename=filepath+"smote/训练样本_y.csv"
+    y = pd.read_csv(filename, encoding="gbk", index_col=0, header=0)
+    filename=filepath+"smote/训练样本_x.csv"
+    X = pd.read_csv(filename,encoding="gbk", index_col=0, header=0)
+    #index_col=0声明文件第一列为索引，header=0第一行为列名（默认就是，不必重新申明）
+    print(X.columns)
+    # 导入特征和label
+
+    from sklearn.model_selection import train_test_split
+    X_train, X_test_s, y_train, y_test_s = train_test_split(X, y, test_size=0.2, random_state=1)
+    
+    import lightgbm as lgb
+    from sklearn import metrics
+    param = {'boosting_type':'gbdt',
+                         'objective' : 'binary', #任务类型
+                         'metric' : 'auc', #评估指标
+                         'learning_rate' : 0.002, #学习率
+                         'max_depth' : 10, #树的最大深度
+                         'feature_fraction':0.8, #设置在每次迭代中使用特征的比例
+                         'bagging_fraction': 0.9, #样本采样比例
+                         'bagging_freq': 8, #bagging的次数
+                         'lambda_l1': 0.6, #L1正则
+                         'lambda_l2': 0, #L2正则
+        }
+
+    train_data = lgb.Dataset(X_train, label=y_train)
+    valid_data = lgb.Dataset(X_test_s, label=y_test_s)
+
+    model = lgb.train(param,train_data,valid_sets=[train_data,valid_data],num_boost_round = 5000 ,early_stopping_rounds=200,verbose_eval=25)
+    y_pred = model.predict(X_test_s)
+    y_pred1 = [1 if x>=0.5 else 0 for x in y_pred]
+    print('Light GBM_smote 准确率:', metrics.accuracy_score(y_test_s,y_pred1))
+
+    ##计算AUC值
+    from sklearn.metrics import roc_curve,auc
+    fpr, tpr, thresholds = roc_curve(y_test_s, y_pred, pos_label=1)
+    roc_auc = auc(fpr, tpr)  ###计算auc的值
+    lw = 2
+    plt.figure(figsize=(8, 5))
+    plt.plot(fpr, tpr, color='darkorange',
+            lw=lw, label='ROC curve (area = %0.2f)' % roc_auc)  ###假正率为横坐标，真正率为纵坐标做曲线
+    plt.plot([0, 1], [0, 1], color='navy', lw=lw, linestyle='--')
+    plt.grid()
+    plt.xlim([0.0, 1.0])
+    plt.ylim([0.0, 1.0])
+    plt.xlabel('False Positive Rate')
+    plt.ylabel('True Positive Rate')
+    plt.title('Receiver operating characteristic example')
+    plt.legend(loc="lower right")
+    plt.savefig(filepath+"smote/roc_LGBM_somte.jpg")
+    plt.show()
+
+    #验证集样本验证
+    filename=filepath+"valid_data/验证样本_y.csv"
+    y_valid = pd.read_csv(filename, encoding="gbk", index_col=0, header=0)
+    filename=filepath+"valid_data/验证样本_x.csv"
+    x_valid = pd.read_csv(filename,encoding="gbk", index_col=0, header=0)
+    valid_data = lgb.Dataset(x_valid, label=y_valid)
+    y_pred_v = model.predict(x_valid)
+    y_pred_v1 = [1 if x>=0.5 else 0 for x in y_pred_v]
+    print('LGBM_smote[验证集] 准确率:', metrics.accuracy_score(y_valid,y_pred_v1))
+    fpr, tpr, thresholds = roc_curve(y_valid, y_pred_v, pos_label=1)
+    roc_auc = auc(fpr, tpr)  ###计算auc的值
+    lw = 2
+    plt.figure(figsize=(8, 5))
+    plt.plot(fpr, tpr, color='darkorange',
+            lw=lw, label='ROC curve (area = %0.2f)' % roc_auc)  ###假正率为横坐标，真正率为纵坐标做曲线
+    plt.plot([0, 1], [0, 1], color='navy', lw=lw, linestyle='--')
+    plt.grid()
+    plt.xlim([0.0, 1.0])
+    plt.ylim([0.0, 1.0])
+    plt.xlabel('False Positive Rate')
+    plt.ylabel('True Positive Rate')
+    plt.title('Receiver operating characteristic example')
+    plt.legend(loc="lower right")
+    plt.savefig(filepath+"smote/roc_LGBM_somte(vaid).jpg")
+    plt.show()
+
+train_LGBM()
+#train_LGBM_smote()
+a=1
