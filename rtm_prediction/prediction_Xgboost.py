@@ -12,12 +12,13 @@ filepath = "D:/01 RTM/rtm/rtm_prediction/data/feature_reconstruction/"
 
 
 # 训练数据预处理及感知
-def pre1():
+def pre1(filename_warming, filename_noWarming, output_path):
+    '''
+    原始特征工程63项特征，特征不完整数据直接去除的数据预处理
+    '''
 
-    filename=filepath+'train_feature_no_warming.csv'
-    s1=pd.read_csv(filename,encoding="gbk")    #s1=pd.read_csv(filename,encoding="gbk",index_col=0,header=0)
-    filename=filepath+'train_feature_warming.csv'
-    s2=pd.read_csv(filename,encoding="gbk")
+    s1=pd.read_csv(filename_noWarming,encoding="gbk")    #s1=pd.read_csv(filename,encoding="gbk",index_col=0,header=0)
+    s2=pd.read_csv(filename_warming,encoding="gbk")
     print(s1.shape)
     print(s2.shape)
     s1 = s1.drop(s1[s1.Integrity == 1].index)
@@ -30,9 +31,9 @@ def pre1():
     print(s2.shape)
     
     des=s1.describe()
-    des.to_csv(filepath+"no_warming_f_describe.csv",encoding="gbk")
+    des.to_csv(output_path+"no_warming_f_describe.csv",encoding="gbk")
     des=s2.describe()
-    des.to_csv(filepath+"warming_f_describe.csv",encoding="gbk")
+    des.to_csv(output_path+"warming_f_describe.csv",encoding="gbk")
 
     a=[2]
     a.extend(range(6,64))
@@ -46,7 +47,7 @@ def pre1():
         plt.title(s1.columns[i],fontsize=14)#标题，并设定字号大小
         plt.boxplot([s1.iloc[:,i],s2.iloc[:,i]],showmeans=True, labels = ['No_warming','Warming'],sym = '*')
         #plt.show()
-        plt.savefig(filepath+"pic/"+str(i)+"_"+s1.columns[i]+'.jpg')
+        plt.savefig(output_path+"pic/"+str(i)+"_"+s1.columns[i]+'.jpg')
 
     
     ss=s1.append(s2)
@@ -73,11 +74,11 @@ def pre1():
 
     # corr相关系数函数
     c=X.corr()
-    c.to_csv(filepath+'特征值之间的相关系数.csv',encoding="gbk")
+    c.to_csv(output_path+'特征值之间的相关系数.csv',encoding="gbk")
     print(c)
     sns.heatmap(c)
     #plt.show()
-    plt.savefig(filepath+"corr.jpg")
+    plt.savefig(output_path+"corr.jpg")
 
     #归一化
     # 最大最小值归一化 将数值映射到 [-1, 1]之间
@@ -92,27 +93,29 @@ def pre1():
     #scaler = StandardScaler()
     #scaler.fit(X)
 
+    X1.to_csv(output_path+'训练样本_x.csv',encoding="gbk")
+    y.to_csv(output_path+'训练样本_y.csv',encoding="gbk")
 
-    X1.to_csv(filepath+'训练样本_x.csv',encoding="gbk")
-    y.to_csv(filepath+'训练样本_y.csv',encoding="gbk")
 
-#pre1()
+filename_noWarming = filepath+'train_feature_no_warming.csv'
+filename_warming = filepath+'train_feature_warming.csv'
+output_path = "D:/01 RTM/rtm/rtm_prediction/data/new/"
+#pre1(filename_warming, filename_noWarming, output_path)
 
 #@time_cost
-def xgb_search_param():
+def xgb_search_param(filename_train_x,filename_train_y):
     '''
     网格搜索获得最优参数：
     结果：
     模型最优参数 {'learning_rate': 0.005, 'max_depth': 6}
     最佳模型得分 0.6203925515304519
     '''
-
-    filename=filepath+"训练样本_x.csv"
-    X = pd.read_csv(filename, encoding="gbk", index_col=0, header=0)
+    
+    X = pd.read_csv(filename_train_x, encoding="gbk", index_col=0, header=0)
     #index_col=0声明文件第一列为索引，header=0第一行为列名（默认就是，不必重新申明）
     print(X.columns)
     # 导入特征和label
-    filename=filepath+"训练样本_y.csv"
+    
     y = pd.read_csv(filename, encoding="gbk", index_col=0, header=0)
 
 
@@ -148,13 +151,16 @@ def xgb_search_param():
     print('模型最优参数', gs.best_params_)
     print('最佳模型得分', gs.best_score_)
 
+filename_train_x=filepath+"训练样本_x.csv"
+filename_train_y=filepath+"训练样本_y.csv"
+#xgb_search_param(filename_train_x,filename_train_y)
 
-def train_xgboost():
-    filepath = "D:/01 RTM/rtm/rtm_prediction/data/feature_reconstruction/"
-    filename=filepath+"训练样本_y.csv"
-    y = pd.read_csv(filename, encoding="gbk", index_col=0, header=0)
-    filename=filepath+"训练样本_x.csv"
-    X = pd.read_csv(filename,encoding="gbk", index_col=0, header=0)
+
+
+def train_xgboost(filename_train_x,filename_train_y,filename_valid_x,filename_valid_y,output_path):
+
+    y = pd.read_csv(filename_train_y, encoding="gbk", index_col=0, header=0)
+    X = pd.read_csv(filename_train_x,encoding="gbk", index_col=0, header=0)
     #index_col=0声明文件第一列为索引，header=0第一行为列名（默认就是，不必重新申明）
     print(X.columns)
     # 导入特征和label
@@ -208,16 +214,16 @@ def train_xgboost():
     plt.ylabel('True Positive Rate')
     plt.title('Receiver operating characteristic example')
     plt.legend(loc="lower right")
-    plt.savefig(filepath+"roc.jpg")
+    plt.savefig(output_path+"roc.jpg")
     plt.show()
     
 
     #验证集样本验证
-    filepath= 'D:/01 RTM/rtm/rtm_prediction/data/new/'
-    filename=filepath+"valid_data/验证样本_y.csv"
-    y_valid = pd.read_csv(filename, encoding="gbk", index_col=0, header=0)
-    filename=filepath+"valid_data/验证样本_x.csv"
-    x_valid = pd.read_csv(filename,encoding="gbk", index_col=0, header=0)
+
+    
+    y_valid = pd.read_csv(filename_valid_y, encoding="gbk", index_col=0, header=0)
+
+    x_valid = pd.read_csv(filename_valid_x,encoding="gbk", index_col=0, header=0)
     valid_data = xgb.DMatrix(x_valid, label=y_valid)
     y_pred_v = model.predict(valid_data)
     y_pred_v1 = [1 if x>=0.5 else 0 for x in y_pred_v]
@@ -236,7 +242,7 @@ def train_xgboost():
     plt.ylabel('True Positive Rate')
     plt.title('Receiver operating characteristic example')
     plt.legend(loc="lower right")
-    plt.savefig(filepath+"roc(vaid).jpg")
+    plt.savefig(output_path+"roc(vaid).jpg")
     plt.show()
 
 
@@ -252,7 +258,7 @@ def train_xgboost():
     labels, values = zip(*tuples)
     df_imp = pd.DataFrame([labels, values])
     df_imp2 = pd.DataFrame(df_imp.values.T)
-    df_imp2.to_csv('imp_gain.csv')
+    df_imp2.to_csv(output_path+'imp_gain.csv')
 
     importance = model.get_score(importance_type='weight', fmap='')
     #weight：权重（某特征在整个树群节点中出现的次数，出现越多，价值就越高）
@@ -261,7 +267,7 @@ def train_xgboost():
     labels, values = zip(*tuples)
     df_imp = pd.DataFrame([labels, values])
     df_imp2 = pd.DataFrame(df_imp.values.T)
-    df_imp2.to_csv('imp_weight.csv')
+    df_imp2.to_csv(output_path+'imp_weight.csv')
 
     importance = model.get_score(importance_type='cover', fmap='')
     #cover比较复杂，python文档未做解释，其实是指某特征节点样本的二阶导数和再除以某特征出现的 我在xgboost R API文档中找到了部分解释： https://github.com/dmlc/xgboost
@@ -270,15 +276,25 @@ def train_xgboost():
     labels, values = zip(*tuples)
     df_imp = pd.DataFrame([labels, values])
     df_imp2 = pd.DataFrame(df_imp.values.T)
-    df_imp2.to_csv('imp_cover.csv')
+    df_imp2.to_csv(output_path+'imp_cover.csv')
 
     xgb.plot_importance(model,max_num_features=20,importance_type='gain')
-    plt.savefig(filepath+"importance_gain.jpg")
+    plt.savefig(output_path+"importance_gain.jpg")
     plt.show()
 
     xgb.plot_importance(model,max_num_features=20,importance_type='weight')
-    plt.savefig(filepath+"importance_weight.jpg")
+    plt.savefig(output_path+"importance_weight.jpg")
     plt.show()
+
+filepath = "D:/01 RTM/rtm/rtm_prediction/data/feature_reconstruction/"
+filename_train_x=filepath+"训练样本_x.csv"
+filename_train_y=filepath+"训练样本_y.csv"
+filepath= 'D:/01 RTM/rtm/rtm_prediction/data/new/'
+filename_valid_y=filepath+"valid_data/验证样本_y.csv"
+filename_valid_x=filepath+"valid_data/验证样本_x.csv"
+train_xgboost(filename_train_x, filename_train_y, filename_valid_x, filename_valid_y, output_path)
+
+
 
 def pre2_smote():
     filename=filepath+'smote/smote_resample.csv'
@@ -578,6 +594,8 @@ def valid_pre():
     y.to_csv(filepath+'验证样本_y.csv',encoding="gbk")
 
 filepath = "D:/01 RTM/rtm/rtm_prediction/data/feature_reconstruction/"
+
+
 def pre3():
     #第一次特征重构，只保留11个特征，保留不充电样本
     filename=filepath+'1/train_feature_no_warming.csv'
@@ -594,7 +612,7 @@ def pre3():
     s1 = s1[col_list]
     s2 = s2[col_list]
     #print(s1.columns)
-    #print(s1.info())
+    #print(s1.info()
     #print(s2.info())
     print(s1.isnull().sum())
     print('~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~')

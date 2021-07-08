@@ -89,8 +89,6 @@ def train_LGBM():
     plt.savefig(filepath+"roc_LGBM(vaid).jpg")
     plt.show()
 
-
-
 def LGBM_pre():
     filename=filepath+'train_feature_no_warming.csv'
     s1=pd.read_csv(filename,encoding="gbk")    #s1=pd.read_csv(filename,encoding="gbk",index_col=0,header=0)
