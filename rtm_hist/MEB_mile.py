@@ -13,6 +13,144 @@ from en_client import en_client
 client=en_client()
 
 
+def create_vin_table():
+    #MEBlist写入clickhouse 中
+    vin_list=[]
+    for line in open("MEB VIn.txt",'r'):
+        vin_list.append(line[:-1])
+    print(vin_list[1])
+    print(len(vin_list))
+    vin_list=list(set(vin_list))
+    print(len(vin_list))
+    sql="CREATE TABLE IF NOT EXISTS en.MEB_vin (vin String) ENGINE = MergeTree() ORDER BY vin"
+    aus=client.execute(sql)
+    sql ='desc en.MEB_vin'
+    aus=client.execute(sql)
+    print(aus)
+    for a in vin_list:
+        sql="INSERT INTO en.MEB_vin FORMAT Values ( '" + a +"' )"
+        aus=client.execute(sql)
+
+#平均车速 （不包括怠速）
+sql="WITH cast(vehiclespeed,'Float32') as v, cast(accmiles,'Float32') AS mile " \
+    "SELECT deviceid, toDate(uploadtime), toDayOfWeek(toDate(uploadtime)), " \
+    "if(toDayOfWeek(toDate(uploadtime))<6, 'weekday', 'weekend' ), " \
+    "avg(v), max(mile)-min(mile), " \
+    "multiIf(max(mile)-min(mile)<80, '<80', max(mile)-min(mile)>250, '>250','80~250') " \
+    "FROM ods.rtm_details_v2 " \
+    "WHERE v>0 " \
+    "AND uploadtime BETWEEN '2021-02-01 00:00:00' AND '2021-05-31 23:59:59' " \
+    "AND deviceid in ( SELECT vin FROM en.MEB_vin ) " \
+    "GROUP BY deviceid, toDate(uploadtime) "
+
+aus=pd.DataFrame(client.execute(sql))
+w1=np.array(aus[2])
+w=np.array(aus[3])
+v=np.array(aus[4])
+m=np.array(aus[6])
+aus.columns=['vin','date','toDayOfWeek','weekday/weekend','mean_v','mileage','mileage_range']
+aus.to_csv('speed.csv')
+
+step=range(0,150,10)
+
+[a,b,c] = hist_func_np.hist_con_dis(v,step,m,['<80','80~250','>250'],show_hist=1)
+re1=pd.DataFrame(np.array(b).T)
+re1.index=a
+re1.columns=['<80km','80~250km','>=250km']
+re2=pd.DataFrame(np.array(c).T)
+re2.index=['min','1%percentile','25%percentile','50%percentile','75%percentile','99%percentile','max','mean']
+re2.columns=['<80km','80~250km','>=250km']
+re1.to_csv('v_mile1.csv')
+re2.to_csv('v_mile2.csv')
+
+[a,b,c] = hist_func_np.hist_con_dis(v,step,w,['weekday', 'weekend'],show_hist=1)
+re1=pd.DataFrame(np.array(b).T)
+re1.index=a
+re1.columns=['weekday', 'weekend']
+re2=pd.DataFrame(np.array(c).T)
+re2.index=['min','1%percentile','25%percentile','50%percentile','75%percentile','99%percentile','max','mean']
+re2.columns=['weekday', 'weekend']
+re1.to_csv('v_week1.csv')
+re2.to_csv('v_week2.csv')
+
+[a,b,c] = hist_func_np.hist_con_dis(v,step,w1,[1, 2, 3, 4, 5, 6, 7],show_hist=1)
+re1=pd.DataFrame(np.array(b).T)
+re1.index=a
+re1.columns=['Mon', 'Tue','Wed','Thu','Fri','Sat','Sun']
+re2=pd.DataFrame(np.array(c).T)
+re2.index=['min','1%percentile','25%percentile','50%percentile','75%percentile','99%percentile','max','mean']
+re2.columns=['Mon', 'Tue','Wed','Thu','Fri','Sat','Sun']
+re1.to_csv('v_week3.csv')
+re2.to_csv('v_week4.csv')
+
+a=1
+
+#工作日几休息日行驶里程
+sql="SELECT deviceid, d, w1, w2, mi FROM (" \
+    "WITH cast(accmiles,'Float32') AS mile " \
+    "SELECT deviceid, toDate(uploadtime) as d, toDayOfWeek(toDate(uploadtime)) as w1 , " \
+    "if(toDayOfWeek(toDate(uploadtime))<6, 'weekday', 'weekend' ) as w2, max(mile)-min(mile) as mi FROM ods.rtm_details_v2 " \
+    "WHERE uploadtime BETWEEN '2021-02-01 00:00:00' AND '2021-07-31 23:59:59' " \
+    "AND deviceid in ( SELECT vin FROM en.MEB_vin ) " \
+    "GROUP BY deviceid, toDate(uploadtime) ) " \
+    "WHERE mi < 1200 "
+
+aus=pd.DataFrame(client.execute(sql))
+aus.columns=['vin','date','toDayOfWeek','weekday/weekend','mileage']
+aus.to_csv('mile_week.csv')
+
+w1=np.array(aus['toDayOfWeek'])
+w=np.array(aus['weekday/weekend'])
+mile=np.array(aus['mileage'])
+step=range(0,1220,20)
+[a,b,c] = hist_func_np.hist_con_dis(mile,step,w,['weekday', 'weekend'],show_hist=1)
+re1=pd.DataFrame(np.array(b).T)
+re1.index=a
+re1.columns=['weekday', 'weekend']
+re2=pd.DataFrame(np.array(c).T)
+re2.index=['min','1%percentile','25%percentile','50%percentile','75%percentile','99%percentile','max','mean']
+re2.columns=['weekday', 'weekend']
+re1.to_csv('mile_week1.csv')
+re2.to_csv('mile_week2.csv')
+
+[a,b,c] = hist_func_np.hist_con_dis(mile,step,w1,[1, 2, 3, 4, 5, 6, 7],show_hist=1)
+re1=pd.DataFrame(np.array(b).T)
+re1.index=a
+re1.columns=['Mon', 'Tue','Wed','Thu','Fri','Sat','Sun']
+re2=pd.DataFrame(np.array(c).T)
+re2.index=['min','1%percentile','25%percentile','50%percentile','75%percentile','99%percentile','max','mean']
+re2.columns=['Mon', 'Tue','Wed','Thu','Fri','Sat','Sun']
+re1.to_csv('mile_week3.csv')
+re2.to_csv('mile_week4.csv')
+
+
+
+#月行驶里程
+sql="SELECT deviceid, mo, mi FROM " \
+    "(WITH cast(accmiles,'Float32') AS mile " \
+    "SELECT deviceid, toMonth(uploadtime) as mo, max(mile)-min(mile) as mi FROM ods.rtm_details_v2 " \
+    "WHERE uploadtime BETWEEN '2021-02-01 00:00:00' AND '2021-06-31 23:59:59' " \
+    "AND deviceid in ( " \
+    "SELECT vin FROM en.MEB_vin ) " \
+    "GROUP BY deviceid, toMonth(uploadtime) ) " \
+    "WHERE mi<6000"
+aus=pd.DataFrame(client.execute(sql))
+aus.columns=['vin','month','mileage']
+aus.to_csv('mile_month.csv')
+
+m=np.array(aus['month'])
+mile=np.array(aus['mileage'])
+step=range(0,6100,50)
+[a,b,c] = hist_func_np.hist_con_dis(mile,step,m,[2,3,4,5,6],show_hist=1)
+re1=pd.DataFrame(np.array(b).T)
+re1.index=a
+re1.columns=['Fer',"Mar",'Apr','May','Jun']
+re2=pd.DataFrame(np.array(c).T)
+re2.index=['min','1%percentile','25%percentile','50%percentile','75%percentile','99%percentile','max','mean']
+re2.columns=['Fer',"Mar",'Apr','May','Jun']
+re1.to_csv('mile_month1.csv')
+re2.to_csv('mile_month2.csv')
+
 
 
 def Meb_mileage(date_range):

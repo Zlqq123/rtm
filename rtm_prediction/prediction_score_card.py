@@ -3,13 +3,13 @@ import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
 
-filepath="D:/21python/rtm/rtm_prediction/new/"
+filepath="D:/01 RTM/rtm/rtm_prediction/data/new/cridet/new/"
 #评分卡模型
 # https://www.jianshu.com/p/c3fa53c54cca
 
-filename=filepath+'train_feature_no_warming.csv'
+filename='D:/01 RTM/rtm/rtm_prediction/data/new/train_feature_no_warming.csv'
 s1=pd.read_csv(filename,encoding="gbk")    #s1=pd.read_csv(filename,encoding="gbk",index_col=0,header=0)
-filename=filepath+'train_feature_warming.csv'
+filename='D:/01 RTM/rtm/rtm_prediction/data/new/train_feature_warming.csv'
 s2=pd.read_csv(filename,encoding="gbk")
 #数据预处理
 print("原始非报警样本个数: {}".format(s1.shape))
@@ -44,7 +44,7 @@ x2=ss[['week_num','region']]
 #数据分箱
 
 import math
-x2['bin_week_num'] = pd.cut(ss['week_num'], bins=[-math.inf, 10, 20, 30, 40, 50, math.inf])
+x2['bin_week_num'] = pd.cut(ss['week_num'], bins=[-math.inf, 15, 30, 45,  math.inf])
 x2['bin_region'] = pd.cut(ss['region'], bins=[-math.inf, 0.1, 0.2, 0.4, 0.6, 0.7, 0.9, math.inf])
 print(x2)
 
@@ -63,7 +63,7 @@ a=['VIN','province','acc_mileage','ir','mile','daily mile (mean)','driving time'
     'charge start SOC 50%','charge end SOC mean','charge end SOC 50%','mean(ΔSOC)','sum(ΔSOC)']
 
 for aa in a:
-    x2['bin_' + aa]=pd.qcut(ss[aa], q=7,duplicates='drop')
+    x2['bin_' + aa]=pd.qcut(ss[aa], q=3, duplicates='drop')
 
 x=pd.concat([x1, x2], axis=1)
 
@@ -92,7 +92,7 @@ def cal_IV(df, feature, target):
     data['Bad Rate'] = data['Bad'] / data['All'] # 这个value导致bad情况，在这个value个数的比例
     data['Distribution Bad'] = data['Bad'] / data['Bad'].sum() # 这个value导致Bad 在所有Bad中的比例
     data['Distribution Good'] = (data['All'] - data['Bad']) / (data['All'].sum() - data['Bad'].sum())
-    data['WOE'] = np.log1p(data['Distribution Bad'] / data['Distribution Good'])
+    data['WOE'] = np.log(data['Distribution Bad'] / data['Distribution Good'])
     #data['IV'] = ((data['Distribution Bad'] - data['Distribution Good']) * data['WOE']).sum()
     data['IV'] = (data['Distribution Bad'] - data['Distribution Good']) * data['WOE']
     
@@ -130,8 +130,8 @@ def cal_WOE(df, features, target):
         df_woe['good_rate'] = df_woe['good'] / df_woe['good'].sum()
         print(df_woe['good_rate'])
         # 计算woe
-        #df_woe['woe'] = np.log(df_woe['bad_rate'].divide(df_woe['good_rate']))
-        df_woe['woe'] = np.log1p(df_woe['bad_rate'] / df_woe['good_rate'])
+        df_woe['woe'] = np.log(df_woe['bad_rate'].divide(df_woe['good_rate']))
+        #df_woe['woe'] = np.log1p(df_woe['bad_rate'] / df_woe['good_rate'])
         #df_woe['woe'] = df_woe['bad_rate'] / df_woe['good_rate']
         # 在后面拼接上 _feature, 比如 _age
         df_woe.columns = [c if c==feature else c+'_'+feature for c in list(df_woe.columns.values)]
